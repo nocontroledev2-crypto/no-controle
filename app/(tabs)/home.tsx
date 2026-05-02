@@ -1,6 +1,12 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function Home() {
+  // ESTADO DO MICROFONE (M1)
+  const [ouvindo, setOuvindo] = useState(false);
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
       {/* TOPO */}
@@ -32,17 +38,23 @@ export default function Home() {
         </View>
       </View>
 
-      {/* AÇÕES */}
-      <TouchableOpacity style={styles.voiceButton}>
-        <Text style={styles.voiceButtonText}>🎤 Falar despesa</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.manualButton}>
-        <Text style={styles.manualButtonText}>➕ Registrar manualmente</Text>
-      </TouchableOpacity>
+      {/* BOTÃO DE VOZ */}
+      <TouchableOpacity
+  style={[
+    styles.voiceButton,
+    ouvindo && styles.voiceButtonListening,
+  ]}
+  onPress={() => router.push("/(tabs)/registrar?voice=true")}
+>
+  <Text style={styles.voiceButtonText}>
+    🎤 Falar despesa
+  </Text>
+</TouchableOpacity>
     </View>
   );
 }
+
+/* ===== ESTILOS ===== */
 
 const styles = StyleSheet.create({
   container: {
@@ -94,6 +106,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     marginBottom: 12,
+  },
+  voiceButtonListening: {
+    backgroundColor: "#666",
   },
   voiceButtonText: {
     color: "#FFFFFF",
