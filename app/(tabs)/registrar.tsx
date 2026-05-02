@@ -19,32 +19,31 @@ export default function Registrar() {
     useState<"idle" | "listening" | "processing">("idle");
 
   useEffect(() => {
-    if (iniciouPorVoz) {
-      setEstadoVoz("listening");
+  if (iniciouPorVoz) {
+    setEstadoVoz("listening");
 
-      // OUVINDO → PROCESSANDO
+    setTimeout(() => {
+      setEstadoVoz("processing");
+
       setTimeout(() => {
-        setEstadoVoz("processing");
+        const textoFalado = "45 reais gasolina";
+        const categoriaDetectada = matchCategory(textoFalado);
 
-        // MOCK de reconhecimento
-        setTimeout(() => {
-          const textoFalado = "45 reais gasolina";
-          const categoriaDetectada = matchCategory(textoFalado);
+        router.replace({
+          pathname: "/(tabs)/confirmacao",
+          params: {
+            valor: "R$ 45,00",
+            categoria: categoriaDetectada,
+            data: "Hoje",
+          },
+        });
 
-          router.push({
-            pathname: "/(tabs)/confirmacao",
-            params: {
-              valor: "R$ 45,00",
-              categoria: categoriaDetectada,
-              data: "Hoje",
-            },
-          });
-
-          setEstadoVoz("idle");
-        }, 900);
-      }, 700);
-    }
-  }, [iniciouPorVoz]);
+        // RESET IMPORTANTE
+        setEstadoVoz("idle");
+      }, 1800); // ⏳ processamento visível
+    }, 1500); // 🎙️ tempo para “falar”
+  }
+}, [iniciouPorVoz]);
 
   function salvarManual() {
     if (!valor || !categoria) {

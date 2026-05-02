@@ -18,12 +18,19 @@ const CATEGORY_MAP: CategoryMap[] = [
 ];
 
 export function matchCategory(text: string): string {
-  const normalized = text.toLowerCase();
+  const normalized = normalize(text);
 
   for (const item of CATEGORY_MAP) {
-    if (item.keywords.some((k) => normalized.includes(k))) {
+    if (item.keywords.some((k) => normalized.includes(normalize(k)))) {
       return item.category;
     }
   }
   return "Outros";
+}
+
+function normalize(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 }
