@@ -1,15 +1,50 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { matchCategory } from "../helpers/categoryMatcher";
+import { saveExpense } from "../storage/expenseStorage";
+
+/**
+ * Converte qualquer valor monetário em number seguro
+ * Aceita:
+ *  - "45.9"
+ *  - "45,90"
+ *  - "R$ 45,90"
+ *  - "R$45.90"
+ */
+function parseMoney(value: unknown): number {
+  if (!value) return NaN;
+
+  const sanitized = String(value)
+    .replace(/[^\d.,-]/g, "") // remove R$, espaços etc
+    .replace(".", "")         // remove separador de milhar
+    .replace(",", ".");       // converte vírgula para ponto
+
+  return Number(sanitized);
+}
 
 export default function Confirmacao() {
   const router = useRouter();
   const params = useLocalSearchParams();
 
-  const textoFalado = String(params.texto || "");
-  const valor = params.valor ? String(params.valor) : "0,00";
-  const categoria = matchCategory(textoFalado);
-  const data = "Hoje";
+  const valor = parseMoney(params.valor);
+  const categoria = String(params.categoria ?? "");
+  const data = String(params.data ?? "Hoje");
+
+  async function confirmar() {
+    if (isNaN(valor)) {
+      alert("Valor inválido. Ajuste o valor.");
+      return;
+    }
+
+    await saveExpense({
+      id: Date.now().toString(),
+      valor,
+      categoria,
+      data,
+      createdAt: new Date().toISOString(),
+    });
+
+    router.replace("/(tabs)/home");
+  }
 
   return (
     <View style={styles.container}>
@@ -17,7 +52,9 @@ export default function Confirmacao() {
 
       <View style={styles.card}>
         <Text style={styles.label}>Valor</Text>
-        <Text style={styles.value}>R$ {valor}</Text>
+        <Text style={styles.value}>
+          R$ {valor.toFixed(2).replace(".", ",")}
+        </Text>
 
         <Text style={styles.label}>Categoria</Text>
         <Text style={styles.value}>{categoria}</Text>
@@ -26,18 +63,12 @@ export default function Confirmacao() {
         <Text style={styles.value}>{data}</Text>
       </View>
 
-      <TouchableOpacity
-        style={styles.confirmButton}
-        onPress={() => {
-          alert("Despesa salva (mock)");
-          router.replace("/(tabs)/home");
-        }}
-      >
-        <Text style={styles.confirmText}>✅ Confirmar</Text>
+      <TouchableOpacity style={styles.confirmBtn} onPress={confirmar}>
+        <Text style={styles.btnText}>✅ Confirmar</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={styles.adjustButton}
+        style={styles.adjustBtn}
         onPress={() => router.back()}
       >
         <Text style={styles.adjustText}>✏️ Ajustar</Text>
@@ -46,13 +77,11 @@ export default function Confirmacao() {
   );
 }
 
-/* ===== ESTILOS ===== */
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F2F2F2",
     padding: 20,
+    backgroundColor: "#F2F2F2",
   },
   title: {
     fontSize: 24,
@@ -61,7 +90,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FFF",
     padding: 16,
     borderRadius: 8,
     marginBottom: 30,
@@ -74,24 +103,23 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
-  confirmButton: {
+  confirmBtn: {
     backgroundColor: "#0A8F55",
     padding: 16,
     borderRadius: 10,
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 10,
   },
-  confirmText: {
+  btnText: {
     color: "#FFF",
-    fontSize: 16,
     fontWeight: "bold",
+    fontSize: 16,
   },
-  adjustButton: {
+  adjustBtn: {
     alignItems: "center",
   },
   adjustText: {
     color: "#0A8F55",
-    fontSize: 16,
     fontWeight: "600",
   },
 });
