@@ -1,22 +1,18 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { saveExpense } from "../storage/expenseStorage";
 
 /**
- * Converte qualquer valor monetário em number seguro
- * Aceita:
- *  - "45.9"
- *  - "45,90"
- *  - "R$ 45,90"
- *  - "R$45.90"
+ * Converte string monetária em number seguro
  */
 function parseMoney(value: unknown): number {
   if (!value) return NaN;
 
   const sanitized = String(value)
-    .replace(/[^\d.,-]/g, "") // remove R$, espaços etc
-    .replace(".", "")         // remove separador de milhar
-    .replace(",", ".");       // converte vírgula para ponto
+    .replace(/[^\d.,-]/g, "")
+    .replace(".", "")
+    .replace(",", ".");
 
   return Number(sanitized);
 }
@@ -28,6 +24,8 @@ export default function Confirmacao() {
   const valor = parseMoney(params.valor);
   const categoria = String(params.categoria ?? "");
   const data = String(params.data ?? "Hoje");
+
+  const [showSuccess, setShowSuccess] = useState(false);
 
   async function confirmar() {
     if (isNaN(valor)) {
@@ -43,7 +41,14 @@ export default function Confirmacao() {
       createdAt: new Date().toISOString(),
     });
 
-    router.replace("/(tabs)/home");
+    // ✅ Feedback visual
+    setShowSuccess(true);
+
+    // ⏱️ Após 1.5s, volta para Home
+    setTimeout(() => {
+      setShowSuccess(false);
+      router.replace("/(tabs)/home");
+    }, 1500);
   }
 
   return (
@@ -73,6 +78,15 @@ export default function Confirmacao() {
       >
         <Text style={styles.adjustText}>✏️ Ajustar</Text>
       </TouchableOpacity>
+
+      {/* ✅ FEEDBACK VISUAL */}
+      {showSuccess && (
+        <View style={styles.toast}>
+          <Text style={styles.toastText}>
+            ✅ Despesa registrada com sucesso
+          </Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -121,5 +135,21 @@ const styles = StyleSheet.create({
   adjustText: {
     color: "#0A8F55",
     fontWeight: "600",
+  },
+
+  /* ✅ Toast de sucesso */
+  toast: {
+    position: "absolute",
+    bottom: 30,
+    left: 20,
+    right: 20,
+    backgroundColor: "#0A8F55",
+    padding: 14,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  toastText: {
+    color: "#FFF",
+    fontWeight: "bold",
   },
 });
