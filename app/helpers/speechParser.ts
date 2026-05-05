@@ -78,7 +78,7 @@ export function parseSpeech(textoFalado: string) {
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/(reais|real|com|no|na|de|do|da|por)/g, "")
+    .replace(/\b(reais|real)\b/g, "")
     .trim();
 
   const valor = parseValueFromText(normalized);

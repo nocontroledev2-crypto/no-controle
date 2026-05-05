@@ -1,36 +1,69 @@
-type CategoryMap = {
-  category: string;
-  keywords: string[];
-};
-
-const CATEGORY_MAP: CategoryMap[] = [
-  { category: "Transporte", keywords: ["gasolina","etanol","alcool","diesel","combustivel","posto","uber","99","taxi","ônibus","metro","corrida","abastecimento","transporte"] },
-  { category: "Alimentação", keywords: ["mercado","mercadinho","supermercado","comida","alimentacao","almoço","jantar","lanche","padaria","restaurante","ifood","delivery","rancho","compras"] },
-  { category: "Moradia", keywords: ["aluguel","condominio","luz","energia","agua","gás","gas","internet","telefone","casa","moradia"] },
-  { category: "Educação", keywords: ["escola","colegio","faculdade","universidade","curso","cursos","ingles","idiomas","linguas","pós","pos","especializacao","treinamento"] },
-  { category: "Cartão de crédito", keywords: ["cartao","cartão","fatura","credito","crédito","visa","master","elo"] },
-  { category: "Impostos", keywords: ["imposto","impostos","ipva","iptu","ir","imposto de renda","inss","taxa","tributo"] },
-  { category: "Saúde", keywords: ["farmacia","farmácia","remedio","remédio","medicamento","medico","médico","consulta","exame","plano","saude","saúde"] },
-  { category: "Lazer", keywords: ["lazer","cinema","show","viagem","passeio","diversao","diversão","netflix","spotify","streaming","jogo"] },
-  { category: "Serviços", keywords: ["servico","serviço","manutencao","manutenção","conserto","mecanico","mecânico","limpeza","diarista","tecnico","técnico"] },
-  { category: "Investimentos", keywords: ["investimento","investimentos","cdb","cdi","lci","lca","poupanca","poupança","acoes","ações","bolsa","renda fixa","renda variavel","bitcoin","cripto","criptoativos"] },
-  { category: "Compras", keywords: ["compra","compras","roupa","vestuario","vestuário","tenis","tênis","eletronico","eletrônico","presente","shopping"] },
-];
-
 export function matchCategory(text: string): string {
-  const normalized = normalize(text);
+  const t = text.toLowerCase();
 
-  for (const item of CATEGORY_MAP) {
-    if (item.keywords.some((k) => normalized.includes(normalize(k)))) {
-      return item.category;
-    }
+  // 🚗 TRANSPORTE (alta prioridade)
+  if (
+    t.includes("gasolina") ||
+    t.includes("etanol") ||
+    t.includes("alcool") ||
+    t.includes("diesel") ||
+    t.includes("posto") ||
+    t.includes("combustivel")
+  ) {
+    return "Transporte";
   }
-  return "Outros";
-}
 
-function normalize(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
+  // 🛒 ALIMENTAÇÃO
+  if (
+    t.includes("mercado") ||
+    t.includes("supermercado") ||
+    t.includes("padaria") ||
+    t.includes("comida") ||
+    t.includes("almoco") ||
+    t.includes("jantar")
+  ) {
+    return "Alimentação";
+  }
+
+  // 🛠️ SERVIÇOS / MANUTENÇÃO
+  if (
+    t.includes("manutencao") ||
+    t.includes("conserto") ||
+    t.includes("servico") ||
+    t.includes("mecanico")
+  ) {
+    return "Serviços";
+  }
+
+  // 🏠 MORADIA
+  if (
+    t.includes("aluguel") ||
+    t.includes("condominio") ||
+    t.includes("energia") ||
+    t.includes("luz") ||
+    t.includes("agua")
+  ) {
+    return "Moradia";
+  }
+
+  // 💊 SAÚDE
+  if (
+    t.includes("farmacia") ||
+    t.includes("remedio") ||
+    t.includes("consulta")
+  ) {
+    return "Saúde";
+  }
+
+  // 💳 CARTÃO
+  if (
+    t.includes("cartao") ||
+    t.includes("fatura") ||
+    t.includes("credito")
+  ) {
+    return "Cartão de crédito";
+  }
+
+  // 🔚 FALLBACK
+  return "Outros";
 }

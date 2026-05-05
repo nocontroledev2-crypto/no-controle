@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
+  Animated,
   StyleSheet,
   Text,
   TextInput,
@@ -10,6 +11,9 @@ import {
 import { parseSpeech } from "../helpers/speechParser";
 import { saveExpense } from "../storage/expenseStorage";
 
+/**
+ * Estados da tela Registrar
+ */
 type RegistrarState = "idle" | "listening" | "processing" | "confirm";
 
 export default function Registrar() {
@@ -23,9 +27,35 @@ export default function Registrar() {
   const recognitionRef = useRef<any>(null);
 
   /**
-   * 🎙️ Inicializa Web Speech API
+   * 🎤 Animação do microfone (pulsar)
    */
-  const startListening = () => {
+  const micPulse = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (state === "listening") {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(micPulse, {
+            toValue: 1.3,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(micPulse, {
+            toValue: 1,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    } else {
+      micPulse.setValue(1);
+    }
+  }, [state, micPulse]);
+
+  /**
+   * 🎙️ Inicia o reconhecimento de voz REAL (Web Speech API)
+   */
+  function iniciarEscuta() {
     const SpeechRecognition =
       (window as any).SpeechRecognition ||
       (window as any).webkitSpeechRecognition;
@@ -45,20 +75,21 @@ export default function Registrar() {
     };
 
     recognition.onresult = (event: any) => {
-  const textoFalado = event.results[0][0].transcript;
-  console.log("🎙️ Texto reconhecido:", textoFalado);
+      const textoFalado = event.results[0][0].transcript;
+      console.log("🎙️ Texto reconhecido:", textoFalado);
 
-  setState("processing");
+      setState("processing");
 
-  const parsed = parseSpeech(textoFalado);
+      const parsed = parseSpeech(textoFalado);
 
-  if (parsed.valor !== null) {
-    setValor(String(parsed.valor));
-  }
+      if (parsed.valor !== null) {
+        setValor(String(parsed.valor));
+      }
 
-  setCategoria(parsed.categoria);
-  setState("confirm");
-};
+      setCategoria(parsed.categoria);
+      setState("confirm");
+    };
+
     recognition.onerror = () => {
       alert("Erro ao reconhecer a fala.");
       setState("idle");
@@ -66,19 +97,19 @@ export default function Registrar() {
 
     recognition.start();
     recognitionRef.current = recognition;
-  };
+  }
 
   /**
-   * 🎤 Disparo automático quando vem da Home
+   * 🎤 Disparo automático de voz quando vem da Home
    */
   useEffect(() => {
     if (params.startVoice === "true") {
-      startListening();
+      iniciarEscuta();
     }
   }, [params.startVoice]);
 
   /**
-   * ✅ Confirma e salva
+   * ✅ Confirma e salva a despesa
    */
   async function confirmarRegistro() {
     if (!valor || !categoria) {
@@ -88,7 +119,7 @@ export default function Registrar() {
 
     await saveExpense({
       id: Date.now().toString(),
-      valor: Number(valor),
+      valor: Number(valor.replace(",", ".")),
       categoria,
       data: "Hoje",
       createdAt: new Date().toISOString(),
@@ -97,6 +128,7 @@ export default function Registrar() {
     setValor("");
     setCategoria("");
     setState("idle");
+
     router.replace("/(tabs)/home");
   }
 
@@ -104,16 +136,32 @@ export default function Registrar() {
     <View style={styles.container}>
       <Text style={styles.title}>Registrar despesa</Text>
 
+      {/* 🎙️ ESCUTANDO */}
       {state === "listening" && (
-        <Text style={styles.voiceText}>🎙️ Pode falar…</Text>
+        <View style={styles.voiceContainer}>
+          <Animated.Text
+            style={[
+              styles.micIcon,
+              { transform: [{ scale: micPulse }] },
+            ]}
+          >
+            🎤
+          </Animated.Text>
+          <Text style={styles.voiceText}>Ouvindo… fale agora</Text>
+        </View>
       )}
 
+      {/* ⏳ PROCESSANDO */}
       {state === "processing" && (
-        <Text style={styles.voiceText}>
-          ⏳ Entendendo sua despesa…
-        </Text>
+        <View style={styles.voiceContainer}>
+          <Text style={styles.processingIcon}>⏳</Text>
+          <Text style={styles.voiceText}>
+            Entendendo sua despesa…
+          </Text>
+        </View>
       )}
 
+      {/* ✍️ FORMULÁRIO */}
       {(state === "idle" || state === "confirm") && (
         <>
           <Text style={styles.label}>Valor</Text>
@@ -145,7 +193,7 @@ export default function Registrar() {
           ) : (
             <TouchableOpacity
               style={styles.voiceButton}
-              onPress={startListening}
+              onPress={iniciarEscuta}
             >
               <Text style={styles.voiceButtonText}>
                 🎤 Falar despesa
@@ -172,12 +220,23 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 16,
   },
+  voiceContainer: {
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  micIcon: {
+    fontSize: 48,
+    marginBottom: 8,
+  },
+  processingIcon: {
+    fontSize: 40,
+    marginBottom: 8,
+  },
   voiceText: {
     textAlign: "center",
     color: "#0A8F55",
     fontSize: 16,
     fontWeight: "600",
-    marginBottom: 20,
   },
   label: {
     fontSize: 14,
