@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { matchCategory } from "../helpers/categoryMatcher";
+import { parseSpeech } from "../helpers/speechParser";
 import { saveExpense } from "../storage/expenseStorage";
 
 type RegistrarState = "idle" | "listening" | "processing" | "confirm";
@@ -45,22 +45,20 @@ export default function Registrar() {
     };
 
     recognition.onresult = (event: any) => {
-      const textoFalado = event.results[0][0].transcript;
-      console.log("🎙️ Texto reconhecido:", textoFalado);
+  const textoFalado = event.results[0][0].transcript;
+  console.log("🎙️ Texto reconhecido:", textoFalado);
 
-      setState("processing");
+  setState("processing");
 
-      // Extrai número (valor)
-      const valorEncontrado = textoFalado.match(/\d+([.,]\d+)?/);
-      if (valorEncontrado) {
-        setValor(valorEncontrado[0].replace(",", "."));
-      }
+  const parsed = parseSpeech(textoFalado);
 
-      // Categoria por match semântico
-      setCategoria(matchCategory(textoFalado));
-      setState("confirm");
-    };
+  if (parsed.valor !== null) {
+    setValor(String(parsed.valor));
+  }
 
+  setCategoria(parsed.categoria);
+  setState("confirm");
+};
     recognition.onerror = () => {
       alert("Erro ao reconhecer a fala.");
       setState("idle");
