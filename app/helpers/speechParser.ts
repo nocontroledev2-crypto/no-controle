@@ -57,20 +57,44 @@ function parseValue(text: string): number | null {
 
 function parseDateFromSpeech(text: string): Date {
   const now = new Date();
+
   let day: number | null = null;
   let month: number | null = null;
   let year: number = now.getFullYear();
 
-  const digitDay = text.match(/dia (\d{1,2})/);
-  if (digitDay) day = Number(digitDay[1]);
+  // ✅ PRIORIDADE 1 → "12 de janeiro"
+  const fullMatch = text.match(/(\d{1,2})\s+de\s+([a-zç]+)/);
 
-  Object.keys(numberWords).forEach((k) => {
-    if (text.includes(`dia ${k}`)) day = numberWords[k];
-  });
+  if (fullMatch) {
+    day = Number(fullMatch[1]);
+    const mesTexto = fullMatch[2];
+    if (months[mesTexto] !== undefined) {
+      month = months[mesTexto];
+    }
+  }
 
-  Object.keys(months).forEach((m) => {
-    if (text.includes(m)) month = months[m];
-  });
+  // ✅ PRIORIDADE 2 → ano (ex: "2024")
+  const yearMatch = text.match(/\b(20\d{2})\b/);
+  if (yearMatch) {
+    year = Number(yearMatch[1]);
+  }
+
+  // ✅ PRIORIDADE 3 → número isolado (caso só fale "dia 12" ou "12")
+  if (day === null) {
+    const numbers = text.match(/\b\d{1,2}\b/g);
+
+    if (numbers) {
+      for (let num of numbers) {
+        const n = Number(num);
+
+        // ignora valores grandes (ex: 450)
+        if (n > 0 && n <= 31) {
+          day = n;
+          break;
+        }
+      }
+    }
+  }
 
   return new Date(
     year,

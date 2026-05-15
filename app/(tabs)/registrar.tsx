@@ -25,7 +25,27 @@ export default function Registrar() {
   const valorInputRef = useRef<TextInput>(null);
   const micPulse = useRef(new Animated.Value(1)).current;
 
-  /* 🎤 animação do microfone */
+  /* ✅ FORMATAR DATA */
+  function formatarData(date: Date) {
+    return date.toLocaleDateString("pt-BR");
+  }
+
+  /* ✅ PARSE DATA DO INPUT */
+  function parseData(text: string) {
+    const partes = text.split("/");
+
+    if (partes.length !== 3) return new Date();
+
+    const [dia, mes, ano] = partes;
+
+    return new Date(
+      Number(ano),
+      Number(mes) - 1,
+      Number(dia)
+    );
+  }
+
+  /* 🎤 animação */
   useEffect(() => {
     if (state === "listening") {
       Animated.loop(
@@ -47,7 +67,7 @@ export default function Registrar() {
     }
   }, [state]);
 
-  /* 🎙️ iniciar escuta (gesto direto) */
+  /* 🎙️ iniciar voz */
   function iniciarEscuta() {
     const SpeechRecognition =
       (window as any).SpeechRecognition ||
@@ -120,32 +140,11 @@ export default function Registrar() {
     setTimeout(() => valorInputRef.current?.focus(), 100);
   }
 
-function formatarData(date: Date) {
-  if (!date) return "";
-  return date.toLocaleDateString("pt-BR");
-}
-
-function parseData(text: string) {
-  const partes = text.split("/");
-
-  if (partes.length !== 3) return new Date();
-
-  const [dia, mes, ano] = partes;
-
-  return new Date(
-    Number(ano),
-    Number(mes) - 1,
-    Number(dia)
-  );
-}
-
-
-
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Registrar despesa</Text>
 
+      {/* 🎤 ESCUTA */}
       {state === "listening" && (
         <View style={styles.voiceContainer}>
           <Animated.Text
@@ -161,7 +160,9 @@ function parseData(text: string) {
       )}
 
       {state === "processing" && (
-        <Text style={styles.voiceText}>⏳ Entendendo sua despesa…</Text>
+        <Text style={styles.voiceText}>
+          ⏳ Entendendo sua despesa…
+        </Text>
       )}
 
       {(state === "idle" || state === "confirm") && (
@@ -169,7 +170,6 @@ function parseData(text: string) {
           <Text style={styles.label}>Valor</Text>
           <TextInput
             ref={valorInputRef}
-            autoFocus={state === "idle"}
             style={styles.input}
             value={valor}
             keyboardType="numeric"
@@ -177,38 +177,72 @@ function parseData(text: string) {
           />
 
           <Text style={styles.label}>Categoria</Text>
-          <TextInput
-            style={styles.input}
-            value={categoria}
-            onChangeText={setCategoria}
-          />
+          
+          <Text style={styles.label}>Categoria</Text>
+
+<select
+  value={categoria}
+  onChange={(e) => setCategoria(e.target.value)}
+  style={styles.input}
+>
+  <option value="">Selecione</option>
+
+  <option>Alimentação</option>
+  <option>Transporte</option>
+  <option>Moradia</option>
+  <option>Contas</option>
+  <option>Assinaturas</option>
+  <option>Saúde</option>
+  <option>Serviços</option>
+  <option>Cartão de crédito</option>
+  <option>Outros</option>
+</select>
+``
 
           <Text style={styles.label}>Data</Text>
-
-            <TextInput
+          <TextInput
             style={styles.input}
-             value={formatarData(data)}
-             onChangeText={(text) => setData(parseData(text))}
-             placeholder="dd/mm/aaaa"
-            />
+            value={formatarData(data)}
+            onChangeText={(text) => setData(parseData(text))}
+            placeholder="dd/mm/aaaa"
+          />
 
           {state === "confirm" ? (
             <>
-              <TouchableOpacity style={styles.confirmButton} onPress={salvarDespesa}>
-                <Text style={styles.confirmText}>✅ Confirmar despesa</Text>
+              <TouchableOpacity
+                style={styles.confirmButton}
+                onPress={salvarDespesa}
+              >
+                <Text style={styles.confirmText}>
+                  ✅ Confirmar despesa
+                </Text>
               </TouchableOpacity>
+
               <TouchableOpacity onPress={alterarDados}>
-                <Text style={styles.editText}>✏️ Alterar dados</Text>
+                <Text style={styles.editText}>
+                  ✏️ Alterar dados
+                </Text>
               </TouchableOpacity>
             </>
           ) : (
             <>
-              <TouchableOpacity style={styles.voiceButton} onPress={iniciarEscuta}>
-                <Text style={styles.confirmText}>🎤 Falar despesa</Text>
+              <TouchableOpacity
+                style={styles.voiceButton}
+                onPress={iniciarEscuta}
+              >
+                <Text style={styles.confirmText}>
+                  🎤 Falar despesa
+                </Text>
               </TouchableOpacity>
+
               {valor && categoria && (
-                <TouchableOpacity style={styles.confirmButton} onPress={salvarDespesa}>
-                  <Text style={styles.confirmText}>💾 Salvar despesa</Text>
+                <TouchableOpacity
+                  style={styles.confirmButton}
+                  onPress={salvarDespesa}
+                >
+                  <Text style={styles.confirmText}>
+                    💾 Salvar despesa
+                  </Text>
                 </TouchableOpacity>
               )}
             </>
@@ -219,17 +253,47 @@ function parseData(text: string) {
   );
 }
 
+/* 🎨 estilos mantidos */
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: "#F2F2F2" },
-  title: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 16 },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 16,
+  },
   label: { fontSize: 14, marginBottom: 4 },
-  input: { backgroundColor: "#FFF", padding: 12, borderRadius: 8, marginBottom: 12 },
+  input: {
+    backgroundColor: "#FFF",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
   voiceContainer: { alignItems: "center", marginBottom: 24 },
   micIcon: { fontSize: 48, marginBottom: 8 },
   voiceText: { fontSize: 16, color: "#0A8F55", marginBottom: 8 },
   cancelText: { color: "#C0392B", fontWeight: "600" },
-  confirmButton: { backgroundColor: "#0A8F55", padding: 16, borderRadius: 10, marginTop: 10 },
-  voiceButton: { backgroundColor: "#0A8F55", padding: 16, borderRadius: 10, marginTop: 10 },
-  confirmText: { color: "#FFF", fontWeight: "bold", textAlign: "center" },
-  editText: { textAlign: "center", marginTop: 8, color: "#2980B9", fontWeight: "600" },
+  confirmButton: {
+    backgroundColor: "#0A8F55",
+    padding: 16,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  voiceButton: {
+    backgroundColor: "#0A8F55",
+    padding: 16,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  confirmText: {
+    color: "#FFF",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  editText: {
+    textAlign: "center",
+    marginTop: 8,
+    color: "#2980B9",
+    fontWeight: "600",
+  },
 });
