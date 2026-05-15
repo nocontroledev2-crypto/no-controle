@@ -1,0 +1,1 @@
+export const GOOGLE_SPEECH_API_KEY = "AIzaSySUA_KEY_REAL_AQUI";
