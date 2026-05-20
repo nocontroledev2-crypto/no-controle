@@ -386,12 +386,11 @@ export default function Resumo() {
       : "Selecione a data final"}
   </Text>
 )}
-    
-    
-    <input
-  type="date"
-  value=""   // 👈 força reset sempre
-  onChange={(e) => {
+        
+     <input
+     type="date"
+     value=""   // 👈 força reset sempre
+    onChange={(e) => {
     const selected = parseDateSafe(e.target.value);
 
     if (selectingStart) {

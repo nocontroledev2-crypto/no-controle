@@ -20,6 +20,7 @@ export default function Registrar() {
   const [valor, setValor] = useState("");
   const [categoria, setCategoria] = useState("");
   const [data, setData] = useState(new Date());
+  const [dataTexto, setDataTexto] = useState(formatarData(new Date()));
 
   const recognitionRef = useRef<any>(null);
   const valorInputRef = useRef<TextInput>(null);
@@ -199,11 +200,14 @@ export default function Registrar() {
 
           <Text style={styles.label}>Data</Text>
           <TextInput
-            style={styles.input}
-            value={formatarData(data)}
-            onChangeText={(text) => setData(parseData(text))}
-            placeholder="dd/mm/aaaa"
-          />
+  style={styles.input}
+  value={dataTexto}
+  onChangeText={(text) => {
+    setDataTexto(text);
+    setData(parseData(text));
+  }}
+  placeholder="dd/mm/aaaa"
+/>
 
           {state === "confirm" ? (
             <>
