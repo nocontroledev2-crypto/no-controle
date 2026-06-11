@@ -201,6 +201,9 @@ export default function Resumo() {
 
   const dias = new Set(filtered.map((e) => e.data)).size;
   const media = dias > 0 ? total / dias : 0;
+  const previousDias = new Set(  previousFiltered.map((e) => e.data)).size;
+  const previousMedia =
+  previousDias > 0 ? previousTotal / previousDias : 0;
 
   /* ✅ VARIAÇÃO */
   let percentual = 0;
@@ -328,49 +331,170 @@ export default function Resumo() {
       {/* ✅ CARDS */}
       <View style={styles.row}>
         <Card title="💰 Total gasto" value={formatMoney(total)}>
-          {mostrarComparacao && (
-            <>
-              <Text style={styles.subText}>
-                {previousTotal === 0
-                  ? "Sem dados do período anterior."
-                  : diffTotal > 0
-                  ? `Você gastou ${formatMoney(
-                      diffTotal
-                    )} a mais que o período anterior.`
-                  : `Você gastou ${formatMoney(
-                      Math.abs(diffTotal)
-                    )} a menos que o período anterior.`}
-              </Text>
+  {mostrarComparacao && (
+    <>
+      <Text style={[
+        styles.subText,
+        {
+          color:
+            diffTotal > 0
+              ? "#D9534F"
+              : diffTotal < 0
+              ? "#0A8F55"
+              : "#666",
+        }
+      ]}>
+        {previousTotal === 0
+          ? "Sem dados do período anterior."
+          : diffTotal === 0
+          ? "Mesmo valor do período anterior."
+          : diffTotal > 0
+          ? `⚠️ Você gastou ${formatMoney(diffTotal)} a mais`
+          : `✅ Você gastou ${formatMoney(Math.abs(diffTotal))} a menos`}
+      </Text>
 
-              {textoVariacao && (
-                <Text style={styles.subText}>
-                  {textoVariacao}
-                </Text>
-              )}
-            </>
-          )}
-        </Card>
+      {textoVariacao && (
+        <Text style={styles.subText}>{textoVariacao}</Text>
+      )}
+    </>
+  )}
+</Card>
+
+
 
         <Card title="📊 Média diária" value={formatMoney(media)} />
       </View>
 
       <View style={styles.row}>
-        <Card title="🔥 Top 3 maiores gastos">
-          {topGastos.map((e, i) => (
-            <Text key={e.id}>
-              {i + 1}. {formatMoney(e.valor)} — {e.categoria}
-            </Text>
-          ))}
-        </Card>
+        <Card
+   title={`🔥 Top ${topGastos.length} ${ topGastos.length <= 1 ? "maior gasto" : "maiores gastos"
+  }`}>  {topGastos.length === 0 ? (
+    <Text style={styles.subText}>Nenhum gasto registrado</Text>
+  ) : (
+    topGastos.map((e, i) => (
+      <Text key={e.id}>
+        {i + 1}. {formatMoney(e.valor)} — {e.categoria}
+      </Text>
+    ))
+  )}
+</Card>
 
-        <Card title="🏷️ Top 3 categorias">
-          {topCategorias.map(([cat, val]) => (
-            <Text key={cat}>
-              • {cat} — {formatMoney(val)}
-            </Text>
-          ))}
-        </Card>
+        <Card
+  title={`🏷️ Top ${topCategorias.length} ${
+    topCategorias.length <= 1 ? "categoria" : "categorias"
+  }`}
+
+>
+  {topCategorias.length === 0 ? (
+    <Text style={styles.subText}>
+      Nenhuma categoria registrada
+    </Text>
+  ) : (
+    topCategorias.map(([cat, val]) => (
+      <Text key={cat}>
+        • {cat} — {formatMoney(val)}
+      </Text>
+    ))
+  )}
+</Card>
       </View>
+
+
+
+{period !== "weekPrev" &&
+ period !== "monthPrev" &&
+ period !== "lastYear" && (
+  <Card title="💡 Insight do período">
+    {total === 0 ? (
+      <Text style={styles.subText}>
+        Sem dados suficientes para análise
+      </Text>
+    ) : (
+      (() => {
+  const hoje = new Date();
+
+  let diasPeriodo = 0;
+  let diasPassados = 0;
+  let textoPeriodo = "";
+
+  if (period === "week") {
+    diasPeriodo = 7;
+
+    const diaSemana = hoje.getDay(); // 0 (domingo) a 6 (sábado)
+    diasPassados = diaSemana === 0 ? 7 : diaSemana; // ajustando domingo
+
+    textoPeriodo = "até o fim da semana";
+  }
+
+  else if (period === "month") {
+    const totalDiasMes = new Date(
+      hoje.getFullYear(),
+      hoje.getMonth() + 1,
+      0
+    ).getDate();
+
+    diasPeriodo = totalDiasMes;
+    diasPassados = hoje.getDate();
+
+    textoPeriodo = "até o fim do mês";
+  }
+
+  else if (period === "year") {
+    diasPeriodo = 365;
+
+    const inicioAno = new Date(hoje.getFullYear(), 0, 1);
+    const diasDesdeInicio =
+      Math.floor((hoje.getTime() - inicioAno.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+    diasPassados = diasDesdeInicio;
+
+    textoPeriodo = "até o fim do ano";
+  }
+
+  else if (period === "today") {
+    return (
+      <Text style={styles.subText}>
+        Sem projeção para apenas um dia
+      </Text>
+    );
+  }
+
+  const diasRestantes = diasPeriodo - diasPassados;
+
+  const projecao = total + media * diasRestantes;
+
+  return (
+    <>
+      <Text style={styles.subText}>
+        📈 Mantendo esse ritmo:
+      </Text>
+
+      <Text style={styles.cardValue}>
+        {formatMoney(projecao)}
+      </Text>
+
+      <Text style={styles.subText}>
+        {textoPeriodo}
+      </Text>
+
+      {topCategorias.length > 0 && (
+        <Text style={styles.subText}>
+          💡 Reduzindo{" "}
+          <Text style={{ fontWeight: "bold" }}>
+            {topCategorias[0][0]}
+          </Text>
+          , você pode economizar até{" "}
+          {formatMoney(topCategorias[0][1] * 0.2)}
+        </Text>
+      )}
+    </>
+  );
+})()
+    )}
+  </Card>
+)}
+
+
 
       {/* ✅ CALENDÁRIO (FORMA CORRETA) */}
       
