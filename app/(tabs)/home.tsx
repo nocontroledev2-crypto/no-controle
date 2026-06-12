@@ -98,25 +98,51 @@ export default function Home() {
           }
         }
 
-        // 🔥 PREVISÃO DO MÊS
-        const diaAtual = hoje.getDate();
-        const diasNoMes = new Date(
-          anoAtual,
-          mesAtual + 1,
-          0
-        ).getDate();
+        // 🔥 PREVISÃO DO MÊS (CORRIGIDA)
+// ✅ dias com gasto no mês
+const diasComGasto = new Set(
+  data
+    .filter((item) => {
+      const d = parseDateSafe(item.data);
+      return (
+        d.getMonth() === mesAtual &&
+        d.getFullYear() === anoAtual
+      );
+    })
+    .map((item) => {
+  const d = parseDateSafe(item.data);
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+})
 
-        let textoPrevisao = "";
+).size;
 
-        if (totalMesTemp > 0) {
-          const mediaDia = totalMesTemp / diaAtual;
-          const previsao = mediaDia * diasNoMes;
+// ✅ média real
+const mediaMes =
+  diasComGasto > 0 ? totalMesTemp / diasComGasto : 0;
 
-          textoPrevisao = `📊 Se continuar assim, você gastará ${formatMoney(
-            previsao
-          )} este mês`;
-        }
+// ✅ dias do mês
+const diasNoMes = new Date(
+  anoAtual,
+  mesAtual + 1,
+  0
+).getDate();
 
+// ✅ dia atual
+const diaAtual = hoje.getDate();
+
+// ✅ dias restantes
+const diasRestantes = diasNoMes - diaAtual;
+
+// ✅ projeção correta
+const projecaoMes =
+  totalMesTemp + mediaMes * diasRestantes;
+
+let textoPrevisao = "";
+
+if (totalMesTemp > 0) {
+  textoPrevisao = `📈 Mantendo esse ritmo:
+  ${formatMoney(projecaoMes)} até o fim do mês`;
+}
         // 🔥 CATEGORIA DOMINANTE
         let maiorCategoria = "";
         let maiorValor = 0;
