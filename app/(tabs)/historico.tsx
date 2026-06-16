@@ -20,10 +20,27 @@ type Period =
   | "all"
   | "custom";
 
+const CATEGORY_OPTIONS = [
+  "Todas",
+  "Alimentação",
+  "Transporte",
+  "Moradia",
+  "Contas",
+  "Assinaturas",
+  "Saúde",
+  "Serviços",
+  "Cartão de crédito",
+  "Outros",
+];
+
 export default function Historico() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [period, setPeriod] = useState<Period>("all");
-  const [menuAberto, setMenuAberto] = useState(false);
+
+  const [menuPeriodoAberto, setMenuPeriodoAberto] = useState(false);
+  const [menuCategoriaAberto, setMenuCategoriaAberto] = useState(false);
+
+  const [categoriaSelecionada, setCategoriaSelecionada] = useState("Todas");
 
   const [showCalendar, setShowCalendar] = useState(false);
   const [startDate, setStartDate] = useState<Date | null>(null);
@@ -60,7 +77,7 @@ export default function Historico() {
 
   function getStartOfWeek(date: Date) {
     const d = new Date(date);
-    const day = d.getDay(); // domingo=0 ... sábado=6
+    const day = d.getDay(); // domingo = 0 ... sábado = 6
     const diff = day === 0 ? -6 : 1 - day; // semana começa na segunda
     d.setDate(d.getDate() + diff);
     d.setHours(0, 0, 0, 0);
@@ -73,6 +90,29 @@ export default function Historico() {
     end.setDate(start.getDate() + 6);
     end.setHours(23, 59, 59, 999);
     return end;
+  }
+
+  function labelPeriod(p: Period) {
+    switch (p) {
+      case "today":
+        return "Hoje";
+      case "week":
+        return "Esta semana";
+      case "weekPrev":
+        return "Semana passada";
+      case "month":
+        return "Este mês";
+      case "monthPrev":
+        return "Mês passado";
+      case "year":
+        return "Este ano";
+      case "lastYear":
+        return "Ano passado";
+      case "all":
+        return "Desde o início";
+      case "custom":
+        return "Personalizado";
+    }
   }
 
   /* ===============================
@@ -101,7 +141,7 @@ export default function Historico() {
      FILTRO POR PERÍODO
   =============================== */
 
-  const filteredExpenses = useMemo(() => {
+  const periodFilteredExpenses = useMemo(() => {
     return expenses.filter((item) => {
       const d = parseDateSafe(item.data);
 
@@ -141,7 +181,11 @@ export default function Historico() {
       }
 
       if (period === "monthPrev") {
-        const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const prevMonthDate = new Date(
+          now.getFullYear(),
+          now.getMonth() - 1,
+          1
+        );
         return (
           d.getMonth() === prevMonthDate.getMonth() &&
           d.getFullYear() === prevMonthDate.getFullYear()
@@ -191,6 +235,20 @@ export default function Historico() {
   }, [expenses, period, startDate, endDate]);
 
   /* ===============================
+     FILTRO POR CATEGORIA (FASE 1)
+  =============================== */
+
+  const filteredExpenses = useMemo(() => {
+    if (categoriaSelecionada === "Todas") {
+      return periodFilteredExpenses;
+    }
+
+    return periodFilteredExpenses.filter(
+      (item) => item.categoria === categoriaSelecionada
+    );
+  }, [periodFilteredExpenses, categoriaSelecionada]);
+
+  /* ===============================
      AGRUPAR POR DATA
   =============================== */
 
@@ -215,7 +273,7 @@ export default function Historico() {
   }, [filteredExpenses]);
 
   /* ===============================
-     TOTAL DO PERÍODO (opcional mas útil)
+     RESUMO RÁPIDO DO PERÍODO FILTRADO
   =============================== */
 
   const totalPeriodo = filteredExpenses.reduce(
@@ -231,15 +289,93 @@ export default function Historico() {
     <View style={styles.container}>
       <Text style={styles.title}>Histórico</Text>
 
-      {/* ✅ DROPDOWN */}
-      <TouchableOpacity
-        style={styles.periodBox}
-        onPress={() => setMenuAberto(!menuAberto)}
-      >
-        <Text style={styles.periodText}>📅 {labelPeriod(period)}</Text>
-      </TouchableOpacity>
+      {/* ✅ CONTROLES */}
+      <View style={styles.controlsRow}>
+        {/* PERIODOS */}
+        <View style={styles.controlBlock}>
+          <TouchableOpacity
+            style={styles.controlButton}
+            onPress={() => {
+              setMenuPeriodoAberto(!menuPeriodoAberto);
+              setMenuCategoriaAberto(false);
+            }}
+          >
+            <Text style={styles.controlText}>
+              📅 {labelPeriod(period)}
+            </Text>
+          </TouchableOpacity>
 
-      {/* ✅ intervalo selecionado */}
+          {menuPeriodoAberto && (
+            <View style={styles.menu}>
+              {[
+                ["Hoje", "today"],
+                ["Esta semana", "week"],
+                ["Semana passada", "weekPrev"],
+                ["Este mês", "month"],
+                ["Mês passado", "monthPrev"],
+                ["Este ano", "year"],
+                ["Ano passado", "lastYear"],
+                ["Desde o início", "all"],
+                ["Personalizado", "custom"],
+              ].map(([label, value]) => (
+                <TouchableOpacity
+                  key={value}
+                  onPress={() => {
+                    if (value === "custom") {
+                      setMenuPeriodoAberto(false);
+                      setStartDate(null);
+                      setEndDate(null);
+                      setSelectingStart(true);
+
+                      setTimeout(() => {
+                        setShowCalendar(true);
+                      }, 100);
+                    } else {
+                      setPeriod(value as Period);
+                      setMenuPeriodoAberto(false);
+                    }
+                  }}
+                >
+                  <Text style={styles.menuItem}>{label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
+
+        {/* CATEGORIAS */}
+        <View style={styles.controlBlock}>
+          <TouchableOpacity
+            style={styles.controlButton}
+            onPress={() => {
+              setMenuCategoriaAberto(!menuCategoriaAberto);
+              setMenuPeriodoAberto(false);
+            }}
+          >
+            <Text style={styles.controlText}>
+              🏷️ {categoriaSelecionada}
+            </Text>
+          </TouchableOpacity>
+
+          {menuCategoriaAberto && (
+            <View style={styles.menu}>
+              {CATEGORY_OPTIONS.map((cat) => (
+                <TouchableOpacity
+                  key={cat}
+                  onPress={() => {
+                    setCategoriaSelecionada(cat);
+                    setMenuCategoriaAberto(false);
+                  }}
+                >
+                  <Text style={styles.menuItem}>{cat}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
+      </View>
+
+      {/* ✅ intervalo custom selecionado */}
       {period === "custom" && startDate && endDate && (
         <>
           <Text style={styles.customPeriodText}>
@@ -251,45 +387,7 @@ export default function Historico() {
         </>
       )}
 
-      {/* ✅ MENU */}
-      {menuAberto && (
-        <View style={styles.menu}>
-          {[
-            ["Hoje", "today"],
-            ["Esta semana", "week"],
-            ["Semana passada", "weekPrev"],
-            ["Este mês", "month"],
-            ["Mês passado", "monthPrev"],
-            ["Este ano", "year"],
-            ["Ano passado", "lastYear"],
-            ["Desde o início", "all"],
-            ["Personalizado", "custom"],
-          ].map(([label, value]) => (
-            <TouchableOpacity
-              key={value}
-              onPress={() => {
-                if (value === "custom") {
-                  setMenuAberto(false);
-                  setStartDate(null);
-                  setEndDate(null);
-                  setSelectingStart(true);
-
-                  setTimeout(() => {
-                    setShowCalendar(true);
-                  }, 100);
-                } else {
-                  setPeriod(value as Period);
-                  setMenuAberto(false);
-                }
-              }}
-            >
-              <Text style={styles.menuItem}>{label}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
-
-      {/* ✅ seletor de período personalizado (fallback web) */}
+      {/* ✅ seletor data custom (fallback web) */}
       {showCalendar && (
         <View style={styles.calendarBox}>
           <Text style={styles.calendarLabel}>
@@ -329,24 +427,26 @@ export default function Historico() {
         </View>
       )}
 
-      {/* ✅ resumo rápido do período */}
+      {/* ✅ resumo do filtro */}
       <View style={styles.summaryCard}>
         <Text style={styles.summaryLabel}>Total no período</Text>
-        <Text style={styles.summaryValue}>{formatMoney(totalPeriodo)}</Text>
+        <Text style={styles.summaryValue}>
+          {formatMoney(totalPeriodo)}
+        </Text>
         <Text style={styles.summarySubText}>
           {filteredExpenses.length}{" "}
           {filteredExpenses.length === 1 ? "registro" : "registros"}
         </Text>
       </View>
 
-      {/* ✅ LISTA */}
+      {/* ✅ lista */}
       {groupedByDate.length === 0 ? (
         <View style={styles.emptyBox}>
           <Text style={styles.emptyText}>
-            Nenhum registro encontrado neste período.
+            Nenhum registro encontrado neste filtro.
           </Text>
           <Text style={styles.subEmptyText}>
-            Tente outro filtro ou registre uma nova despesa.
+            Tente outro período ou outra categoria.
           </Text>
         </View>
       ) : (
@@ -375,33 +475,6 @@ export default function Historico() {
 }
 
 /* ===============================
-   LABELS
-=============================== */
-
-function labelPeriod(p: Period) {
-  switch (p) {
-    case "today":
-      return "Hoje";
-    case "week":
-      return "Esta semana";
-    case "weekPrev":
-      return "Semana passada";
-    case "month":
-      return "Este mês";
-    case "monthPrev":
-      return "Mês passado";
-    case "year":
-      return "Este ano";
-    case "lastYear":
-      return "Ano passado";
-    case "all":
-      return "Desde o início";
-    case "custom":
-      return "Personalizado";
-  }
-}
-
-/* ===============================
    ESTILOS
 =============================== */
 
@@ -420,13 +493,24 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-  periodBox: {
-    alignItems: "center",
+  controlsRow: {
+    flexDirection: "row",
+    gap: 10,
     marginBottom: 8,
   },
 
-  periodText: {
+  controlBlock: {
+    flex: 1,
+  },
+
+  controlButton: {
+    alignItems: "center",
+    paddingVertical: 6,
+  },
+
+  controlText: {
     color: "#555",
+    fontSize: 13,
   },
 
   customPeriodText: {
@@ -437,20 +521,20 @@ const styles = StyleSheet.create({
   },
 
   menu: {
-    position: "absolute",
-    top: 78,
-    alignSelf: "center",
-    width: 220,
     backgroundColor: "#FFF",
     borderRadius: 12,
-    padding: 12,
-    elevation: 6,
+    padding: 10,
+    marginTop: 6,
+    borderWidth: 0.5,
+    borderColor: "#eee",
+    elevation: 4,
     zIndex: 10,
   },
 
   menuItem: {
     paddingVertical: 8,
     color: "#333",
+    fontSize: 14,
   },
 
   calendarBox: {
