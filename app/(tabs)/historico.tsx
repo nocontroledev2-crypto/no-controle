@@ -19,6 +19,8 @@ type Period =
   | "lastYear"
   | "all"
   | "custom";
+  type ViewMode = "lancamentos" | "categorias";
+
 
 const CATEGORY_OPTIONS = [
   "Todas",
@@ -36,6 +38,7 @@ const CATEGORY_OPTIONS = [
 export default function Historico() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [period, setPeriod] = useState<Period>("all");
+  const [viewMode, setViewMode] = useState<ViewMode>("lancamentos");
 
   const [menuPeriodoAberto, setMenuPeriodoAberto] = useState(false);
   const [menuCategoriaAberto, setMenuCategoriaAberto] = useState(false);
@@ -305,6 +308,55 @@ export default function Historico() {
   }, [filteredExpenses]);
 
   /* ===============================
+   AGRUPAR POR CATEGORIA (modo categorias)
+   Percentual em relação ao total do período base
+=============================== */
+
+const totalPeriodoBase = periodFilteredExpenses.reduce(
+  (sum, item) => sum + Number(item.valor),
+  0
+);
+
+  const groupedByCategory = useMemo(() => {
+  const groups: Record<
+    string,
+    {
+      total: number;
+      qtd: number;
+    }
+  > = {};
+
+  filteredExpenses.forEach((item) => {
+    if (!groups[item.categoria]) {
+      groups[item.categoria] = {
+        total: 0,
+        qtd: 0,
+      };
+    }
+
+    groups[item.categoria].total += Number(item.valor);
+    groups[item.categoria].qtd += 1;
+  });
+
+  return Object.entries(groups)
+    .map(([categoria, info]) => {
+      const percentual =
+        totalPeriodoBase > 0
+          ? (info.total / totalPeriodoBase) * 100
+          : 0;
+
+      return {
+        categoria,
+        total: info.total,
+        qtd: info.qtd,
+        percentual,
+      };
+    })
+    .sort((a, b) => b.total - a.total);
+}, [filteredExpenses, totalPeriodoBase]);
+
+
+  /* ===============================
      CONTROLES GLOBAIS
   =============================== */
 
@@ -384,6 +436,42 @@ export default function Historico() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Histórico</Text>
+      {/* ✅ MODO DE VISUALIZAÇÃO */}
+<View style={styles.viewModeRow}>
+  <TouchableOpacity
+    style={[
+      styles.viewModeButton,
+      viewMode === "lancamentos" && styles.viewModeButtonActive,
+    ]}
+    onPress={() => setViewMode("lancamentos")}
+  >
+    <Text
+      style={[
+        styles.viewModeText,
+        viewMode === "lancamentos" && styles.viewModeTextActive,
+      ]}
+    >
+      📋 Lançamentos
+    </Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    style={[
+      styles.viewModeButton,
+      viewMode === "categorias" && styles.viewModeButtonActive,
+    ]}
+    onPress={() => setViewMode("categorias")}
+  >
+    <Text
+      style={[
+        styles.viewModeText,
+        viewMode === "categorias" && styles.viewModeTextActive,
+      ]}
+    >
+      🏷️ Categorias
+    </Text>
+  </TouchableOpacity>
+</View>
 
       {/* ✅ TOPO UNIFICADO */}
       <View style={styles.topControlsWrap}>
@@ -463,21 +551,24 @@ export default function Historico() {
           )}
         </View>
 
-        {/* EXPANDIR TUDO */}
-        <TouchableOpacity
-          style={styles.topActionButton}
-          onPress={expandirTudo}
-        >
-          <Text style={styles.topActionText}>▲ Expandir tudo</Text>
-        </TouchableOpacity>
+        {/* Ações globais só no modo lançamentos */}
+{viewMode === "lancamentos" && (
+  <>
+    <TouchableOpacity
+      style={styles.topActionButton}
+      onPress={expandirTudo}
+    >
+      <Text style={styles.topActionText}>▲ Expandir tudo</Text>
+    </TouchableOpacity>
 
-        {/* RECOLHER TUDO */}
-        <TouchableOpacity
-          style={styles.topActionButton}
-          onPress={recolherTudo}
-        >
-          <Text style={styles.topActionText}>▼ Recolher tudo</Text>
-        </TouchableOpacity>
+    <TouchableOpacity
+      style={styles.topActionButton}
+      onPress={recolherTudo}
+    >
+      <Text style={styles.topActionText}>▼ Recolher tudo</Text>
+    </TouchableOpacity>
+  </>
+)}
       </View>
 
       {/* ✅ intervalo custom selecionado */}
@@ -576,63 +667,91 @@ export default function Historico() {
         </View>
       </View>
 
-      {/* ✅ LISTA */}
-      {groupedByDate.length === 0 ? (
-        <View style={styles.emptyBox}>
-          <Text style={styles.emptyText}>
-            Nenhum registro encontrado neste filtro.
-          </Text>
-          <Text style={styles.subEmptyText}>
-            Tente outro período ou outra categoria.
-          </Text>
-        </View>
-      ) : (
-        <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
-          {groupedByDate.map((group) => {
-            const collapsed = isDateCollapsed(group.date);
+      
+   {/* ✅ LISTA / VISÃO POR CATEGORIA */}
+{viewMode === "lancamentos" ? (
 
-            return (
-              <View key={group.date} style={styles.groupBox}>
-                <TouchableOpacity
-                  style={styles.groupHeader}
-                  onPress={() => toggleDateCollapse(group.date)}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.groupTitle}>
-                    {formatDateBR(group.date)}
+
+  groupedByDate.length === 0 ? (
+    <View style={styles.emptyBox}>
+      <Text style={styles.emptyText}>
+        Nenhum registro encontrado neste filtro.
+      </Text>
+      <Text style={styles.subEmptyText}>
+        Tente outro período ou outra categoria.
+      </Text>
+    </View>
+  ) : (
+    <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
+      {groupedByDate.map((group) => {
+        const collapsed = isDateCollapsed(group.date);
+
+        return (
+          <View key={group.date} style={styles.groupBox}>
+            <TouchableOpacity
+              style={styles.groupHeader}
+              onPress={() => toggleDateCollapse(group.date)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.groupTitle}>
+                {formatDateBR(group.date)}
+              </Text>
+
+              <View style={styles.groupHeaderRight}>
+                {mostrarResumoPorDia && (
+                  <Text style={styles.groupMeta}>
+                    {formatMoney(group.totalDia)}
+                    {group.qtdLancamentos > 1
+                      ? ` • ${group.qtdLancamentos} registros`
+                      : ""}
+                  </Text>
+                )}
+
+                <Text style={styles.toggleIcon}>
+                  {collapsed ? "▼" : "▲"}
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            {!collapsed &&
+              group.items.map((item) => (
+                <View key={item.id} style={styles.card}>
+                  <Text style={styles.value}>
+                    {formatMoney(Number(item.valor))}
                   </Text>
 
-                  <View style={styles.groupHeaderRight}>
-                    {mostrarResumoPorDia && (
-                      <Text style={styles.groupMeta}>
-                        {formatMoney(group.totalDia)}
-                        {group.qtdLancamentos > 1
-                          ? ` • ${group.qtdLancamentos} registros`
-                          : ""}
-                      </Text>
-                    )}
+                  <Text style={styles.category}>{item.categoria}</Text>
+                </View>
+              ))}
+          </View>
+        );
+      })}
+    </ScrollView>
+  )
+) : groupedByCategory.length === 0 ? (
+  <View style={styles.emptyBox}>
+    <Text style={styles.emptyText}>
+      Nenhuma categoria encontrada neste filtro.
+    </Text>
+    <Text style={styles.subEmptyText}>
+      Ajuste o período ou a categoria selecionada.
+    </Text>
+  </View>
+) : (
+  <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
+    {groupedByCategory.map((group) => (
+      <View key={group.categoria} style={styles.card}>
+        <Text style={styles.value}>{group.categoria}</Text>
 
-                    <Text style={styles.toggleIcon}>
-                      {collapsed ? "▼" : "▲"}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-
-                {!collapsed &&
-                  group.items.map((item) => (
-                    <View key={item.id} style={styles.card}>
-                      <Text style={styles.value}>
-                        {formatMoney(Number(item.valor))}
-                      </Text>
-
-                      <Text style={styles.category}>{item.categoria}</Text>
-                    </View>
-                  ))}
-              </View>
-            );
-          })}
-        </ScrollView>
-      )}
+        <Text style={styles.categorySummary}>
+          {formatMoney(group.total)} •{" "}
+          {group.qtd === 1 ? "1 registro" : `${group.qtd} registros`} •{" "}
+          {group.percentual.toFixed(0)}% do período
+        </Text>
+      </View>
+    ))}
+  </ScrollView>
+)}
     </View>
   );
 }
@@ -701,7 +820,6 @@ topActionText: {
   color: "#555",
   fontWeight: "600",
 },
-
 
   customPeriodText: {
     textAlign: "center",
@@ -879,8 +997,45 @@ topActionText: {
     marginTop: 4,
   },
 
+  categorySummary: {
+  fontSize: 14,
+  color: "#555",
+  marginTop: 6,
+},
+
   customInputGroup: {
   width: "100%",
   marginBottom: 10,
+},
+viewModeRow: {
+  flexDirection: "row",
+  gap: 10,
+  marginBottom: 10,
+},
+
+viewModeButton: {
+  flex: 1,
+  backgroundColor: "#FFF",
+  borderWidth: 0.5,
+  borderColor: "#eee",
+  borderRadius: 10,
+  paddingVertical: 8,
+  paddingHorizontal: 12,
+  alignItems: "center",
+},
+
+viewModeButtonActive: {
+  borderColor: "#0A8F55",
+  borderWidth: 1,
+},
+
+viewModeText: {
+  fontSize: 13,
+  color: "#555",
+  fontWeight: "600",
+},
+
+viewModeTextActive: {
+  color: "#0A8F55",
 },
 });
