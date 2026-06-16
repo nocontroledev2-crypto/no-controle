@@ -47,7 +47,7 @@ export default function Historico() {
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [selectingStart, setSelectingStart] = useState(true);
 
-  // ✅ FASE 3/4: expandir e recolher por dia
+  // ✅ FASE 3/4: expandir/recolher por dia
   const [collapsedDates, setCollapsedDates] = useState<Record<string, boolean>>(
     {}
   );
@@ -332,6 +332,11 @@ export default function Historico() {
 
   const mostrarResumoPorDia = period !== "today";
 
+  const textoRegistrosResumo =
+    filteredExpenses.length === 1
+      ? "1 registro"
+      : `${filteredExpenses.length} registros`;
+
   /* ===============================
      RENDER
   =============================== */
@@ -340,18 +345,18 @@ export default function Historico() {
     <View style={styles.container}>
       <Text style={styles.title}>Histórico</Text>
 
-      {/* CONTROLES */}
-      <View style={styles.controlsRow}>
+      {/* ✅ TOPO UNIFICADO */}
+      <View style={styles.topControlsWrap}>
         {/* PERÍODO */}
-        <View style={styles.controlBlock}>
+        <View style={styles.topControlBlock}>
           <TouchableOpacity
-            style={styles.controlButton}
+            style={styles.topControlButton}
             onPress={() => {
               setMenuPeriodoAberto(!menuPeriodoAberto);
               setMenuCategoriaAberto(false);
             }}
           >
-            <Text style={styles.controlText}>
+            <Text style={styles.topControlText}>
               📅 {labelPeriod(period)}
             </Text>
           </TouchableOpacity>
@@ -395,15 +400,15 @@ export default function Historico() {
         </View>
 
         {/* CATEGORIA */}
-        <View style={styles.controlBlock}>
+        <View style={styles.topControlBlock}>
           <TouchableOpacity
-            style={styles.controlButton}
+            style={styles.topControlButton}
             onPress={() => {
               setMenuCategoriaAberto(!menuCategoriaAberto);
               setMenuPeriodoAberto(false);
             }}
           >
-            <Text style={styles.controlText}>
+            <Text style={styles.topControlText}>
               🏷️ {categoriaSelecionada}
             </Text>
           </TouchableOpacity>
@@ -424,9 +429,25 @@ export default function Historico() {
             </View>
           )}
         </View>
+
+        {/* EXPANDIR TUDO */}
+        <TouchableOpacity
+          style={styles.topActionButton}
+          onPress={expandirTudo}
+        >
+          <Text style={styles.topActionText}>▲ Expandir tudo</Text>
+        </TouchableOpacity>
+
+        {/* RECOLHER TUDO */}
+        <TouchableOpacity
+          style={styles.topActionButton}
+          onPress={recolherTudo}
+        >
+          <Text style={styles.topActionText}>▼ Recolher tudo</Text>
+        </TouchableOpacity>
       </View>
 
-      {/* interval custom selecionado */}
+      {/* ✅ intervalo custom selecionado */}
       {period === "custom" && startDate && endDate && (
         <>
           <Text style={styles.customPeriodText}>
@@ -438,7 +459,7 @@ export default function Historico() {
         </>
       )}
 
-      {/* seletor custom */}
+      {/* ✅ seletor custom */}
       {showCalendar && (
         <View style={styles.calendarBox}>
           <Text style={styles.calendarLabel}>
@@ -478,38 +499,22 @@ export default function Historico() {
         </View>
       )}
 
-      {/* resumo */}
+      {/* ✅ CARD RESUMO COM 2 LINHAS */}
       <View style={styles.summaryCard}>
         <Text style={styles.summaryLabel}>Total no período</Text>
-        <Text style={styles.summaryValue}>
-          {formatMoney(totalPeriodo)}
-        </Text>
-        <Text style={styles.summarySubText}>
-          {filteredExpenses.length}{" "}
-          {filteredExpenses.length === 1 ? "registro" : "registros"}
-        </Text>
+
+        <View style={styles.summaryInlineRow}>
+          <Text style={styles.summaryValue}>
+            {formatMoney(totalPeriodo)}
+          </Text>
+
+          <Text style={styles.summaryInlineMeta}>
+            • {textoRegistrosResumo}
+          </Text>
+        </View>
       </View>
 
-      {/* BOTÕES GLOBAIS */}
-      {groupedByDate.length > 0 && (
-        <View style={styles.actionsRow}>
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={expandirTudo}
-          >
-            <Text style={styles.actionButtonText}>▲ Expandir tudo</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={recolherTudo}
-          >
-            <Text style={styles.actionButtonText}>▼ Recolher tudo</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* LISTA */}
+      {/* ✅ LISTA */}
       {groupedByDate.length === 0 ? (
         <View style={styles.emptyBox}>
           <Text style={styles.emptyText}>
@@ -557,6 +562,7 @@ export default function Historico() {
                       <Text style={styles.value}>
                         {formatMoney(Number(item.valor))}
                       </Text>
+
                       <Text style={styles.category}>{item.categoria}</Text>
                     </View>
                   ))}
@@ -584,24 +590,51 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-  controlsRow: {
+  /* ✅ TOPO UNIFICADO */
+  topControlsWrap: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 10,
-    marginBottom: 8,
+    marginBottom: 10,
   },
 
-  controlBlock: {
-    flex: 1,
+  topControlBlock: {
+    flexGrow: 1,
+    minWidth: 150,
   },
 
-  controlButton: {
+  topControlButton: {
+    backgroundColor: "#FFF",
+    borderWidth: 0.5,
+    borderColor: "#eee",
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     alignItems: "center",
-    paddingVertical: 6,
   },
 
-  controlText: {
+  topControlText: {
     color: "#555",
     fontSize: 13,
+    fontWeight: "600",
+  },
+
+  topActionButton: {
+    backgroundColor: "#FFF",
+    borderWidth: 0.5,
+    borderColor: "#eee",
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 140,
+  },
+
+  topActionText: {
+    fontSize: 13,
+    color: "#555",
+    fontWeight: "600",
   },
 
   customPeriodText: {
@@ -662,41 +695,25 @@ const styles = StyleSheet.create({
   summaryLabel: {
     fontSize: 13,
     color: "#666",
+    marginBottom: 6,
+  },
+
+  summaryInlineRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
   },
 
   summaryValue: {
     fontSize: 22,
     fontWeight: "bold",
     color: "#0A8F55",
-    marginTop: 4,
   },
 
-  summarySubText: {
-    marginTop: 6,
+  summaryInlineMeta: {
+    marginLeft: 8,
     fontSize: 12,
     color: "#777",
-  },
-
-  actionsRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 10,
-    marginBottom: 14,
-  },
-
-  actionButton: {
-    backgroundColor: "#FFF",
-    borderWidth: 0.5,
-    borderColor: "#eee",
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-  },
-
-  actionButtonText: {
-    fontSize: 13,
-    color: "#555",
-    fontWeight: "600",
   },
 
   emptyBox: {
