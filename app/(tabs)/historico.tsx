@@ -653,50 +653,55 @@ const styles = StyleSheet.create({
   },
 
   topControlsWrap: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-    marginBottom: 10,
-  },
+  flexDirection: "row",
+  flexWrap: "wrap",
+  justifyContent: "flex-start",
+  alignItems: "flex-start",
+  gap: 10,
+  marginBottom: 10,
+},
 
-  topControlBlock: {
-    flexGrow: 1,
-    minWidth: 150,
-  },
+topControlBlock: {
+  width: 180,
+},
 
-  topControlButton: {
-    backgroundColor: "#FFF",
-    borderWidth: 0.5,
-    borderColor: "#eee",
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    alignItems: "center",
-  },
+topControlButton: {
+  backgroundColor: "#FFF",
+  borderWidth: 0.5,
+  borderColor: "#eee",
+  borderRadius: 10,
+  paddingVertical: 8,
+  paddingHorizontal: 12,
+  alignItems: "center",
+  justifyContent: "center",
+  minHeight: 40,
+},
 
-  topControlText: {
-    color: "#555",
-    fontSize: 13,
-    fontWeight: "600",
-  },
+topControlText: {
+  color: "#555",
+  fontSize: 13,
+  fontWeight: "600",
+},
 
-  topActionButton: {
-    backgroundColor: "#FFF",
-    borderWidth: 0.5,
-    borderColor: "#eee",
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    minWidth: 140,
-  },
+topActionButton: {
+  backgroundColor: "#FFF",
+  borderWidth: 0.5,
+  borderColor: "#eee",
+  borderRadius: 10,
+  paddingVertical: 8,
+  paddingHorizontal: 12,
+  alignItems: "center",
+  justifyContent: "center",
+  minHeight: 40,
+  width: 180,
+},
 
-  topActionText: {
-    fontSize: 13,
-    color: "#555",
-    fontWeight: "600",
-  },
+topActionText: {
+  fontSize: 13,
+  color: "#555",
+  fontWeight: "600",
+},
+
 
   customPeriodText: {
     textAlign: "center",
