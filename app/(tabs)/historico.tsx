@@ -47,6 +47,11 @@ export default function Historico() {
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [selectingStart, setSelectingStart] = useState(true);
 
+  // ✅ FASE 3/4: expandir e recolher por dia
+  const [collapsedDates, setCollapsedDates] = useState<Record<string, boolean>>(
+    {}
+  );
+
   const now = new Date();
 
   /* ===============================
@@ -112,7 +117,20 @@ export default function Historico() {
         return "Desde o início";
       case "custom":
         return "Personalizado";
+      default:
+        return "Desde o início";
     }
+  }
+
+  function toggleDateCollapse(date: string) {
+    setCollapsedDates((prev) => ({
+      ...prev,
+      [date]: !prev[date],
+    }));
+  }
+
+  function isDateCollapsed(date: string) {
+    return collapsedDates[date] ?? false;
   }
 
   /* ===============================
@@ -235,7 +253,7 @@ export default function Historico() {
   }, [expenses, period, startDate, endDate]);
 
   /* ===============================
-     FILTRO POR CATEGORIA (FASE 1)
+     FILTRO POR CATEGORIA
   =============================== */
 
   const filteredExpenses = useMemo(() => {
@@ -266,20 +284,53 @@ export default function Historico() {
       return parseDateSafe(b).getTime() - parseDateSafe(a).getTime();
     });
 
-    return orderedDates.map((date) => ({
-      date,
-      items: groups[date],
-    }));
+    return orderedDates.map((date) => {
+      const items = groups[date];
+      const totalDia = items.reduce(
+        (sum, item) => sum + Number(item.valor),
+        0
+      );
+      const qtdLancamentos = items.length;
+
+      return {
+        date,
+        items,
+        totalDia,
+        qtdLancamentos,
+      };
+    });
   }, [filteredExpenses]);
 
   /* ===============================
-     RESUMO RÁPIDO DO PERÍODO FILTRADO
+     FASE 4 — CONTROLES GLOBAIS
+  =============================== */
+
+  function recolherTudo() {
+    const novoEstado: Record<string, boolean> = {};
+    groupedByDate.forEach((group) => {
+      novoEstado[group.date] = true;
+    });
+    setCollapsedDates(novoEstado);
+  }
+
+  function expandirTudo() {
+    const novoEstado: Record<string, boolean> = {};
+    groupedByDate.forEach((group) => {
+      novoEstado[group.date] = false;
+    });
+    setCollapsedDates(novoEstado);
+  }
+
+  /* ===============================
+     RESUMO DO PERÍODO
   =============================== */
 
   const totalPeriodo = filteredExpenses.reduce(
     (sum, e) => sum + Number(e.valor),
     0
   );
+
+  const mostrarResumoPorDia = period !== "today";
 
   /* ===============================
      RENDER
@@ -289,9 +340,9 @@ export default function Historico() {
     <View style={styles.container}>
       <Text style={styles.title}>Histórico</Text>
 
-      {/* ✅ CONTROLES */}
+      {/* CONTROLES */}
       <View style={styles.controlsRow}>
-        {/* PERIODOS */}
+        {/* PERÍODO */}
         <View style={styles.controlBlock}>
           <TouchableOpacity
             style={styles.controlButton}
@@ -343,7 +394,7 @@ export default function Historico() {
           )}
         </View>
 
-        {/* CATEGORIAS */}
+        {/* CATEGORIA */}
         <View style={styles.controlBlock}>
           <TouchableOpacity
             style={styles.controlButton}
@@ -375,7 +426,7 @@ export default function Historico() {
         </View>
       </View>
 
-      {/* ✅ intervalo custom selecionado */}
+      {/* interval custom selecionado */}
       {period === "custom" && startDate && endDate && (
         <>
           <Text style={styles.customPeriodText}>
@@ -387,7 +438,7 @@ export default function Historico() {
         </>
       )}
 
-      {/* ✅ seletor data custom (fallback web) */}
+      {/* seletor custom */}
       {showCalendar && (
         <View style={styles.calendarBox}>
           <Text style={styles.calendarLabel}>
@@ -427,7 +478,7 @@ export default function Historico() {
         </View>
       )}
 
-      {/* ✅ resumo do filtro */}
+      {/* resumo */}
       <View style={styles.summaryCard}>
         <Text style={styles.summaryLabel}>Total no período</Text>
         <Text style={styles.summaryValue}>
@@ -439,7 +490,26 @@ export default function Historico() {
         </Text>
       </View>
 
-      {/* ✅ lista */}
+      {/* BOTÕES GLOBAIS */}
+      {groupedByDate.length > 0 && (
+        <View style={styles.actionsRow}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={expandirTudo}
+          >
+            <Text style={styles.actionButtonText}>▲ Expandir tudo</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={recolherTudo}
+          >
+            <Text style={styles.actionButtonText}>▼ Recolher tudo</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* LISTA */}
       {groupedByDate.length === 0 ? (
         <View style={styles.emptyBox}>
           <Text style={styles.emptyText}>
@@ -451,32 +521,53 @@ export default function Historico() {
         </View>
       ) : (
         <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
-          {groupedByDate.map((group) => (
-            <View key={group.date} style={styles.groupBox}>
-              <Text style={styles.groupTitle}>
-                {formatDateBR(group.date)}
-              </Text>
+          {groupedByDate.map((group) => {
+            const collapsed = isDateCollapsed(group.date);
 
-              {group.items.map((item) => (
-                <View key={item.id} style={styles.card}>
-                  <Text style={styles.value}>
-                    {formatMoney(Number(item.valor))}
+            return (
+              <View key={group.date} style={styles.groupBox}>
+                <TouchableOpacity
+                  style={styles.groupHeader}
+                  onPress={() => toggleDateCollapse(group.date)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.groupTitle}>
+                    {formatDateBR(group.date)}
                   </Text>
 
-                  <Text style={styles.category}>{item.categoria}</Text>
-                </View>
-              ))}
-            </View>
-          ))}
+                  <View style={styles.groupHeaderRight}>
+                    {mostrarResumoPorDia && (
+                      <Text style={styles.groupMeta}>
+                        {formatMoney(group.totalDia)}
+                        {group.qtdLancamentos > 1
+                          ? ` • ${group.qtdLancamentos} registros`
+                          : ""}
+                      </Text>
+                    )}
+
+                    <Text style={styles.toggleIcon}>
+                      {collapsed ? "▼" : "▲"}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+
+                {!collapsed &&
+                  group.items.map((item) => (
+                    <View key={item.id} style={styles.card}>
+                      <Text style={styles.value}>
+                        {formatMoney(Number(item.valor))}
+                      </Text>
+                      <Text style={styles.category}>{item.categoria}</Text>
+                    </View>
+                  ))}
+              </View>
+            );
+          })}
         </ScrollView>
       )}
     </View>
   );
 }
-
-/* ===============================
-   ESTILOS
-=============================== */
 
 const styles = StyleSheet.create({
   container: {
@@ -586,6 +677,28 @@ const styles = StyleSheet.create({
     color: "#777",
   },
 
+  actionsRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 10,
+    marginBottom: 14,
+  },
+
+  actionButton: {
+    backgroundColor: "#FFF",
+    borderWidth: 0.5,
+    borderColor: "#eee",
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+
+  actionButtonText: {
+    fontSize: 13,
+    color: "#555",
+    fontWeight: "600",
+  },
+
   emptyBox: {
     flex: 1,
     justifyContent: "center",
@@ -610,11 +723,34 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 
+  groupHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    marginBottom: 8,
+  },
+
+  groupHeaderRight: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
   groupTitle: {
     fontSize: 14,
     fontWeight: "700",
     color: "#555",
-    marginBottom: 8,
+  },
+
+  groupMeta: {
+    fontSize: 12,
+    color: "#777",
+    marginLeft: 10,
+  },
+
+  toggleIcon: {
+    marginLeft: 8,
+    fontSize: 12,
+    color: "#666",
   },
 
   card: {
