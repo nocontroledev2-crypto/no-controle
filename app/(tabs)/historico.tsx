@@ -494,44 +494,72 @@ export default function Historico() {
 
       {/* ✅ NOVO BOX DO PERSONALIZADO */}
       {showCustomRangeBox && (
-        <View style={styles.calendarBox}>
-          <Text style={styles.calendarLabel}>
-            Selecione o intervalo personalizado
-          </Text>
+  <View style={styles.calendarBox}>
+    <Text style={styles.calendarLabel}>
+      Selecione o intervalo personalizado
+    </Text>
 
-          <Text style={styles.calendarInfo}>Data inicial</Text>
-          <input
-            type="date"
-            value={startDateInput}
-            onChange={(e: any) => setStartDateInput(e.target.value)}
-          />
+    <View style={styles.customInputGroup}>
+      <Text style={styles.calendarInfo}>Data inicial</Text>
+      <input
+        type="date"
+        value={startDateInput}
+        onChange={(e: any) => setStartDateInput(e.target.value)}
+        style={
+          {
+            width: 220,
+            maxWidth: "100%",
+            padding: "8px 10px",
+            borderRadius: 8,
+            border: "1px solid #D9DDE3",
+            backgroundColor: "#FFF",
+            color: "#333",
+            fontSize: "14px",
+            boxSizing: "border-box",
+          } as any
+        }
+      />
+    </View>
 
-          <Text style={[styles.calendarInfo, { marginTop: 10 }]}>
-            Data final
-          </Text>
-          <input
-            type="date"
-            value={endDateInput}
-            onChange={(e: any) => setEndDateInput(e.target.value)}
-          />
+    <View style={styles.customInputGroup}>
+      <Text style={styles.calendarInfo}>Data final</Text>
+      <input
+        type="date"
+        value={endDateInput}
+        onChange={(e: any) => setEndDateInput(e.target.value)}
+        style={
+          {
+            width: 220,
+            maxWidth: "100%",
+            padding: "8px 10px",
+            borderRadius: 8,
+            border: "1px solid #D9DDE3",
+            backgroundColor: "#FFF",
+            color: "#333",
+            fontSize: "14px",
+            boxSizing: "border-box",
+          } as any
+        }
+      />
+    </View>
 
-          <View style={styles.customActionRow}>
-            <TouchableOpacity
-              style={styles.customActionButton}
-              onPress={aplicarPeriodoPersonalizado}
-            >
-              <Text style={styles.customActionText}>Aplicar</Text>
-            </TouchableOpacity>
+    <View style={styles.customActionRow}>
+      <TouchableOpacity
+        style={styles.customActionButton}
+        onPress={aplicarPeriodoPersonalizado}
+      >
+        <Text style={styles.customActionText}>Aplicar</Text>
+      </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.customActionButton}
-              onPress={cancelarPeriodoPersonalizado}
-            >
-              <Text style={styles.customActionText}>Cancelar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
+      <TouchableOpacity
+        style={styles.customActionButton}
+        onPress={cancelarPeriodoPersonalizado}
+      >
+        <Text style={styles.customActionText}>Cancelar</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+)}
 
       {/* ✅ CARD RESUMO */}
       <View style={styles.summaryCard}>
@@ -701,6 +729,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderWidth: 0.5,
     borderColor: "#eee",
+    alignItems: "flex-start",
   },
 
   calendarLabel: {
@@ -844,4 +873,9 @@ const styles = StyleSheet.create({
     color: "#555",
     marginTop: 4,
   },
+
+  customInputGroup: {
+  width: "100%",
+  marginBottom: 10,
+},
 });
