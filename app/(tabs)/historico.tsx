@@ -42,12 +42,15 @@ export default function Historico() {
 
   const [categoriaSelecionada, setCategoriaSelecionada] = useState("Todas");
 
-  const [showCalendar, setShowCalendar] = useState(false);
+  // ✅ NOVO fluxo do personalizado
+  const [showCustomRangeBox, setShowCustomRangeBox] = useState(false);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
-  const [selectingStart, setSelectingStart] = useState(true);
 
-  // ✅ FASE 3/4: expandir/recolher por dia
+  const [startDateInput, setStartDateInput] = useState("");
+  const [endDateInput, setEndDateInput] = useState("");
+
+  // ✅ expandir/recolher por dia
   const [collapsedDates, setCollapsedDates] = useState<Record<string, boolean>>(
     {}
   );
@@ -250,7 +253,7 @@ export default function Historico() {
 
       return false;
     });
-  }, [expenses, period, startDate, endDate]);
+  }, [expenses, period, startDate, endDate, now]);
 
   /* ===============================
      FILTRO POR CATEGORIA
@@ -302,7 +305,7 @@ export default function Historico() {
   }, [filteredExpenses]);
 
   /* ===============================
-     FASE 4 — CONTROLES GLOBAIS
+     CONTROLES GLOBAIS
   =============================== */
 
   function recolherTudo() {
@@ -319,6 +322,43 @@ export default function Historico() {
       novoEstado[group.date] = false;
     });
     setCollapsedDates(novoEstado);
+  }
+
+  /* ===============================
+     PERSONALIZADO — NOVO FLUXO
+  =============================== */
+
+  function abrirPersonalizado() {
+    setMenuPeriodoAberto(false);
+    setStartDateInput("");
+    setEndDateInput("");
+    setShowCustomRangeBox(true);
+  }
+
+  function aplicarPeriodoPersonalizado() {
+    if (!startDateInput || !endDateInput) {
+      alert("Selecione a data inicial e a data final.");
+      return;
+    }
+
+    const start = parseDateSafe(startDateInput);
+    const end = parseDateSafe(endDateInput);
+
+    if (start.getTime() > end.getTime()) {
+      alert("A data inicial não pode ser maior que a data final.");
+      return;
+    }
+
+    setStartDate(start);
+    setEndDate(end);
+    setPeriod("custom");
+    setShowCustomRangeBox(false);
+  }
+
+  function cancelarPeriodoPersonalizado() {
+    setShowCustomRangeBox(false);
+    setStartDateInput("");
+    setEndDateInput("");
   }
 
   /* ===============================
@@ -378,14 +418,7 @@ export default function Historico() {
                   key={value}
                   onPress={() => {
                     if (value === "custom") {
-                      setMenuPeriodoAberto(false);
-                      setStartDate(null);
-                      setEndDate(null);
-                      setSelectingStart(true);
-
-                      setTimeout(() => {
-                        setShowCalendar(true);
-                      }, 100);
+                      abrirPersonalizado();
                     } else {
                       setPeriod(value as Period);
                       setMenuPeriodoAberto(false);
@@ -459,47 +492,48 @@ export default function Historico() {
         </>
       )}
 
-      {/* ✅ seletor custom */}
-      {showCalendar && (
+      {/* ✅ NOVO BOX DO PERSONALIZADO */}
+      {showCustomRangeBox && (
         <View style={styles.calendarBox}>
           <Text style={styles.calendarLabel}>
-            {selectingStart
-              ? "Selecione a data inicial"
-              : "Selecione a data final"}
+            Selecione o intervalo personalizado
           </Text>
 
-          {startDate && (
-            <Text style={styles.calendarInfo}>
-              Início: {formatCustomDate(startDate)}
-            </Text>
-          )}
-
-          {endDate && (
-            <Text style={styles.calendarInfo}>
-              Fim: {formatCustomDate(endDate)}
-            </Text>
-          )}
-
+          <Text style={styles.calendarInfo}>Data inicial</Text>
           <input
             type="date"
-            value=""
-            onChange={(e: any) => {
-              const selected = parseDateSafe(e.target.value);
-
-              if (selectingStart) {
-                setStartDate(selected);
-                setSelectingStart(false);
-              } else {
-                setEndDate(selected);
-                setShowCalendar(false);
-                setPeriod("custom");
-              }
-            }}
+            value={startDateInput}
+            onChange={(e: any) => setStartDateInput(e.target.value)}
           />
+
+          <Text style={[styles.calendarInfo, { marginTop: 10 }]}>
+            Data final
+          </Text>
+          <input
+            type="date"
+            value={endDateInput}
+            onChange={(e: any) => setEndDateInput(e.target.value)}
+          />
+
+          <View style={styles.customActionRow}>
+            <TouchableOpacity
+              style={styles.customActionButton}
+              onPress={aplicarPeriodoPersonalizado}
+            >
+              <Text style={styles.customActionText}>Aplicar</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.customActionButton}
+              onPress={cancelarPeriodoPersonalizado}
+            >
+              <Text style={styles.customActionText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       )}
 
-      {/* ✅ CARD RESUMO COM 2 LINHAS */}
+      {/* ✅ CARD RESUMO */}
       <View style={styles.summaryCard}>
         <Text style={styles.summaryLabel}>Total no período</Text>
 
@@ -590,7 +624,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-  /* ✅ TOPO UNIFICADO */
   topControlsWrap: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -681,6 +714,27 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#666",
     marginBottom: 4,
+  },
+
+  customActionRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 14,
+  },
+
+  customActionButton: {
+    backgroundColor: "#FFF",
+    borderWidth: 0.5,
+    borderColor: "#eee",
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+
+  customActionText: {
+    fontSize: 13,
+    color: "#555",
+    fontWeight: "600",
   },
 
   summaryCard: {
