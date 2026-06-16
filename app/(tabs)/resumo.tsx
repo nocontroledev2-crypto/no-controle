@@ -466,7 +466,7 @@ export default function Resumo() {
   return (
     <>
       <Text style={styles.subText}>
-        📈 Mantendo esse ritmo:
+        📈 Estimativa simples com base no ritmo atual:
       </Text>
 
       <Text style={styles.cardValue}>
@@ -479,11 +479,11 @@ export default function Resumo() {
 
       {topCategorias.length > 0 && (
         <Text style={styles.subText}>
-          💡 Reduzindo{" "}
+          💡 Se reduzir 20% dos gastos com{" "}
           <Text style={{ fontWeight: "bold" }}>
             {topCategorias[0][0]}
           </Text>
-          , você pode economizar até{" "}
+          , a economia estimada seria de{" "}
           {formatMoney(topCategorias[0][1] * 0.2)}
         </Text>
       )}

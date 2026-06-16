@@ -1,116 +1,556 @@
 import { useFocusEffect } from "expo-router";
-import React, { useState } from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import React, { useCallback, useMemo, useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Expense, getAllExpenses } from "../storage/expenseStorage";
+
+type Period =
+  | "today"
+  | "week"
+  | "weekPrev"
+  | "month"
+  | "monthPrev"
+  | "year"
+  | "lastYear"
+  | "all"
+  | "custom";
 
 export default function Historico() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [period, setPeriod] = useState<Period>("all");
+  const [menuAberto, setMenuAberto] = useState(false);
 
-  // 🔄 Atualiza sempre que a aba ganhar foco
-  useFocusEffect(() => {
-    async function loadExpenses() {
-      const data = await getAllExpenses();
-      // Ordena do mais recente para o mais antigo
-      const ordered = data.sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() -
-          new Date(a.createdAt).getTime()
-      );
-      setExpenses(ordered);
-    }
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [selectingStart, setSelectingStart] = useState(true);
 
-    loadExpenses();
-  });
+  const now = new Date();
 
-  // 📭 ESTADO VAZIO
-  if (expenses.length === 0) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.emptyBox}>
-          <Text style={styles.emptyText}>
-            Nenhuma despesa registrada ainda.
-          </Text>
-          <Text style={styles.subText}>
-            Use o 🎤 ou registre manualmente para começar.
-          </Text>
-        </View>
-      </View>
-    );
+  /* ===============================
+     HELPERS
+  =============================== */
+
+  function parseDateSafe(dateStr: string) {
+    const [ano, mes, dia] = dateStr.split("-");
+    return new Date(Number(ano), Number(mes) - 1, Number(dia));
   }
+
+  function formatMoney(valor: number) {
+    return valor.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+  }
+
+  function formatDateBR(dateStr: string) {
+    const d = parseDateSafe(dateStr);
+    return d.toLocaleDateString("pt-BR");
+  }
+
+  function formatCustomDate(date: Date | null) {
+    if (!date) return "--/--/----";
+    return date.toLocaleDateString("pt-BR");
+  }
+
+  function getStartOfWeek(date: Date) {
+    const d = new Date(date);
+    const day = d.getDay(); // domingo=0 ... sábado=6
+    const diff = day === 0 ? -6 : 1 - day; // semana começa na segunda
+    d.setDate(d.getDate() + diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  function getEndOfWeek(date: Date) {
+    const start = getStartOfWeek(date);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    end.setHours(23, 59, 59, 999);
+    return end;
+  }
+
+  /* ===============================
+     CARREGAR DADOS
+  =============================== */
+
+  useFocusEffect(
+    useCallback(() => {
+      async function loadExpenses() {
+        const data = await getAllExpenses();
+
+        const ordered = (data || []).sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() -
+            new Date(a.createdAt).getTime()
+        );
+
+        setExpenses(ordered);
+      }
+
+      loadExpenses();
+    }, [])
+  );
+
+  /* ===============================
+     FILTRO POR PERÍODO
+  =============================== */
+
+  const filteredExpenses = useMemo(() => {
+    return expenses.filter((item) => {
+      const d = parseDateSafe(item.data);
+
+      const dNormalized = new Date(
+        d.getFullYear(),
+        d.getMonth(),
+        d.getDate()
+      );
+
+      if (period === "today") {
+        return (
+          d.getDate() === now.getDate() &&
+          d.getMonth() === now.getMonth() &&
+          d.getFullYear() === now.getFullYear()
+        );
+      }
+
+      if (period === "week") {
+        const start = getStartOfWeek(now);
+        const end = getEndOfWeek(now);
+        return dNormalized >= start && dNormalized <= end;
+      }
+
+      if (period === "weekPrev") {
+        const ref = new Date(now);
+        ref.setDate(ref.getDate() - 7);
+        const start = getStartOfWeek(ref);
+        const end = getEndOfWeek(ref);
+        return dNormalized >= start && dNormalized <= end;
+      }
+
+      if (period === "month") {
+        return (
+          d.getMonth() === now.getMonth() &&
+          d.getFullYear() === now.getFullYear()
+        );
+      }
+
+      if (period === "monthPrev") {
+        const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        return (
+          d.getMonth() === prevMonthDate.getMonth() &&
+          d.getFullYear() === prevMonthDate.getFullYear()
+        );
+      }
+
+      if (period === "year") {
+        return d.getFullYear() === now.getFullYear();
+      }
+
+      if (period === "lastYear") {
+        return d.getFullYear() === now.getFullYear() - 1;
+      }
+
+      if (period === "all") {
+        return true;
+      }
+
+      if (period === "custom") {
+        if (!startDate || !endDate) return false;
+
+        const start = new Date(
+          startDate.getFullYear(),
+          startDate.getMonth(),
+          startDate.getDate(),
+          0,
+          0,
+          0,
+          0
+        );
+
+        const end = new Date(
+          endDate.getFullYear(),
+          endDate.getMonth(),
+          endDate.getDate(),
+          23,
+          59,
+          59,
+          999
+        );
+
+        return dNormalized >= start && dNormalized <= end;
+      }
+
+      return false;
+    });
+  }, [expenses, period, startDate, endDate]);
+
+  /* ===============================
+     AGRUPAR POR DATA
+  =============================== */
+
+  const groupedByDate = useMemo(() => {
+    const groups: Record<string, Expense[]> = {};
+
+    filteredExpenses.forEach((item) => {
+      if (!groups[item.data]) {
+        groups[item.data] = [];
+      }
+      groups[item.data].push(item);
+    });
+
+    const orderedDates = Object.keys(groups).sort((a, b) => {
+      return parseDateSafe(b).getTime() - parseDateSafe(a).getTime();
+    });
+
+    return orderedDates.map((date) => ({
+      date,
+      items: groups[date],
+    }));
+  }, [filteredExpenses]);
+
+  /* ===============================
+     TOTAL DO PERÍODO (opcional mas útil)
+  =============================== */
+
+  const totalPeriodo = filteredExpenses.reduce(
+    (sum, e) => sum + Number(e.valor),
+    0
+  );
+
+  /* ===============================
+     RENDER
+  =============================== */
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Histórico</Text>
 
-      <FlatList
-        data={expenses}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 20 }}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            
-            <Text>
-  R$ {typeof item.valor === "number"
-    ? item.valor.toFixed(2)
-    : "0.00"}
-</Text>
+      {/* ✅ DROPDOWN */}
+      <TouchableOpacity
+        style={styles.periodBox}
+        onPress={() => setMenuAberto(!menuAberto)}
+      >
+        <Text style={styles.periodText}>📅 {labelPeriod(period)}</Text>
+      </TouchableOpacity>
 
-            <Text style={styles.category}>{item.categoria}</Text>
-            <Text style={styles.date}>{item.data}</Text>
-          </View>
-        )}
-      />
+      {/* ✅ intervalo selecionado */}
+      {period === "custom" && startDate && endDate && (
+        <>
+          <Text style={styles.customPeriodText}>
+            Início: {formatCustomDate(startDate)}
+          </Text>
+          <Text style={styles.customPeriodText}>
+            Fim: {formatCustomDate(endDate)}
+          </Text>
+        </>
+      )}
+
+      {/* ✅ MENU */}
+      {menuAberto && (
+        <View style={styles.menu}>
+          {[
+            ["Hoje", "today"],
+            ["Esta semana", "week"],
+            ["Semana passada", "weekPrev"],
+            ["Este mês", "month"],
+            ["Mês passado", "monthPrev"],
+            ["Este ano", "year"],
+            ["Ano passado", "lastYear"],
+            ["Desde o início", "all"],
+            ["Personalizado", "custom"],
+          ].map(([label, value]) => (
+            <TouchableOpacity
+              key={value}
+              onPress={() => {
+                if (value === "custom") {
+                  setMenuAberto(false);
+                  setStartDate(null);
+                  setEndDate(null);
+                  setSelectingStart(true);
+
+                  setTimeout(() => {
+                    setShowCalendar(true);
+                  }, 100);
+                } else {
+                  setPeriod(value as Period);
+                  setMenuAberto(false);
+                }
+              }}
+            >
+              <Text style={styles.menuItem}>{label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      {/* ✅ seletor de período personalizado (fallback web) */}
+      {showCalendar && (
+        <View style={styles.calendarBox}>
+          <Text style={styles.calendarLabel}>
+            {selectingStart
+              ? "Selecione a data inicial"
+              : "Selecione a data final"}
+          </Text>
+
+          {startDate && (
+            <Text style={styles.calendarInfo}>
+              Início: {formatCustomDate(startDate)}
+            </Text>
+          )}
+
+          {endDate && (
+            <Text style={styles.calendarInfo}>
+              Fim: {formatCustomDate(endDate)}
+            </Text>
+          )}
+
+          <input
+            type="date"
+            value=""
+            onChange={(e: any) => {
+              const selected = parseDateSafe(e.target.value);
+
+              if (selectingStart) {
+                setStartDate(selected);
+                setSelectingStart(false);
+              } else {
+                setEndDate(selected);
+                setShowCalendar(false);
+                setPeriod("custom");
+              }
+            }}
+          />
+        </View>
+      )}
+
+      {/* ✅ resumo rápido do período */}
+      <View style={styles.summaryCard}>
+        <Text style={styles.summaryLabel}>Total no período</Text>
+        <Text style={styles.summaryValue}>{formatMoney(totalPeriodo)}</Text>
+        <Text style={styles.summarySubText}>
+          {filteredExpenses.length}{" "}
+          {filteredExpenses.length === 1 ? "registro" : "registros"}
+        </Text>
+      </View>
+
+      {/* ✅ LISTA */}
+      {groupedByDate.length === 0 ? (
+        <View style={styles.emptyBox}>
+          <Text style={styles.emptyText}>
+            Nenhum registro encontrado neste período.
+          </Text>
+          <Text style={styles.subEmptyText}>
+            Tente outro filtro ou registre uma nova despesa.
+          </Text>
+        </View>
+      ) : (
+        <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
+          {groupedByDate.map((group) => (
+            <View key={group.date} style={styles.groupBox}>
+              <Text style={styles.groupTitle}>
+                {formatDateBR(group.date)}
+              </Text>
+
+              {group.items.map((item) => (
+                <View key={item.id} style={styles.card}>
+                  <Text style={styles.value}>
+                    {formatMoney(Number(item.valor))}
+                  </Text>
+
+                  <Text style={styles.category}>{item.categoria}</Text>
+                </View>
+              ))}
+            </View>
+          ))}
+        </ScrollView>
+      )}
     </View>
   );
 }
 
-/* 🎨 ESTILOS */
+/* ===============================
+   LABELS
+=============================== */
+
+function labelPeriod(p: Period) {
+  switch (p) {
+    case "today":
+      return "Hoje";
+    case "week":
+      return "Esta semana";
+    case "weekPrev":
+      return "Semana passada";
+    case "month":
+      return "Este mês";
+    case "monthPrev":
+      return "Mês passado";
+    case "year":
+      return "Este ano";
+    case "lastYear":
+      return "Ano passado";
+    case "all":
+      return "Desde o início";
+    case "custom":
+      return "Personalizado";
+  }
+}
+
+/* ===============================
+   ESTILOS
+=============================== */
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: "#F2F2F2",
+    backgroundColor: "#F7F8FA",
+    padding: 16,
   },
+
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 16,
+    color: "#0A8F55",
+    marginBottom: 10,
   },
-  card: {
+
+  periodBox: {
+    alignItems: "center",
+    marginBottom: 8,
+  },
+
+  periodText: {
+    color: "#555",
+  },
+
+  customPeriodText: {
+    textAlign: "center",
+    color: "#666",
+    fontSize: 13,
+    marginBottom: 2,
+  },
+
+  menu: {
+    position: "absolute",
+    top: 78,
+    alignSelf: "center",
+    width: 220,
+    backgroundColor: "#FFF",
+    borderRadius: 12,
+    padding: 12,
+    elevation: 6,
+    zIndex: 10,
+  },
+
+  menuItem: {
+    paddingVertical: 8,
+    color: "#333",
+  },
+
+  calendarBox: {
+    backgroundColor: "#FFF",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 0.5,
+    borderColor: "#eee",
+  },
+
+  calendarLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 8,
+    color: "#333",
+  },
+
+  calendarInfo: {
+    fontSize: 13,
+    color: "#666",
+    marginBottom: 4,
+  },
+
+  summaryCard: {
     backgroundColor: "#FFF",
     padding: 16,
-    borderRadius: 8,
-    marginBottom: 12,
+    borderRadius: 12,
+    marginBottom: 14,
+    borderWidth: 0.5,
+    borderColor: "#eee",
   },
-  value: {
-    fontSize: 18,
+
+  summaryLabel: {
+    fontSize: 13,
+    color: "#666",
+  },
+
+  summaryValue: {
+    fontSize: 22,
     fontWeight: "bold",
-  },
-  category: {
-    fontSize: 14,
-    color: "#555",
+    color: "#0A8F55",
     marginTop: 4,
   },
-  date: {
+
+  summarySubText: {
+    marginTop: 6,
     fontSize: 12,
-    color: "#999",
-    marginTop: 2,
+    color: "#777",
   },
+
   emptyBox: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    paddingTop: 40,
   },
+
   emptyText: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: "600",
+    textAlign: "center",
     marginBottom: 8,
   },
-  subText: {
-    fontSize: 12,
+
+  subEmptyText: {
+    fontSize: 13,
     color: "#888",
     textAlign: "center",
+  },
+
+  groupBox: {
+    marginBottom: 16,
+  },
+
+  groupTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#555",
+    marginBottom: 8,
+  },
+
+  card: {
+    backgroundColor: "#FFF",
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 8,
+    borderWidth: 0.5,
+    borderColor: "#eee",
+  },
+
+  value: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#0A8F55",
+  },
+
+  category: {
+    fontSize: 14,
+    color: "#555",
+    marginTop: 4,
   },
 });

@@ -10,7 +10,6 @@ export default function Home() {
   const [totalMes, setTotalMes] = useState(0);
   const [registrosHoje, setRegistrosHoje] = useState(0);
   const [comparacaoTexto, setComparacaoTexto] = useState("");
-  const [previsaoTexto, setPrevisaoTexto] = useState("");
   const [categoriaInsight, setCategoriaInsight] = useState("");
 
   /* ✅ DATA SEGURA */
@@ -81,7 +80,7 @@ export default function Home() {
           }
         });
 
-        // 🔥 COMPARAÇÃO COM ONTEM
+        /* 🔥 COMPARAÇÃO COM ONTEM */
         let textoComparacao = "";
 
         if (totalOntem !== 0) {
@@ -98,78 +97,32 @@ export default function Home() {
           }
         }
 
-        // 🔥 PREVISÃO DO MÊS (CORRIGIDA)
-// ✅ dias com gasto no mês
-const diasComGasto = new Set(
-  data
-    .filter((item) => {
-      const d = parseDateSafe(item.data);
-      return (
-        d.getMonth() === mesAtual &&
-        d.getFullYear() === anoAtual
-      );
-    })
-    .map((item) => {
-  const d = parseDateSafe(item.data);
-  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-})
-
-).size;
-
-// ✅ média real
-const mediaMes =
-  diasComGasto > 0 ? totalMesTemp / diasComGasto : 0;
-
-// ✅ dias do mês
-const diasNoMes = new Date(
-  anoAtual,
-  mesAtual + 1,
-  0
-).getDate();
-
-// ✅ dia atual
-const diaAtual = hoje.getDate();
-
-// ✅ dias restantes
-const diasRestantes = diasNoMes - diaAtual;
-
-// ✅ projeção correta
-const projecaoMes =
-  totalMesTemp + mediaMes * diasRestantes;
-
-let textoPrevisao = "";
-
-if (totalMesTemp > 0) {
-  textoPrevisao = `📈 Mantendo esse ritmo:
-  ${formatMoney(projecaoMes)} até o fim do mês`;
-}
-        // 🔥 CATEGORIA DOMINANTE
+        /* 🔥 CATEGORIA DOMINANTE */
         let maiorCategoria = "";
         let maiorValor = 0;
 
-        Object.entries(categoriasMap).forEach(
-          ([cat, valor]) => {
-            if (valor > maiorValor) {
-              maiorValor = valor;
-              maiorCategoria = cat;
-            }
+        Object.entries(categoriasMap).forEach(([cat, valor]) => {
+          if (valor > maiorValor) {
+            maiorValor = valor;
+            maiorCategoria = cat;
           }
-        );
+        });
 
         let textoCategoria = "";
 
-if (maiorCategoria && totalMesTemp > 0) {
-  const percentual = (maiorValor / totalMesTemp) * 100;
+        if (maiorCategoria && totalMesTemp > 0) {
+          const percentual = (maiorValor / totalMesTemp) * 100;
 
-  textoCategoria = `📊 ${maiorCategoria} concentra ${percentual.toFixed(0)}% dos seus gastos`;
-}
+          textoCategoria = `📊 ${maiorCategoria} concentra ${percentual.toFixed(
+            0
+          )}% dos seus gastos`;
+        }
 
         // ✅ SET STATES
         setTotalHoje(totalDiaTemp);
         setTotalMes(totalMesTemp);
         setRegistrosHoje(registrosTemp);
         setComparacaoTexto(textoComparacao);
-        setPrevisaoTexto(textoPrevisao);
         setCategoriaInsight(textoCategoria);
       }
 
@@ -216,12 +169,6 @@ if (maiorCategoria && totalMesTemp > 0) {
         <Text style={styles.metricValue}>
           {formatMoney(totalMes)}
         </Text>
-
-        {previsaoTexto !== "" && (
-          <Text style={styles.compareInline}>
-            {previsaoTexto}
-          </Text>
-        )}
 
         {categoriaInsight !== "" && (
           <Text style={styles.compareInline}>
