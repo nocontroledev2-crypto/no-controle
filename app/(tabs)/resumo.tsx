@@ -48,6 +48,8 @@ export default function Resumo() {
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
     const [selectingStart, setSelectingStart] = useState(true);
+    const [startDateInput, setStartDateInput] = useState("");
+    const [endDateInput, setEndDateInput] = useState("");
 
   const now = new Date();
 
@@ -242,6 +244,33 @@ export default function Resumo() {
     .sort((a, b) => b.valor - a.valor)
     .slice(0, 3);
 
+
+    function aplicarPeriodoPersonalizado() {
+  if (!startDateInput || !endDateInput) {
+    alert("Selecione a data inicial e a data final.");
+    return;
+  }
+
+  const start = parseDateSafe(startDateInput);
+  const end = parseDateSafe(endDateInput);
+
+  if (start.getTime() > end.getTime()) {
+    alert("A data inicial não pode ser maior que a data final.");
+    return;
+  }
+
+  setStartDate(start);
+  setEndDate(end);
+  setPeriod("custom");
+  setShowCalendar(false);
+}
+
+function cancelarPeriodoPersonalizado() {
+  setShowCalendar(false);
+  setStartDateInput("");
+  setEndDateInput("");
+}
+
   /* ============================ */
 
   return (
@@ -305,12 +334,11 @@ export default function Resumo() {
 
   setStartDate(null);
   setEndDate(null);
-  setSelectingStart(true);
+  setStartDateInput("");
+  setEndDateInput("");
 
-  setTimeout(() => {
-    setShowCalendar(true);
-  }, 100);
-} 
+  setShowCalendar(true);
+}
   
   
   else {
@@ -327,6 +355,73 @@ export default function Resumo() {
           ))}
         </View>
       )}
+
+      {/* ✅ CALENDÁRIO */}
+      {showCalendar && (
+        <View style={styles.calendarBox}>
+          <Text style={styles.calendarTitle}>
+            Selecione o intervalo personalizado
+          </Text>
+
+          <Text style={styles.calendarLabel}>Data inicial</Text>
+          <input
+            type="date"
+            value={startDateInput}
+            onChange={(e: any) => setStartDateInput(e.target.value)}
+            style={
+              {
+                width: 220,
+                maxWidth: "100%",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #D9DDE3",
+                backgroundColor: "#FFF",
+                color: "#333",
+                fontSize: "14px",
+                boxSizing: "border-box",
+                marginBottom: 10,
+              } as any
+            }
+          />
+
+          <Text style={styles.calendarLabel}>Data final</Text>
+          <input
+            type="date"
+            value={endDateInput}
+            onChange={(e: any) => setEndDateInput(e.target.value)}
+            style={
+              {
+                width: 220,
+                maxWidth: "100%",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #D9DDE3",
+                backgroundColor: "#FFF",
+                color: "#333",
+                fontSize: "14px",
+                boxSizing: "border-box",
+              } as any
+            }
+          />
+
+          <View style={styles.calendarActions}>
+            <TouchableOpacity
+              style={styles.calendarButton}
+              onPress={aplicarPeriodoPersonalizado}
+            >
+              <Text style={styles.calendarButtonText}>Aplicar</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.calendarButton}
+              onPress={cancelarPeriodoPersonalizado}
+            >
+              <Text style={styles.calendarButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+    
 
       {/* ✅ CARDS */}
       <View style={styles.row}>
@@ -493,47 +588,12 @@ export default function Resumo() {
     )}
   </Card>
 )}
-
-
-
-      {/* ✅ CALENDÁRIO (FORMA CORRETA) */}
-      
-      {showCalendar && (
-  <View style={{ marginTop: 10 }}>
-
-    
-
-    {period === "custom" && (
-  <Text style={{ marginTop: 10, color: "#555" }}>
-    {selectingStart
-      ? "Selecione a data inicial"
-      : "Selecione a data final"}
-  </Text>
-)}
-        
-     <input
-     type="date"
-     value=""   // 👈 força reset sempre
-    onChange={(e) => {
-    const selected = parseDateSafe(e.target.value);
-
-    if (selectingStart) {
-      setStartDate(selected);
-      setSelectingStart(false);
-    } else {
-      setEndDate(selected);
-      setShowCalendar(false);
-      setPeriod("custom");
-    }
-  }}
-/>
-
-
-  </View>
-)}
-    </View>
+</View>
   );
 }
+
+
+     
 
 /* =============================== */
 
@@ -623,4 +683,48 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#888",
   },
+  calendarBox: {
+  backgroundColor: "#FFF",
+  borderRadius: 12,
+  padding: 12,
+  marginTop: 12,
+  borderWidth: 0.5,
+  borderColor: "#eee",
+  alignItems: "flex-start",
+},
+
+calendarLabel: {
+  fontSize: 13,
+  color: "#555",
+  marginBottom: 6,
+},
+
+calendarTitle: {
+  fontSize: 14,
+  fontWeight: "600",
+  color: "#333",
+  marginBottom: 10,
+},
+
+
+calendarActions: {
+  flexDirection: "row",
+  gap: 10,
+  marginTop: 14,
+},
+
+calendarButton: {
+  backgroundColor: "#FFF",
+  borderWidth: 0.5,
+  borderColor: "#eee",
+  borderRadius: 10,
+  paddingVertical: 8,
+  paddingHorizontal: 12,
+},
+
+calendarButtonText: {
+  fontSize: 13,
+  color: "#555",
+  fontWeight: "600",
+},
 });
