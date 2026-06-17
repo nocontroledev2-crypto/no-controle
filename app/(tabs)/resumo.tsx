@@ -496,9 +496,10 @@ function cancelarPeriodoPersonalizado() {
 
 
 
-{period !== "weekPrev" &&
+     {period !== "weekPrev" &&
  period !== "monthPrev" &&
- period !== "lastYear" && (
+ period !== "lastYear" &&
+ period !== "custom" && (
   <Card title="💡 Insight do período">
     {total === 0 ? (
       <Text style={styles.subText}>
