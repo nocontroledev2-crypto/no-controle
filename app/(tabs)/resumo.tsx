@@ -1,4 +1,4 @@
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   StyleSheet,
@@ -7,7 +7,6 @@ import {
   View,
 } from "react-native";
 import { getAllExpenses } from "../storage/expenseStorage";
-
 
 function parseDateSafe(dateStr: string) {
   const [ano, mes, dia] = dateStr.split("-");
@@ -37,9 +36,12 @@ type Expense = {
 /* =============================== */
 
 export default function Resumo() {
+  const router = useRouter();
   const [period, setPeriod] = useState<Period>("month");
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [menuAberto, setMenuAberto] = useState(false);
+
+
 
   /* ✅ CALENDÁRIO */
   const [showCalendar, setShowCalendar] = useState(false);
@@ -50,8 +52,9 @@ export default function Resumo() {
     const [selectingStart, setSelectingStart] = useState(true);
     const [startDateInput, setStartDateInput] = useState("");
     const [endDateInput, setEndDateInput] = useState("");
+    
 
-  const now = new Date();
+    const now = new Date();
 
   
    useFocusEffect(
@@ -64,7 +67,6 @@ export default function Resumo() {
     load();
   }, [])
 );
-
 
   const mostrarComparacao =
     period !== "custom" && period !== "all";
@@ -87,7 +89,6 @@ export default function Resumo() {
 
       
 
-
       if (period === "today") {
   return (
     d.getDate() === now.getDate() &&
@@ -95,7 +96,6 @@ export default function Resumo() {
     d.getFullYear() === now.getFullYear()
   );
 }
-
 
 
       if (period === "week") {
@@ -163,7 +163,6 @@ export default function Resumo() {
     d.getFullYear() === ontem.getFullYear()
   );
 }
-
 
 
       if (period === "week") {
@@ -244,7 +243,6 @@ export default function Resumo() {
     .sort((a, b) => b.valor - a.valor)
     .slice(0, 3);
 
-
     function aplicarPeriodoPersonalizado() {
   if (!startDateInput || !endDateInput) {
     alert("Selecione a data inicial e a data final.");
@@ -286,7 +284,6 @@ function cancelarPeriodoPersonalizado() {
           📅 {labelPeriod(period)}
         </Text>
 
-
        {period === "custom" && startDate && (
   <Text style={{ textAlign: "center", color: "#666" }}>
     Início: {startDate.toLocaleDateString("pt-BR")}
@@ -298,7 +295,6 @@ function cancelarPeriodoPersonalizado() {
     Fim: {endDate.toLocaleDateString("pt-BR")}
   </Text>
 )}
-
 
 
 
@@ -425,7 +421,18 @@ function cancelarPeriodoPersonalizado() {
 
       {/* ✅ CARDS */}
       <View style={styles.row}>
-        <Card title="💰 Total gasto" value={formatMoney(total)}>
+        <Card
+  title="💰 Total gasto"
+  value={formatMoney(total)}
+     onPress={() =>
+     router.push({
+    pathname: "/evolucao-total",
+    params: {
+    period: period,
+    },
+     })
+       }
+>
   {mostrarComparacao && (
     <>
       <Text style={[
@@ -454,7 +461,6 @@ function cancelarPeriodoPersonalizado() {
     </>
   )}
 </Card>
-
 
 
         <Card title="📊 Média diária" value={formatMoney(media)} />
@@ -493,7 +499,6 @@ function cancelarPeriodoPersonalizado() {
   )}
 </Card>
       </View>
-
 
 
      {period !== "weekPrev" &&
@@ -593,18 +598,24 @@ function cancelarPeriodoPersonalizado() {
   );
 }
 
-
      
 
 /* =============================== */
 
-function Card({ title, value, children }: any) {
+function Card({ title, value, children, onPress }: any) {
+  const Container = onPress ? TouchableOpacity : View;
+
   return (
-    <View style={styles.card}>
+    <Container
+      style={styles.card}
+      {...(onPress ? { onPress, activeOpacity: 0.8 } : {})}
+    >
       <Text style={styles.cardTitle}>{title}</Text>
+
       {value && <Text style={styles.cardValue}>{value}</Text>}
+
       {children}
-    </View>
+    </Container>
   );
 }
 
@@ -706,7 +717,6 @@ calendarTitle: {
   color: "#333",
   marginBottom: 10,
 },
-
 
 calendarActions: {
   flexDirection: "row",
