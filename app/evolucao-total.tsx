@@ -25,6 +25,10 @@ export default function EvolucaoTotal() {
   const [expenses, setExpenses] = useState<any[]>([]);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const [showCustomBox, setShowCustomBox] = useState(false);
+  const [startDateInput, setStartDateInput] = useState("");
+  const [endDateInput, setEndDateInput] = useState("");
+
   const now = new Date();
 
   useFocusEffect(
@@ -41,6 +45,14 @@ export default function EvolucaoTotal() {
   function parseDateSafe(dateStr: string) {
     const [ano, mes, dia] = dateStr.split("-");
     return new Date(Number(ano), Number(mes) - 1, Number(dia));
+  }
+
+  function getDateKey(date: Date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
   }
 
   function getStartOfWeek(date: Date) {
@@ -67,9 +79,10 @@ export default function EvolucaoTotal() {
     });
   }
 
-  /* ===============================
-     LABELS BASE
-  =============================== */
+  function formatCustomDate(dateStr: string) {
+    if (!dateStr) return "--/--/----";
+    return parseDateSafe(dateStr).toLocaleDateString("pt-BR");
+  }
 
   const labelsMonth = [
     "Jan",
@@ -98,7 +111,6 @@ export default function EvolucaoTotal() {
     return Array.from({ length: days }, (_, index) => {
       const day = index + 1;
 
-      // Mostra alguns dias para não poluir o eixo X
       if (day === 1 || day === days || day % 5 === 0) {
         return String(day);
       }
@@ -198,8 +210,6 @@ export default function EvolucaoTotal() {
 
     let endMonth = lastMonthWithData;
 
-    // Se for o ano atual, mostra até o mês atual,
-    // exceto se houver lançamento futuro depois do mês atual.
     if (onlyYear === now.getFullYear()) {
       endMonth = Math.max(now.getMonth(), lastMonthWithData);
     }
@@ -212,9 +222,152 @@ export default function EvolucaoTotal() {
     };
   }
 
+  function buildCustomRangeData() {
+    if (!startDateInput || !endDateInput) {
+      return {
+        labels: ["Sem dados"],
+        values: [0],
+      };
+    }
+
+    const start = parseDateSafe(startDateInput);
+    const end = parseDateSafe(endDateInput);
+
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+
+    if (start.getTime() > end.getTime()) {
+      return {
+        labels: ["Inválido"],
+        values: [0],
+      };
+    }
+
+    const diffDays =
+      Math.floor(
+        (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+      ) + 1;
+
+    const monthDiff =
+      (end.getFullYear() - start.getFullYear()) * 12 +
+      (end.getMonth() - start.getMonth()) +
+      1;
+
+    // Até 31 dias: gráfico por dia
+    if (diffDays <= 31) {
+      const labels: string[] = [];
+      const values: number[] = Array(diffDays).fill(0);
+
+      for (let i = 0; i < diffDays; i++) {
+        const current = new Date(start);
+        current.setDate(start.getDate() + i);
+
+        if (diffDays <= 14) {
+          labels.push(
+            current.toLocaleDateString("pt-BR", {
+              day: "2-digit",
+              month: "2-digit",
+            })
+          );
+        } else {
+          const day = i + 1;
+
+          if (day === 1 || day === diffDays || day % 5 === 0) {
+            labels.push(
+              current.toLocaleDateString("pt-BR", {
+                day: "2-digit",
+                month: "2-digit",
+              })
+            );
+          } else {
+            labels.push("");
+          }
+        }
+      }
+
+      expenses.forEach((item: any) => {
+        const d = parseDateSafe(item.data);
+        d.setHours(0, 0, 0, 0);
+
+        if (d >= start && d <= end) {
+          const diff = Math.floor(
+            (d.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+          );
+
+          if (diff >= 0 && diff < diffDays) {
+            values[diff] += Number(item.valor);
+          }
+        }
+      });
+
+      return { labels, values };
+    }
+
+    // Até 12 meses: gráfico por mês
+    if (monthDiff <= 12) {
+      const labels: string[] = [];
+      const values: number[] = Array(monthDiff).fill(0);
+
+      for (let i = 0; i < monthDiff; i++) {
+        const current = new Date(
+          start.getFullYear(),
+          start.getMonth() + i,
+          1
+        );
+
+        labels.push(
+          `${labelsMonth[current.getMonth()]}/${String(
+            current.getFullYear()
+          ).slice(2)}`
+        );
+      }
+
+      expenses.forEach((item: any) => {
+        const d = parseDateSafe(item.data);
+
+        if (d >= start && d <= end) {
+          const index =
+            (d.getFullYear() - start.getFullYear()) * 12 +
+            (d.getMonth() - start.getMonth());
+
+          if (index >= 0 && index < monthDiff) {
+            values[index] += Number(item.valor);
+          }
+        }
+      });
+
+      return { labels, values };
+    }
+
+    // Mais de 12 meses: gráfico por ano
+    const startYear = start.getFullYear();
+    const endYear = end.getFullYear();
+    const yearsCount = endYear - startYear + 1;
+
+    const labels: string[] = [];
+    const values: number[] = Array(yearsCount).fill(0);
+
+    for (let year = startYear; year <= endYear; year++) {
+      labels.push(String(year));
+    }
+
+    expenses.forEach((item: any) => {
+      const d = parseDateSafe(item.data);
+
+      if (d >= start && d <= end) {
+        const index = d.getFullYear() - startYear;
+
+        if (index >= 0 && index < yearsCount) {
+          values[index] += Number(item.valor);
+        }
+      }
+    });
+
+    return { labels, values };
+  }
+
   /* ===============================
      DADOS DE HOJE
-     Últimos 7 dias terminando hoje
   =============================== */
 
   const last7DaysData: number[] = Array(7).fill(0);
@@ -326,6 +479,8 @@ export default function EvolucaoTotal() {
 
   const singleYearMonthlyRange = buildSingleYearMonthlyRange();
 
+  const customRangeData = buildCustomRangeData();
+
   /* ===============================
      ESCOLHA DINÂMICA DO GRÁFICO
   =============================== */
@@ -359,6 +514,9 @@ export default function EvolucaoTotal() {
       chartLabels = singleYearMonthlyRange.labels;
       chartValues = singleYearMonthlyRange.values;
     }
+  } else if (period === "custom") {
+    chartLabels = customRangeData.labels;
+    chartValues = customRangeData.values;
   } else {
     chartLabels = labelsMonth;
     chartValues = currentYearData;
@@ -378,6 +536,37 @@ export default function EvolucaoTotal() {
     ],
   };
 
+  function abrirPersonalizado() {
+    setMenuOpen(false);
+    setStartDateInput("");
+    setEndDateInput("");
+    setShowCustomBox(true);
+  }
+
+  function aplicarPersonalizado() {
+    if (!startDateInput || !endDateInput) {
+      alert("Selecione a data inicial e a data final.");
+      return;
+    }
+
+    const start = parseDateSafe(startDateInput);
+    const end = parseDateSafe(endDateInput);
+
+    if (start.getTime() > end.getTime()) {
+      alert("A data inicial não pode ser maior que a data final.");
+      return;
+    }
+
+    setPeriod("custom");
+    setShowCustomBox(false);
+  }
+
+  function cancelarPersonalizado() {
+    setShowCustomBox(false);
+    setStartDateInput("");
+    setEndDateInput("");
+  }
+
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => router.back()}>
@@ -394,6 +583,12 @@ export default function EvolucaoTotal() {
           📅 {labelPeriod(String(period))}
         </Text>
       </TouchableOpacity>
+
+      {period === "custom" && startDateInput && endDateInput && (
+        <Text style={styles.customRangeText}>
+          {formatCustomDate(startDateInput)} até {formatCustomDate(endDateInput)}
+        </Text>
+      )}
 
       {menuOpen && (
         <View style={styles.menu}>
@@ -413,12 +608,12 @@ export default function EvolucaoTotal() {
                 key={value}
                 onPress={() => {
                   if (value === "custom") {
-                    alert("Personalizado será implementado na próxima etapa.");
-                    setMenuOpen(false);
+                    abrirPersonalizado();
                     return;
                   }
 
                   setPeriod(value as string);
+                  setShowCustomBox(false);
                   setMenuOpen(false);
                 }}
               >
@@ -426,6 +621,71 @@ export default function EvolucaoTotal() {
               </TouchableOpacity>
             );
           })}
+        </View>
+      )}
+
+      {showCustomBox && (
+        <View style={styles.customBox}>
+          <Text style={styles.customTitle}>
+            Selecione o intervalo personalizado
+          </Text>
+
+          <Text style={styles.customLabel}>Data inicial</Text>
+          <input
+            type="date"
+            value={startDateInput}
+            onChange={(e: any) => setStartDateInput(e.target.value)}
+            style={
+              {
+                width: 220,
+                maxWidth: "100%",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #D9DDE3",
+                backgroundColor: "#FFF",
+                color: "#333",
+                fontSize: "14px",
+                boxSizing: "border-box",
+                marginBottom: 10,
+              } as any
+            }
+          />
+
+          <Text style={styles.customLabel}>Data final</Text>
+          <input
+            type="date"
+            value={endDateInput}
+            onChange={(e: any) => setEndDateInput(e.target.value)}
+            style={
+              {
+                width: 220,
+                maxWidth: "100%",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #D9DDE3",
+                backgroundColor: "#FFF",
+                color: "#333",
+                fontSize: "14px",
+                boxSizing: "border-box",
+              } as any
+            }
+          />
+
+          <View style={styles.customActions}>
+            <TouchableOpacity
+              style={styles.customButton}
+              onPress={aplicarPersonalizado}
+            >
+              <Text style={styles.customButtonText}>Aplicar</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.customButton}
+              onPress={cancelarPersonalizado}
+            >
+              <Text style={styles.customButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       )}
 
@@ -509,12 +769,19 @@ const styles = StyleSheet.create({
 
   filterButton: {
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 8,
   },
 
   filterText: {
     fontSize: 14,
     color: "#555",
+  },
+
+  customRangeText: {
+    textAlign: "center",
+    fontSize: 12,
+    color: "#777",
+    marginBottom: 8,
   },
 
   menu: {
@@ -530,6 +797,50 @@ const styles = StyleSheet.create({
   menuItem: {
     paddingVertical: 8,
     color: "#333",
+  },
+
+  customBox: {
+    backgroundColor: "#FFF",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 0.5,
+    borderColor: "#eee",
+    alignItems: "flex-start",
+  },
+
+  customTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 10,
+  },
+
+  customLabel: {
+    fontSize: 13,
+    color: "#555",
+    marginBottom: 4,
+  },
+
+  customActions: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 14,
+  },
+
+  customButton: {
+    backgroundColor: "#FFF",
+    borderWidth: 0.5,
+    borderColor: "#eee",
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+
+  customButtonText: {
+    fontSize: 13,
+    color: "#555",
+    fontWeight: "600",
   },
 
   totalText: {
