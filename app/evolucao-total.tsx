@@ -45,8 +45,8 @@ export default function EvolucaoTotal() {
 
   function getStartOfWeek(date: Date) {
     const d = new Date(date);
-    const day = d.getDay(); // domingo = 0
-    const diff = day === 0 ? -6 : 1 - day; // segunda-feira como início
+    const day = d.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
     d.setDate(d.getDate() + diff);
     d.setHours(0, 0, 0, 0);
     return d;
@@ -68,20 +68,8 @@ export default function EvolucaoTotal() {
   }
 
   /* ===============================
-     DADOS MENSAIS
+     LABELS BASE
   =============================== */
-
-  const monthlyData: number[] = Array(12).fill(0);
-
-  expenses.forEach((item: any) => {
-    const d = parseDateSafe(item.data);
-
-    // Por enquanto, evolução mensal do ano atual
-    if (d.getFullYear() === now.getFullYear()) {
-      const mesIndex = d.getMonth();
-      monthlyData[mesIndex] += Number(item.valor);
-    }
-  });
 
   const labelsMonth = [
     "Jan",
@@ -99,12 +87,185 @@ export default function EvolucaoTotal() {
   ];
 
   /* ===============================
+     HELPERS DO GRÁFICO
+  =============================== */
+
+  function getDaysInMonth(year: number, month: number) {
+    return new Date(year, month + 1, 0).getDate();
+  }
+
+  function buildDayLabels(days: number) {
+    return Array.from({ length: days }, (_, index) => {
+      const day = index + 1;
+
+      // Mostra alguns dias para não poluir o eixo X
+      if (day === 1 || day === days || day % 5 === 0) {
+        return String(day);
+      }
+
+      return "";
+    });
+  }
+
+  function buildDailyDataForMonth(year: number, month: number) {
+    const days = getDaysInMonth(year, month);
+    const values = Array(days).fill(0);
+
+    expenses.forEach((item: any) => {
+      const d = parseDateSafe(item.data);
+
+      if (d.getFullYear() === year && d.getMonth() === month) {
+        const dayIndex = d.getDate() - 1;
+        values[dayIndex] += Number(item.valor);
+      }
+    });
+
+    return values;
+  }
+
+  function buildMonthlyDataForYear(year: number) {
+    const values = Array(12).fill(0);
+
+    expenses.forEach((item: any) => {
+      const d = parseDateSafe(item.data);
+
+      if (d.getFullYear() === year) {
+        values[d.getMonth()] += Number(item.valor);
+      }
+    });
+
+    return values;
+  }
+
+  function buildYearlyData() {
+    const map: Record<string, number> = {};
+
+    expenses.forEach((item: any) => {
+      const d = parseDateSafe(item.data);
+      const year = String(d.getFullYear());
+
+      map[year] = (map[year] || 0) + Number(item.valor);
+    });
+
+    const years = Object.keys(map).sort();
+
+    return {
+      labels: years,
+      values: years.map((year) => map[year]),
+    };
+  }
+
+  function buildSingleYearMonthlyRange() {
+    const yearsWithData = Array.from(
+      new Set(
+        expenses.map((item: any) => {
+          const d = parseDateSafe(item.data);
+          return d.getFullYear();
+        })
+      )
+    ).sort((a, b) => a - b);
+
+    if (yearsWithData.length !== 1) {
+      return {
+        labels: [] as string[],
+        values: [] as number[],
+      };
+    }
+
+    const onlyYear = yearsWithData[0];
+
+    const monthsWithData = expenses
+      .map((item: any) => {
+        const d = parseDateSafe(item.data);
+
+        if (d.getFullYear() !== onlyYear) {
+          return null;
+        }
+
+        return d.getMonth();
+      })
+      .filter((month) => month !== null) as number[];
+
+    if (monthsWithData.length === 0) {
+      return {
+        labels: [] as string[],
+        values: [] as number[],
+      };
+    }
+
+    const firstMonthWithData = Math.min(...monthsWithData);
+    const lastMonthWithData = Math.max(...monthsWithData);
+
+    let endMonth = lastMonthWithData;
+
+    // Se for o ano atual, mostra até o mês atual,
+    // exceto se houver lançamento futuro depois do mês atual.
+    if (onlyYear === now.getFullYear()) {
+      endMonth = Math.max(now.getMonth(), lastMonthWithData);
+    }
+
+    const fullYearValues = buildMonthlyDataForYear(onlyYear);
+
+    return {
+      labels: labelsMonth.slice(firstMonthWithData, endMonth + 1),
+      values: fullYearValues.slice(firstMonthWithData, endMonth + 1),
+    };
+  }
+
+  /* ===============================
+     DADOS DE HOJE
+     Últimos 7 dias terminando hoje
+  =============================== */
+
+  const last7DaysData: number[] = Array(7).fill(0);
+  const labelsLast7Days: string[] = [];
+
+  const startLast7Days = new Date(now);
+  startLast7Days.setDate(now.getDate() - 6);
+  startLast7Days.setHours(0, 0, 0, 0);
+
+  const endToday = new Date(now);
+  endToday.setHours(23, 59, 59, 999);
+
+  for (let i = 0; i < 7; i++) {
+    const currentDay = new Date(startLast7Days);
+    currentDay.setDate(startLast7Days.getDate() + i);
+
+    if (i === 6) {
+      labelsLast7Days.push("Hoje");
+    } else {
+      labelsLast7Days.push(
+        currentDay.toLocaleDateString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+        })
+      );
+    }
+  }
+
+  expenses.forEach((item: any) => {
+    const d = parseDateSafe(item.data);
+    d.setHours(0, 0, 0, 0);
+
+    if (d >= startLast7Days && d <= endToday) {
+      const diffDays = Math.floor(
+        (d.getTime() - startLast7Days.getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
+
+      if (diffDays >= 0 && diffDays < 7) {
+        last7DaysData[diffDays] += Number(item.valor);
+      }
+    }
+  });
+
+  /* ===============================
      DADOS SEMANAIS
   =============================== */
 
   const weeklyData: number[] = Array(7).fill(0);
 
-  let weekReference = new Date(now);
+  const weekReference = new Date(now);
 
   if (period === "weekPrev") {
     weekReference.setDate(now.getDate() - 7);
@@ -117,8 +278,8 @@ export default function EvolucaoTotal() {
     const d = parseDateSafe(item.data);
 
     if (d >= startWeek && d <= endWeek) {
-      const jsDay = d.getDay(); // domingo = 0
-      const index = jsDay === 0 ? 6 : jsDay - 1; // segunda = 0, domingo = 6
+      const jsDay = d.getDay();
+      const index = jsDay === 0 ? 6 : jsDay - 1;
 
       weeklyData[index] += Number(item.valor);
     }
@@ -127,22 +288,92 @@ export default function EvolucaoTotal() {
   const labelsWeek = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
 
   /* ===============================
+     DADOS POR MÊS / ANO
+  =============================== */
+
+  const currentMonthData = buildDailyDataForMonth(
+    now.getFullYear(),
+    now.getMonth()
+  );
+
+  const currentMonthLabels = buildDayLabels(
+    getDaysInMonth(now.getFullYear(), now.getMonth())
+  );
+
+  const previousMonthDate = new Date(
+    now.getFullYear(),
+    now.getMonth() - 1,
+    1
+  );
+
+  const previousMonthData = buildDailyDataForMonth(
+    previousMonthDate.getFullYear(),
+    previousMonthDate.getMonth()
+  );
+
+  const previousMonthLabels = buildDayLabels(
+    getDaysInMonth(
+      previousMonthDate.getFullYear(),
+      previousMonthDate.getMonth()
+    )
+  );
+
+  const currentYearData = buildMonthlyDataForYear(now.getFullYear());
+
+  const previousYearData = buildMonthlyDataForYear(now.getFullYear() - 1);
+
+  const yearlyData = buildYearlyData();
+
+  const singleYearMonthlyRange = buildSingleYearMonthlyRange();
+
+  /* ===============================
      ESCOLHA DINÂMICA DO GRÁFICO
   =============================== */
 
-  const isWeekChart =
-    period === "today" || period === "week" || period === "weekPrev";
+  let chartLabels: string[] = [];
+  let chartValues: number[] = [];
 
-  const chartLabels = isWeekChart ? labelsWeek : labelsMonth;
-  const chartValues = isWeekChart ? weeklyData : monthlyData;
+  if (period === "today") {
+    chartLabels = labelsLast7Days;
+    chartValues = last7DaysData;
+  } else if (period === "week" || period === "weekPrev") {
+    chartLabels = labelsWeek;
+    chartValues = weeklyData;
+  } else if (period === "month") {
+    chartLabels = currentMonthLabels;
+    chartValues = currentMonthData;
+  } else if (period === "monthPrev") {
+    chartLabels = previousMonthLabels;
+    chartValues = previousMonthData;
+  } else if (period === "year") {
+    chartLabels = labelsMonth;
+    chartValues = currentYearData;
+  } else if (period === "lastYear") {
+    chartLabels = labelsMonth;
+    chartValues = previousYearData;
+  } else if (period === "all") {
+    if (yearlyData.labels.length > 1) {
+      chartLabels = yearlyData.labels;
+      chartValues = yearlyData.values;
+    } else {
+      chartLabels = singleYearMonthlyRange.labels;
+      chartValues = singleYearMonthlyRange.values;
+    }
+  } else {
+    chartLabels = labelsMonth;
+    chartValues = currentYearData;
+  }
+
+  const safeChartLabels = chartLabels.length > 0 ? chartLabels : ["Sem dados"];
+  const safeChartValues = chartValues.length > 0 ? chartValues : [0];
 
   const totalGrafico = chartValues.reduce((sum, value) => sum + value, 0);
 
   const chartData = {
-    labels: chartLabels,
+    labels: safeChartLabels,
     datasets: [
       {
-        data: chartValues,
+        data: safeChartValues,
       },
     ],
   };
