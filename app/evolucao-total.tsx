@@ -12,7 +12,9 @@ import {
   View,
 } from "react-native";
 import { LineChart } from "react-native-chart-kit";
+import { Text as SvgText } from "react-native-svg";
 import { getAllExpenses } from "./storage/expenseStorage";
+
 
 export default function EvolucaoTotal() {
   const router = useRouter();
@@ -560,6 +562,14 @@ export default function EvolucaoTotal() {
     ],
   };
 
+  function formatShortMoney(valor: number) {
+  if (valor >= 1000) {
+    return `R$ ${(valor / 1000).toFixed(1)}k`;
+  }
+
+  return `R$ ${valor.toFixed(0)}`;
+}
+
   function abrirPersonalizado() {
     setMenuOpen(false);
     setStartDateInput("");
@@ -751,6 +761,32 @@ export default function EvolucaoTotal() {
               stroke: "#0A8F55",
             },
           }}
+            renderDotContent={({ x, y, index, indexData }: any) => {
+  const value = Number(indexData);
+
+  if (value <= 0) {
+    return null;
+  }
+
+  const isTodayPoint =
+    period === "today" && index === safeChartValues.length - 1;
+
+  return (
+    <SvgText
+      key={`dot-label-${index}`}
+      x={x}
+      y={y - 10}
+      fill={isTodayPoint ? "#0A8F55" : "#333"}
+      fontSize={isTodayPoint ? "11" : "10"}
+      fontWeight={isTodayPoint ? "700" : "600"}
+      textAnchor="middle"
+    >
+      {isTodayPoint
+        ? `HOJE ${formatShortMoney(value)}`
+        : formatShortMoney(value)}
+    </SvgText>
+  );
+}}
 
           onDataPointClick={({ value, index }: any) => {
   setSelectedPoint({
