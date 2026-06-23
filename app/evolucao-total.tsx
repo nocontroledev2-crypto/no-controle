@@ -74,13 +74,6 @@ export default function EvolucaoTotal() {
     return new Date(Number(ano), Number(mes) - 1, Number(dia));
   }
 
-  function getDateKey(date: Date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
-  }
 
   function getStartOfWeek(date: Date) {
     const d = new Date(date);
@@ -552,9 +545,8 @@ export default function EvolucaoTotal() {
   const safeChartLabels = chartLabels.length > 0 ? chartLabels : ["Sem dados"];
   const safeChartValues = chartValues.length > 0 ? chartValues : [0];
 
-  const totalGrafico = chartValues.reduce((sum, value) => sum + value, 0);
-  const hasChartData = chartValues.some((value) => Number(value) > 0);
-  const todayValue = last7DaysData[6] ?? 0;
+ const totalGrafico = chartValues.reduce((sum, value) => sum + value, 0);
+ const todayValue = last7DaysData[6] ?? 0;
 
   const chartData = {
     labels: safeChartLabels,
