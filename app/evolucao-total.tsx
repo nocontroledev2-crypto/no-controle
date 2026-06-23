@@ -3,7 +3,7 @@ import {
   useLocalSearchParams,
   useRouter,
 } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Dimensions,
   StyleSheet,
@@ -24,6 +24,10 @@ export default function EvolucaoTotal() {
 
   const [expenses, setExpenses] = useState<any[]>([]);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [selectedPoint, setSelectedPoint] = useState<{
+  label: string;
+  value: number;
+} | null>(null);
 
   const [showCustomBox, setShowCustomBox] = useState(false);
   const [startDateInput, setStartDateInput] = useState("");
@@ -41,6 +45,25 @@ export default function EvolucaoTotal() {
       load();
     }, [])
   );
+
+
+    useEffect(() => {
+     if (!menuOpen) return;
+     if (typeof window === "undefined") return;
+
+     function handleKeyDown(event: any) {
+     if (event.key === "Escape") {
+      setMenuOpen(false);
+      }
+     }
+
+     window.addEventListener("keydown", handleKeyDown);
+
+     return () => {
+     window.removeEventListener("keydown", handleKeyDown);
+     };
+     }, [menuOpen]);
+
 
   function parseDateSafe(dateStr: string) {
     const [ano, mes, dia] = dateStr.split("-");
@@ -385,7 +408,7 @@ export default function EvolucaoTotal() {
     currentDay.setDate(startLast7Days.getDate() + i);
 
     if (i === 6) {
-      labelsLast7Days.push("Hoje");
+      labelsLast7Days.push("HOJE");
     } else {
       labelsLast7Days.push(
         currentDay.toLocaleDateString("pt-BR", {
@@ -526,6 +549,7 @@ export default function EvolucaoTotal() {
   const safeChartValues = chartValues.length > 0 ? chartValues : [0];
 
   const totalGrafico = chartValues.reduce((sum, value) => sum + value, 0);
+  const todayValue = last7DaysData[6] ?? 0;
 
   const chartData = {
     labels: safeChartLabels,
@@ -558,6 +582,7 @@ export default function EvolucaoTotal() {
     }
 
     setPeriod("custom");
+    setSelectedPoint(null);
     setShowCustomBox(false);
   }
 
@@ -613,9 +638,10 @@ export default function EvolucaoTotal() {
                   }
 
                   setPeriod(value as string);
+                  setSelectedPoint(null);
                   setShowCustomBox(false);
                   setMenuOpen(false);
-                }}
+                  }}
               >
                 <Text style={styles.menuItem}>{label}</Text>
               </TouchableOpacity>
@@ -689,9 +715,22 @@ export default function EvolucaoTotal() {
         </View>
       )}
 
-      <Text style={styles.totalText}>
-        Total no gráfico: {formatMoney(totalGrafico)}
-      </Text>
+      <View style={styles.totalRow}>
+  <Text style={styles.totalLabel}>Total no gráfico: </Text>
+  <Text style={styles.totalValue}>{formatMoney(totalGrafico)}</Text>
+</View>
+
+{period === "today" && (
+  <Text style={styles.todayHighlight}>
+    HOJE: {formatMoney(todayValue)}
+  </Text>
+)}
+
+{selectedPoint && (
+  <Text style={styles.pointInfo}>
+    {selectedPoint.label}: {formatMoney(selectedPoint.value)}
+  </Text>
+)}
 
       <View style={styles.chartBox}>
         <LineChart
@@ -712,6 +751,13 @@ export default function EvolucaoTotal() {
               stroke: "#0A8F55",
             },
           }}
+
+          onDataPointClick={({ value, index }: any) => {
+  setSelectedPoint({
+    label: safeChartLabels[index] || "Ponto",
+    value: Number(value),
+  });
+}}
           bezier
           style={styles.chart}
         />
@@ -860,4 +906,40 @@ const styles = StyleSheet.create({
   chart: {
     borderRadius: 16,
   },
+
+  totalRow: {
+  flexDirection: "row",
+  justifyContent: "center",
+  alignItems: "center",
+  marginBottom: 4,
+},
+
+totalLabel: {
+  fontSize: 14,
+  color: "#555",
+},
+
+totalValue: {
+  fontSize: 15,
+  color: "#0A8F55",
+  fontWeight: "bold",
+},
+
+todayHighlight: {
+  textAlign: "center",
+  fontSize: 13,
+  color: "#0A8F55",
+  fontWeight: "bold",
+  marginBottom: 6,
+},
+
+pointInfo: {
+  textAlign: "center",
+  fontSize: 13,
+  color: "#333",
+  fontWeight: "600",
+  marginBottom: 8,
+},
+
+
 });
