@@ -553,6 +553,7 @@ export default function EvolucaoTotal() {
   const safeChartValues = chartValues.length > 0 ? chartValues : [0];
 
   const totalGrafico = chartValues.reduce((sum, value) => sum + value, 0);
+  const hasChartData = chartValues.some((value) => Number(value) > 0);
   const todayValue = last7DaysData[6] ?? 0;
 
   const chartData = {
@@ -635,7 +636,13 @@ export default function EvolucaoTotal() {
           {formatCustomDate(startDateInput)} até {formatCustomDate(endDateInput)}
         </Text>
       )}
-
+        {menuOpen && (
+  <TouchableOpacity
+    style={styles.menuOverlay}
+    activeOpacity={1}
+    onPress={() => setMenuOpen(false)}
+  />
+)}
       {menuOpen && (
         <View style={styles.menu}>
           {[
@@ -753,8 +760,8 @@ export default function EvolucaoTotal() {
   </Text>
 )}
 
-      <View style={styles.chartBox}>
-        <LineChart
+      
+       <View style={styles.chartBox}> <LineChart
           data={chartData}
           width={chartWidth}
           height={220}
@@ -896,6 +903,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
     elevation: 6,
+    zIndex: 10,
   },
 
   menuItem: {
@@ -1002,5 +1010,13 @@ pointInfo: {
   marginBottom: 8,
 },
 
+menuOverlay: {
+  position: "absolute",
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  zIndex: 5,
+},
 
 });
