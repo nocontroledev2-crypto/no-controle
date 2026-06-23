@@ -11,7 +11,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import { LineChart } from "react-native-chart-kit";
+import { BarChart, LineChart } from "react-native-chart-kit";
 import { Text as SvgText } from "react-native-svg";
 import { getAllExpenses } from "./storage/expenseStorage";
 
@@ -26,6 +26,7 @@ export default function EvolucaoTotal() {
 
   const [expenses, setExpenses] = useState<any[]>([]);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [chartType, setChartType] = useState<"line" | "bar">("line");
   const [selectedPoint, setSelectedPoint] = useState<{
   label: string;
   value: number;
@@ -752,72 +753,130 @@ export default function EvolucaoTotal() {
   </Text>
 )}
 
-      
-       <View style={styles.chartBox}> <LineChart
-          data={chartData}
-          width={chartWidth}
-          height={220}
-          yAxisLabel="R$ "
-          chartConfig={{
-            backgroundColor: "#FFFFFF",
-            backgroundGradientFrom: "#FFFFFF",
-            backgroundGradientTo: "#FFFFFF",
-            decimalPlaces: 0,
-            color: (opacity = 1) => `rgba(10, 143, 85, ${opacity})`,
-            labelColor: () => "#666",
-            propsForDots: {
-              r: "4",
-              strokeWidth: "2",
-              stroke: "#0A8F55",
-            },
-          }}
-  renderDotContent={({ x, y, index, indexData }: any) => {
-  const value = Number(indexData);
-
-  if (value <= 0) {
-    return null;
-  }
-
-  const isTodayPoint =
-    period === "today" && index === safeChartValues.length - 1;
-
-  const shouldShowLabel =
-    period === "today"
-      ? value > 0
-      : safeChartValues.length <= 12
-      ? value > 0
-      : topLabelIndexes.includes(index);
-
-  if (!shouldShowLabel) {
-    return null;
-  }
-
-  return (
-    <SvgText
-      key={`dot-label-${index}`}
-      x={x}
-      y={y - 10}
-      fill={isTodayPoint ? "#0A8F55" : "#333"}
-      fontSize={isTodayPoint ? "11" : "10"}
-      fontWeight={isTodayPoint ? "700" : "600"}
-      textAnchor="middle"
+<View style={styles.chartTypeRow}>
+  <TouchableOpacity
+    style={[
+      styles.chartTypeButton,
+      chartType === "line" && styles.chartTypeButtonActive,
+    ]}
+    onPress={() => setChartType("line")}
+  >
+    <Text
+      style={[
+        styles.chartTypeText,
+        chartType === "line" && styles.chartTypeTextActive,
+      ]}
     >
-      {isTodayPoint
-        ? `HOJE ${formatShortMoney(value)}`
-        : formatShortMoney(value)}
-    </SvgText>
-  );
-}}
+      📈 Linha
+    </Text>
+  </TouchableOpacity>
 
-          onDataPointClick={({ value, index }: any) => {
-  setSelectedPoint({
-    label: safeChartLabels[index] || "Ponto",
-    value: Number(value),
-  });
-}}
-          bezier
-          style={styles.chart}
-        />
+  <TouchableOpacity
+    style={[
+      styles.chartTypeButton,
+      chartType === "bar" && styles.chartTypeButtonActive,
+    ]}
+    onPress={() => setChartType("bar")}
+  >
+    <Text
+      style={[
+        styles.chartTypeText,
+        chartType === "bar" && styles.chartTypeTextActive,
+      ]}
+    >
+      📊 Colunas
+    </Text>
+  </TouchableOpacity>
+</View>
+
+<View style={styles.chartBox}>
+  {chartType === "line" ? (
+
+    <LineChart
+    data={chartData}
+    width={chartWidth}
+    height={220}
+    yAxisLabel="R$ "
+    chartConfig={{
+      backgroundColor: "#FFFFFF",
+      backgroundGradientFrom: "#FFFFFF",
+      backgroundGradientTo: "#FFFFFF",
+      decimalPlaces: 0,
+      color: (opacity = 1) => `rgba(10, 143, 85, ${opacity})`,
+      labelColor: () => "#666",
+      propsForDots: {
+        r: "4",
+        strokeWidth: "2",
+        stroke: "#0A8F55",
+      },
+    }}
+    renderDotContent={({ x, y, index, indexData }: any) => {
+      const value = Number(indexData);
+
+      if (value <= 0) {
+        return null;
+      }
+
+      const isTodayPoint =
+        period === "today" && index === safeChartValues.length - 1;
+
+      const shouldShowLabel =
+        period === "today"
+          ? value > 0
+          : safeChartValues.length <= 12
+          ? value > 0
+          : topLabelIndexes.includes(index);
+
+      if (!shouldShowLabel) {
+        return null;
+      }
+
+      return (
+        <SvgText
+          key={`dot-label-${index}`}
+          x={x}
+          y={y - 10}
+          fill={isTodayPoint ? "#0A8F55" : "#333"}
+          fontSize={isTodayPoint ? "11" : "10"}
+          fontWeight={isTodayPoint ? "700" : "600"}
+          textAnchor="middle"
+        >
+          {isTodayPoint
+            ? `HOJE ${formatShortMoney(value)}`
+            : formatShortMoney(value)}
+        </SvgText>
+      );
+    }}
+    onDataPointClick={({ value, index }: any) => {
+      setSelectedPoint({
+        label: safeChartLabels[index] || "Ponto",
+        value: Number(value),
+      });
+    }}
+    bezier
+    style={styles.chart}
+  />
+) : (
+  <BarChart
+    data={chartData}
+    width={chartWidth}
+    height={220}
+    yAxisLabel="R$ "
+    yAxisSuffix=""
+    chartConfig={{
+      backgroundColor: "#FFFFFF",
+      backgroundGradientFrom: "#FFFFFF",
+      backgroundGradientTo: "#FFFFFF",
+      decimalPlaces: 0,
+      color: (opacity = 1) => `rgba(10, 143, 85, ${opacity})`,
+      labelColor: () => "#666",
+      barPercentage: 0.55,
+    }}
+    fromZero
+    showValuesOnTopOfBars
+    style={styles.chart}
+  />
+)}
       </View>
     </View>
   );
@@ -1011,4 +1070,34 @@ menuOverlay: {
   zIndex: 5,
 },
 
+chartTypeRow: {
+  flexDirection: "row",
+  justifyContent: "center",
+  gap: 10,
+  marginBottom: 10,
+},
+
+chartTypeButton: {
+  backgroundColor: "#FFF",
+  borderWidth: 0.5,
+  borderColor: "#eee",
+  borderRadius: 10,
+  paddingVertical: 8,
+  paddingHorizontal: 12,
+},
+
+chartTypeButtonActive: {
+  borderColor: "#0A8F55",
+  borderWidth: 1,
+},
+
+chartTypeText: {
+  fontSize: 13,
+  color: "#555",
+  fontWeight: "600",
+},
+
+chartTypeTextActive: {
+  color: "#0A8F55",
+},
 });
