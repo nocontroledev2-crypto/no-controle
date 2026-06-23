@@ -5,11 +5,11 @@ import {
 } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-  Dimensions,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import { Text as SvgText } from "react-native-svg";
@@ -36,6 +36,8 @@ export default function EvolucaoTotal() {
   const [endDateInput, setEndDateInput] = useState("");
 
   const now = new Date();
+  const { width } = useWindowDimensions();
+  const chartWidth = width >= 768 ? width - 110 : width - 48;
 
   useFocusEffect(
     useCallback(() => {
@@ -561,6 +563,15 @@ export default function EvolucaoTotal() {
       },
     ],
   };
+  const topLabelIndexes = safeChartValues
+  .map((value, index) => ({
+    value: Number(value),
+    index,
+  }))
+  .filter((item) => item.value > 0)
+  .sort((a, b) => b.value - a.value)
+  .slice(0, 5)
+  .map((item) => item.index);
 
   function formatShortMoney(valor: number) {
   if (valor >= 1000) {
@@ -745,7 +756,7 @@ export default function EvolucaoTotal() {
       <View style={styles.chartBox}>
         <LineChart
           data={chartData}
-          width={Dimensions.get("window").width - 32}
+          width={chartWidth}
           height={220}
           yAxisLabel="R$ "
           chartConfig={{
@@ -761,7 +772,7 @@ export default function EvolucaoTotal() {
               stroke: "#0A8F55",
             },
           }}
-            renderDotContent={({ x, y, index, indexData }: any) => {
+  renderDotContent={({ x, y, index, indexData }: any) => {
   const value = Number(indexData);
 
   if (value <= 0) {
@@ -770,6 +781,17 @@ export default function EvolucaoTotal() {
 
   const isTodayPoint =
     period === "today" && index === safeChartValues.length - 1;
+
+  const shouldShowLabel =
+    period === "today"
+      ? value > 0
+      : safeChartValues.length <= 12
+      ? value > 0
+      : topLabelIndexes.includes(index);
+
+  if (!shouldShowLabel) {
+    return null;
+  }
 
   return (
     <SvgText
@@ -937,6 +959,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingVertical: 12,
     alignItems: "center",
+    width: "100%",
+    overflow: "hidden",
+
   },
 
   chart: {
