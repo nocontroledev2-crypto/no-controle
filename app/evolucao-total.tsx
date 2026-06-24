@@ -556,9 +556,17 @@ export default function EvolucaoTotal() {
     {
       data: safeChartValues,
       colors: safeChartValues.map((value) => {
-        const isTop = Number(value) >= maxValue * 0.8;
+        const numericValue = Number(value);
 
-        return () => (isTop ? "#44886e" : "#CFE8DB"); /* aqui cor das barras*/
+        let color = "#CFE8DB"; // baixo
+
+if (numericValue >= maxValue * 0.8) {
+  color = "#043D27"; // top
+} else if (numericValue >= maxValue * 0.4) {
+  color = "#0A8F55"; // médio
+}
+
+        return () => color;
       }),
     },
   ],
