@@ -548,16 +548,24 @@ export default function EvolucaoTotal() {
 
  const totalGrafico = chartValues.reduce((sum, value) => sum + value, 0);
  const todayValue = last7DaysData[6] ?? 0;
+ const maxValue = Math.max(...safeChartValues);
 
   const chartData = {
-    labels: safeChartLabels,
-    datasets: [
-      {
-        data: safeChartValues,
-      },
-    ],
-  };
-  const topLabelIndexes = safeChartValues
+  labels: safeChartLabels,
+  datasets: [
+    {
+      data: safeChartValues,
+      colors: safeChartValues.map((value) => {
+        const isTop = Number(value) >= maxValue * 0.8;
+
+        return () => (isTop ? "#44886e" : "#CFE8DB"); /* aqui cor das barras*/
+      }),
+    },
+  ],
+};
+
+    
+    const topLabelIndexes = safeChartValues
   .map((value, index) => ({
     value: Number(value),
     index,
@@ -566,6 +574,8 @@ export default function EvolucaoTotal() {
   .sort((a, b) => b.value - a.value)
   .slice(0, 5)
   .map((item) => item.index);
+ 
+  
 
   function formatShortMoney(valor: number) {
   if (valor >= 1000) {
@@ -803,7 +813,7 @@ export default function EvolucaoTotal() {
       backgroundGradientTo: "#FFFFFF",
       decimalPlaces: 0,
       color: (opacity = 1) => `rgba(10, 143, 85, ${opacity})`,
-      labelColor: () => "#666",
+      labelColor: () => "#333",
       propsForDots: {
         r: "4",
         strokeWidth: "2",
@@ -864,17 +874,33 @@ export default function EvolucaoTotal() {
     yAxisLabel="R$ "
     yAxisSuffix=""
     chartConfig={{
-      backgroundColor: "#FFFFFF",
-      backgroundGradientFrom: "#FFFFFF",
-      backgroundGradientTo: "#FFFFFF",
-      decimalPlaces: 0,
-      color: (opacity = 1) => `rgba(10, 143, 85, ${opacity})`,
-      labelColor: () => "#666",
-      barPercentage: 0.55,
-    }}
+  backgroundColor: "#FAFAFA",
+  backgroundGradientFrom: "#FAFAFA",
+  backgroundGradientTo: "#FAFAFA",
+  decimalPlaces: 0,
+
+  color: () => "#06643F", // ✅ verde mais escuro
+
+  labelColor: () => "#444", // ✅ texto mais forte
+
+  barPercentage: 0.65, // ✅ barras mais grossas
+
+  propsForBackgroundLines: {
+    stroke: "#E4E7EB", // ✅ grid suave
+    strokeDasharray: "4",
+  },
+}}
     fromZero
     showValuesOnTopOfBars
-    style={styles.chart}
+    withCustomBarColorFromData
+    flatColor
+
+   
+ style={{
+    borderRadius: 16,
+    marginTop: 8,
+  }}
+
   />
 )}
       </View>
@@ -1014,14 +1040,19 @@ const styles = StyleSheet.create({
   },
 
   chartBox: {
-    backgroundColor: "#FFF",
-    borderRadius: 16,
-    paddingVertical: 12,
-    alignItems: "center",
-    width: "100%",
-    overflow: "hidden",
+  backgroundColor: "#FFFFFF",
+  borderRadius: 16,
+  paddingVertical: 12,
+  alignItems: "center",
+  width: "100%",
+  overflow: "hidden",
 
-  },
+  // ✅ sombra premium
+  shadowColor: "#000",
+  shadowOpacity: 0.05,
+  shadowRadius: 8,
+  elevation: 3,
+},
 
   chart: {
     borderRadius: 16,
