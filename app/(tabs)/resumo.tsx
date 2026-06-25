@@ -61,7 +61,17 @@ export default function Resumo() {
   useCallback(() => {
     async function load() {
       const data = await getAllExpenses();
-      setExpenses(data || []);
+
+const normalizedData = (data || []).map((item: any) => {
+  const safeValue = Number(item.valor);
+
+  return {
+    ...item,
+    valor: Number.isFinite(safeValue) ? safeValue : 0,
+  };
+});
+
+setExpenses(normalizedData);
     }
 
     load();
@@ -72,12 +82,14 @@ export default function Resumo() {
     period !== "custom" && period !== "all";
 
   /* ✅ moeda */
-  function formatMoney(valor: number) {
-    return valor.toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    });
-  }
+  function formatMoney(valor: number | null | undefined) {
+  const safeValue = Number(valor);
+
+  return (Number.isFinite(safeValue) ? safeValue : 0).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+}
 
   /* ===========================
      FILTRO ATUAL
