@@ -1,5 +1,6 @@
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
+
 import {
   ScrollView,
   StyleSheet,
@@ -7,7 +8,9 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
+
 import {
   Expense,
   deleteExpense,
@@ -42,6 +45,10 @@ const CATEGORY_OPTIONS = [
 ];
 
 export default function Historico() {
+  
+ const { width } = useWindowDimensions();
+ const isMobile = width < 480;
+
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [period, setPeriod] = useState<Period>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("lancamentos");
@@ -552,7 +559,18 @@ export default function Historico() {
   =============================== */
 
   return (
-    <View style={styles.container}>
+    
+   <View
+  style={[
+    styles.container,
+    {
+      paddingHorizontal: isMobile ? 12 : 16,
+      paddingTop: isMobile ? 12 : 16,
+    },
+  ]}
+>
+
+
       <Text style={styles.title}>Histórico</Text>
 
       <View style={styles.viewModeRow}>
@@ -968,8 +986,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F7F8FA",
-    padding: 16,
-  },
+     paddingBottom: 16,
+      },
+    
 
   title: {
     fontSize: 22,
