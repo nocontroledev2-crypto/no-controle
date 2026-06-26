@@ -11,12 +11,41 @@ export type Expense = {
 };
 
 /**
+ * Normaliza uma despesa garantindo que o valor seja sempre numérico e válido
+ */
+function normalizeExpense(expense: Expense): Expense {
+  const safeValue = Number(expense.valor);
+
+  if (!Number.isFinite(safeValue) || safeValue <= 0) {
+    throw new Error("Valor inválido para despesa.");
+  }
+
+  return {
+    ...expense,
+    valor: Number(safeValue.toFixed(2)),
+  };
+}
+
+/**
  * Busca todas as despesas salvas
  */
 export async function getAllExpenses(): Promise<Expense[]> {
   try {
     const json = await AsyncStorage.getItem(STORAGE_KEY);
-    return json ? JSON.parse(json) : [];
+    const expenses = json ? JSON.parse(json) : [];
+
+    if (!Array.isArray(expenses)) {
+      return [];
+    }
+
+    return expenses.map((expense: any) => {
+      const safeValue = Number(expense.valor);
+
+      return {
+        ...expense,
+        valor: Number.isFinite(safeValue) ? safeValue : 0,
+      };
+    });
   } catch {
     return [];
   }
@@ -26,18 +55,10 @@ export async function getAllExpenses(): Promise<Expense[]> {
  * Salva uma nova despesa
  */
 export async function saveExpense(expense: Expense): Promise<void> {
-  const safeValue = Number(expense.valor);
-
-  if (!Number.isFinite(safeValue) || safeValue <= 0) {
-    throw new Error("Valor inválido para despesa.");
-  }
+  const normalizedExpense = normalizeExpense(expense);
 
   const expenses = await getAllExpenses();
-
-  expenses.push({
-    ...expense,
-    valor: Number(safeValue.toFixed(2)),
-  });
+  expenses.push(normalizedExpense);
 
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
 }
@@ -46,10 +67,12 @@ export async function saveExpense(expense: Expense): Promise<void> {
  * Atualiza uma despesa existente pelo ID
  */
 export async function updateExpense(updatedExpense: Expense): Promise<void> {
+  const normalizedExpense = normalizeExpense(updatedExpense);
+
   const expenses = await getAllExpenses();
 
   const updatedExpenses = expenses.map((expense) =>
-    expense.id === updatedExpense.id ? updatedExpense : expense
+    expense.id === normalizedExpense.id ? normalizedExpense : expense
   );
 
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedExpenses));
