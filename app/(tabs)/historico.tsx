@@ -609,8 +609,23 @@ export default function Historico() {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.topControlsWrap}>
-        <View style={styles.topControlBlock}>
+    <View
+      style={[
+      styles.topControlsWrap,
+      isMobile && {
+      flexDirection: "column",
+      gap: 8,
+       },
+        ]}
+    >
+
+         <View
+           style={[
+           styles.topControlBlock,
+           isMobile && { width: "100%" },
+           ]}
+           >
+
           <TouchableOpacity
             style={styles.topControlButton}
             onPress={() => {
@@ -618,6 +633,8 @@ export default function Historico() {
               setMenuCategoriaAberto(false);
             }}
           >
+
+            
             <Text style={styles.topControlText}>
               📅 {labelPeriod(period)}
             </Text>
@@ -654,7 +671,13 @@ export default function Historico() {
           )}
         </View>
 
-        <View style={styles.topControlBlock}>
+           <View
+           style={[
+           styles.topControlBlock,
+           isMobile && { width: "100%" },
+           ]}
+            >
+
           <TouchableOpacity
             style={styles.topControlButton}
             onPress={() => {
@@ -686,17 +709,28 @@ export default function Historico() {
 
         {viewMode === "lancamentos" && (
           <>
-            <TouchableOpacity
-              style={styles.topActionButton}
-              onPress={expandirTudo}
-            >
+            
+             <TouchableOpacity
+              style={[
+              styles.topActionButton,
+              isMobile && { width: "100%" },
+               ]}
+               onPress={expandirTudo}
+               >
+
+
               <Text style={styles.topActionText}>▲ Expandir tudo</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.topActionButton}
-              onPress={recolherTudo}
-            >
+                  <TouchableOpacity
+                  style={[
+                  styles.topActionButton,
+                  isMobile && { width: "100%" },
+                  ]}
+                  onPress={recolherTudo}
+                  >
+             
+
               <Text style={styles.topActionText}>▼ Recolher tudo</Text>
             </TouchableOpacity>
           </>
