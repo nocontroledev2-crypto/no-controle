@@ -32,6 +32,30 @@ export async function saveExpense(expense: Expense): Promise<void> {
 }
 
 /**
+ * Atualiza uma despesa existente pelo ID
+ */
+export async function updateExpense(updatedExpense: Expense): Promise<void> {
+  const expenses = await getAllExpenses();
+
+  const updatedExpenses = expenses.map((expense) =>
+    expense.id === updatedExpense.id ? updatedExpense : expense
+  );
+
+  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedExpenses));
+}
+
+/**
+ * Exclui uma despesa pelo ID
+ */
+export async function deleteExpense(id: string): Promise<void> {
+  const expenses = await getAllExpenses();
+
+  const updatedExpenses = expenses.filter((expense) => expense.id !== id);
+
+  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedExpenses));
+}
+
+/**
  * Limpa todas as despesas (apenas para debug/desenvolvimento)
  */
 export async function clearExpenses(): Promise<void> {

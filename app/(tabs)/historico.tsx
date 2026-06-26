@@ -4,10 +4,16 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import { Expense, getAllExpenses } from "../storage/expenseStorage";
+import {
+  Expense,
+  deleteExpense,
+  getAllExpenses,
+  updateExpense,
+} from "../storage/expenseStorage";
 
 type Period =
   | "today"
@@ -19,8 +25,8 @@ type Period =
   | "lastYear"
   | "all"
   | "custom";
-  type ViewMode = "lancamentos" | "categorias";
 
+type ViewMode = "lancamentos" | "categorias";
 
 const CATEGORY_OPTIONS = [
   "Todas",
@@ -45,7 +51,6 @@ export default function Historico() {
 
   const [categoriaSelecionada, setCategoriaSelecionada] = useState("Todas");
 
-  // ✅ NOVO fluxo do personalizado
   const [showCustomRangeBox, setShowCustomRangeBox] = useState(false);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
@@ -53,10 +58,14 @@ export default function Historico() {
   const [startDateInput, setStartDateInput] = useState("");
   const [endDateInput, setEndDateInput] = useState("");
 
-  // ✅ expandir/recolher por dia
   const [collapsedDates, setCollapsedDates] = useState<Record<string, boolean>>(
     {}
   );
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValor, setEditValor] = useState("");
+  const [editCategoria, setEditCategoria] = useState("");
+  const [editData, setEditData] = useState("");
 
   const now = new Date();
 
@@ -69,11 +78,16 @@ export default function Historico() {
     return new Date(Number(ano), Number(mes) - 1, Number(dia));
   }
 
-  function formatMoney(valor: number) {
-    return valor.toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    });
+  function formatMoney(valor: number | null | undefined) {
+    const safeValue = Number(valor);
+
+    return (Number.isFinite(safeValue) ? safeValue : 0).toLocaleString(
+      "pt-BR",
+      {
+        style: "currency",
+        currency: "BRL",
+      }
+    );
   }
 
   function formatDateBR(dateStr: string) {
@@ -86,20 +100,51 @@ export default function Historico() {
     return date.toLocaleDateString("pt-BR");
   }
 
+  function parseValorMonetario(valorTexto: string) {
+    if (!valorTexto) return NaN;
+
+    let texto = valorTexto.trim().replace(/[R$\s]/g, "");
+
+    if (!texto) return NaN;
+
+    if (texto.includes(",")) {
+      texto = texto.replace(/\./g, "").replace(",", ".");
+    } else {
+      const partes = texto.split(".");
+
+      if (partes.length > 2) {
+        const decimal = partes.pop();
+        texto = partes.join("") + "." + decimal;
+      } else if (
+        partes.length === 2 &&
+        partes[1].length === 3 &&
+        partes[0].length <= 3
+      ) {
+        texto = partes.join("");
+      }
+    }
+
+    return Number(texto);
+  }
+
   function getStartOfWeek(date: Date) {
     const d = new Date(date);
-    const day = d.getDay(); // domingo = 0 ... sábado = 6
-    const diff = day === 0 ? -6 : 1 - day; // semana começa na segunda
+    const day = d.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+
     d.setDate(d.getDate() + diff);
     d.setHours(0, 0, 0, 0);
+
     return d;
   }
 
   function getEndOfWeek(date: Date) {
     const start = getStartOfWeek(date);
     const end = new Date(start);
+
     end.setDate(start.getDate() + 6);
     end.setHours(23, 59, 59, 999);
+
     return end;
   }
 
@@ -143,23 +188,92 @@ export default function Historico() {
      CARREGAR DADOS
   =============================== */
 
+  async function loadExpenses() {
+    const data = await getAllExpenses();
+
+    const normalized = (data || []).map((item: any) => {
+      const safeValue = Number(item.valor);
+
+      return {
+        ...item,
+        valor: Number.isFinite(safeValue) ? safeValue : 0,
+      };
+    });
+
+    const ordered = normalized.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
+    setExpenses(ordered);
+  }
+
   useFocusEffect(
     useCallback(() => {
-      async function loadExpenses() {
-        const data = await getAllExpenses();
-
-        const ordered = (data || []).sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() -
-            new Date(a.createdAt).getTime()
-        );
-
-        setExpenses(ordered);
-      }
-
       loadExpenses();
     }, [])
   );
+
+  /* ===============================
+     EXCLUIR / EDITAR
+  =============================== */
+
+  async function excluirRegistro(item: Expense) {
+    const mensagem = `Deseja excluir este lançamento?\n\n${formatMoney(
+      item.valor
+    )} — ${item.categoria}\nData: ${formatDateBR(item.data)}`;
+
+    const confirmado =
+      typeof window !== "undefined" ? window.confirm(mensagem) : true;
+
+    if (!confirmado) return;
+
+    await deleteExpense(item.id);
+    await loadExpenses();
+  }
+
+  function iniciarEdicao(item: Expense) {
+    setEditingId(item.id);
+    setEditValor(String(item.valor).replace(".", ","));
+    setEditCategoria(item.categoria);
+    setEditData(item.data);
+  }
+
+  function cancelarEdicao() {
+    setEditingId(null);
+    setEditValor("");
+    setEditCategoria("");
+    setEditData("");
+  }
+
+  async function salvarEdicao(item: Expense) {
+    const valorNumerico = parseValorMonetario(editValor);
+
+    if (!Number.isFinite(valorNumerico) || valorNumerico <= 0) {
+      alert("Informe um valor válido para a despesa.");
+      return;
+    }
+
+    if (!editCategoria) {
+      alert("Selecione uma categoria.");
+      return;
+    }
+
+    if (!editData) {
+      alert("Informe uma data válida.");
+      return;
+    }
+
+    await updateExpense({
+      ...item,
+      valor: Number(valorNumerico.toFixed(2)),
+      categoria: editCategoria,
+      data: editData,
+    });
+
+    cancelarEdicao();
+    await loadExpenses();
+  }
 
   /* ===============================
      FILTRO POR PERÍODO
@@ -192,8 +306,10 @@ export default function Historico() {
       if (period === "weekPrev") {
         const ref = new Date(now);
         ref.setDate(ref.getDate() - 7);
+
         const start = getStartOfWeek(ref);
         const end = getEndOfWeek(ref);
+
         return dNormalized >= start && dNormalized <= end;
       }
 
@@ -210,6 +326,7 @@ export default function Historico() {
           now.getMonth() - 1,
           1
         );
+
         return (
           d.getMonth() === prevMonthDate.getMonth() &&
           d.getFullYear() === prevMonthDate.getFullYear()
@@ -256,7 +373,7 @@ export default function Historico() {
 
       return false;
     });
-  }, [expenses, period, startDate, endDate, now]);
+  }, [expenses, period, startDate, endDate]);
 
   /* ===============================
      FILTRO POR CATEGORIA
@@ -283,6 +400,7 @@ export default function Historico() {
       if (!groups[item.data]) {
         groups[item.data] = [];
       }
+
       groups[item.data].push(item);
     });
 
@@ -292,69 +410,65 @@ export default function Historico() {
 
     return orderedDates.map((date) => {
       const items = groups[date];
+
       const totalDia = items.reduce(
-        (sum, item) => sum + Number(item.valor),
+        (sum, item) => sum + Number(item.valor || 0),
         0
       );
-      const qtdLancamentos = items.length;
 
       return {
         date,
         items,
         totalDia,
-        qtdLancamentos,
+        qtdLancamentos: items.length,
       };
     });
   }, [filteredExpenses]);
 
   /* ===============================
-   AGRUPAR POR CATEGORIA (modo categorias)
-   Percentual em relação ao total do período base
-=============================== */
+     AGRUPAR POR CATEGORIA
+  =============================== */
 
-const totalPeriodoBase = periodFilteredExpenses.reduce(
-  (sum, item) => sum + Number(item.valor),
-  0
-);
+  const totalPeriodoBase = periodFilteredExpenses.reduce(
+    (sum, item) => sum + Number(item.valor || 0),
+    0
+  );
 
   const groupedByCategory = useMemo(() => {
-  const groups: Record<
-    string,
-    {
-      total: number;
-      qtd: number;
-    }
-  > = {};
+    const groups: Record<
+      string,
+      {
+        total: number;
+        qtd: number;
+      }
+    > = {};
 
-  filteredExpenses.forEach((item) => {
-    if (!groups[item.categoria]) {
-      groups[item.categoria] = {
-        total: 0,
-        qtd: 0,
-      };
-    }
+    filteredExpenses.forEach((item) => {
+      if (!groups[item.categoria]) {
+        groups[item.categoria] = {
+          total: 0,
+          qtd: 0,
+        };
+      }
 
-    groups[item.categoria].total += Number(item.valor);
-    groups[item.categoria].qtd += 1;
-  });
+      groups[item.categoria].total += Number(item.valor || 0);
+      groups[item.categoria].qtd += 1;
+    });
 
-  return Object.entries(groups)
-    .map(([categoria, info]) => {
-      const percentual =
-        totalPeriodoBase > 0
-          ? (info.total / totalPeriodoBase) * 100
-          : 0;
+    return Object.entries(groups)
+      .map(([categoria, info]) => {
+        const percentual =
+          totalPeriodoBase > 0 ? (info.total / totalPeriodoBase) * 100 : 0;
 
-      return {
-        categoria,
-        total: info.total,
-        qtd: info.qtd,
-        percentual,
-      };
-    })
-    .sort((a, b) => b.total - a.total);
-}, [filteredExpenses, totalPeriodoBase]);
-
+        return {
+          categoria,
+          total: info.total,
+          qtd: info.qtd,
+          percentual,
+        };
+      })
+      .sort((a, b) => b.total - a.total);
+  }, [filteredExpenses, totalPeriodoBase]);
 
   /* ===============================
      CONTROLES GLOBAIS
@@ -362,22 +476,26 @@ const totalPeriodoBase = periodFilteredExpenses.reduce(
 
   function recolherTudo() {
     const novoEstado: Record<string, boolean> = {};
+
     groupedByDate.forEach((group) => {
       novoEstado[group.date] = true;
     });
+
     setCollapsedDates(novoEstado);
   }
 
   function expandirTudo() {
     const novoEstado: Record<string, boolean> = {};
+
     groupedByDate.forEach((group) => {
       novoEstado[group.date] = false;
     });
+
     setCollapsedDates(novoEstado);
   }
 
   /* ===============================
-     PERSONALIZADO — NOVO FLUXO
+     PERSONALIZADO
   =============================== */
 
   function abrirPersonalizado() {
@@ -418,7 +536,7 @@ const totalPeriodoBase = periodFilteredExpenses.reduce(
   =============================== */
 
   const totalPeriodo = filteredExpenses.reduce(
-    (sum, e) => sum + Number(e.valor),
+    (sum, e) => sum + Number(e.valor || 0),
     0
   );
 
@@ -436,46 +554,44 @@ const totalPeriodoBase = periodFilteredExpenses.reduce(
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Histórico</Text>
-      {/* ✅ MODO DE VISUALIZAÇÃO */}
-<View style={styles.viewModeRow}>
-  <TouchableOpacity
-    style={[
-      styles.viewModeButton,
-      viewMode === "lancamentos" && styles.viewModeButtonActive,
-    ]}
-    onPress={() => setViewMode("lancamentos")}
-  >
-    <Text
-      style={[
-        styles.viewModeText,
-        viewMode === "lancamentos" && styles.viewModeTextActive,
-      ]}
-    >
-      📋 Lançamentos
-    </Text>
-  </TouchableOpacity>
 
-  <TouchableOpacity
-    style={[
-      styles.viewModeButton,
-      viewMode === "categorias" && styles.viewModeButtonActive,
-    ]}
-    onPress={() => setViewMode("categorias")}
-  >
-    <Text
-      style={[
-        styles.viewModeText,
-        viewMode === "categorias" && styles.viewModeTextActive,
-      ]}
-    >
-      🏷️ Categorias
-    </Text>
-  </TouchableOpacity>
-</View>
+      <View style={styles.viewModeRow}>
+        <TouchableOpacity
+          style={[
+            styles.viewModeButton,
+            viewMode === "lancamentos" && styles.viewModeButtonActive,
+          ]}
+          onPress={() => setViewMode("lancamentos")}
+        >
+          <Text
+            style={[
+              styles.viewModeText,
+              viewMode === "lancamentos" && styles.viewModeTextActive,
+            ]}
+          >
+            📋 Lançamentos
+          </Text>
+        </TouchableOpacity>
 
-      {/* ✅ TOPO UNIFICADO */}
+        <TouchableOpacity
+          style={[
+            styles.viewModeButton,
+            viewMode === "categorias" && styles.viewModeButtonActive,
+          ]}
+          onPress={() => setViewMode("categorias")}
+        >
+          <Text
+            style={[
+              styles.viewModeText,
+              viewMode === "categorias" && styles.viewModeTextActive,
+            ]}
+          >
+            🏷️ Categorias
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.topControlsWrap}>
-        {/* PERÍODO */}
         <View style={styles.topControlBlock}>
           <TouchableOpacity
             style={styles.topControlButton}
@@ -520,7 +636,6 @@ const totalPeriodoBase = periodFilteredExpenses.reduce(
           )}
         </View>
 
-        {/* CATEGORIA */}
         <View style={styles.topControlBlock}>
           <TouchableOpacity
             style={styles.topControlButton}
@@ -551,27 +666,25 @@ const totalPeriodoBase = periodFilteredExpenses.reduce(
           )}
         </View>
 
-        {/* Ações globais só no modo lançamentos */}
-{viewMode === "lancamentos" && (
-  <>
-    <TouchableOpacity
-      style={styles.topActionButton}
-      onPress={expandirTudo}
-    >
-      <Text style={styles.topActionText}>▲ Expandir tudo</Text>
-    </TouchableOpacity>
+        {viewMode === "lancamentos" && (
+          <>
+            <TouchableOpacity
+              style={styles.topActionButton}
+              onPress={expandirTudo}
+            >
+              <Text style={styles.topActionText}>▲ Expandir tudo</Text>
+            </TouchableOpacity>
 
-    <TouchableOpacity
-      style={styles.topActionButton}
-      onPress={recolherTudo}
-    >
-      <Text style={styles.topActionText}>▼ Recolher tudo</Text>
-    </TouchableOpacity>
-  </>
-)}
+            <TouchableOpacity
+              style={styles.topActionButton}
+              onPress={recolherTudo}
+            >
+              <Text style={styles.topActionText}>▼ Recolher tudo</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
 
-      {/* ✅ intervalo custom selecionado */}
       {period === "custom" && startDate && endDate && (
         <>
           <Text style={styles.customPeriodText}>
@@ -583,83 +696,79 @@ const totalPeriodoBase = periodFilteredExpenses.reduce(
         </>
       )}
 
-      {/* ✅ NOVO BOX DO PERSONALIZADO */}
       {showCustomRangeBox && (
-  <View style={styles.calendarBox}>
-    <Text style={styles.calendarLabel}>
-      Selecione o intervalo personalizado
-    </Text>
+        <View style={styles.calendarBox}>
+          <Text style={styles.calendarLabel}>
+            Selecione o intervalo personalizado
+          </Text>
 
-    <View style={styles.customInputGroup}>
-      <Text style={styles.calendarInfo}>Data inicial</Text>
-      <input
-        type="date"
-        value={startDateInput}
-        onChange={(e: any) => setStartDateInput(e.target.value)}
-        style={
-          {
-            width: 220,
-            maxWidth: "100%",
-            padding: "8px 10px",
-            borderRadius: 8,
-            border: "1px solid #D9DDE3",
-            backgroundColor: "#FFF",
-            color: "#333",
-            fontSize: "14px",
-            boxSizing: "border-box",
-          } as any
-        }
-      />
-    </View>
+          <View style={styles.customInputGroup}>
+            <Text style={styles.calendarInfo}>Data inicial</Text>
+            <input
+              type="date"
+              value={startDateInput}
+              onChange={(e: any) => setStartDateInput(e.target.value)}
+              style={
+                {
+                  width: 220,
+                  maxWidth: "100%",
+                  padding: "8px 10px",
+                  borderRadius: 8,
+                  border: "1px solid #D9DDE3",
+                  backgroundColor: "#FFF",
+                  color: "#333",
+                  fontSize: "14px",
+                  boxSizing: "border-box",
+                } as any
+              }
+            />
+          </View>
 
-    <View style={styles.customInputGroup}>
-      <Text style={styles.calendarInfo}>Data final</Text>
-      <input
-        type="date"
-        value={endDateInput}
-        onChange={(e: any) => setEndDateInput(e.target.value)}
-        style={
-          {
-            width: 220,
-            maxWidth: "100%",
-            padding: "8px 10px",
-            borderRadius: 8,
-            border: "1px solid #D9DDE3",
-            backgroundColor: "#FFF",
-            color: "#333",
-            fontSize: "14px",
-            boxSizing: "border-box",
-          } as any
-        }
-      />
-    </View>
+          <View style={styles.customInputGroup}>
+            <Text style={styles.calendarInfo}>Data final</Text>
+            <input
+              type="date"
+              value={endDateInput}
+              onChange={(e: any) => setEndDateInput(e.target.value)}
+              style={
+                {
+                  width: 220,
+                  maxWidth: "100%",
+                  padding: "8px 10px",
+                  borderRadius: 8,
+                  border: "1px solid #D9DDE3",
+                  backgroundColor: "#FFF",
+                  color: "#333",
+                  fontSize: "14px",
+                  boxSizing: "border-box",
+                } as any
+              }
+            />
+          </View>
 
-    <View style={styles.customActionRow}>
-      <TouchableOpacity
-        style={styles.customActionButton}
-        onPress={aplicarPeriodoPersonalizado}
-      >
-        <Text style={styles.customActionText}>Aplicar</Text>
-      </TouchableOpacity>
+          <View style={styles.customActionRow}>
+            <TouchableOpacity
+              style={styles.customActionButton}
+              onPress={aplicarPeriodoPersonalizado}
+            >
+              <Text style={styles.customActionText}>Aplicar</Text>
+            </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.customActionButton}
-        onPress={cancelarPeriodoPersonalizado}
-      >
-        <Text style={styles.customActionText}>Cancelar</Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-)}
+            <TouchableOpacity
+              style={styles.customActionButton}
+              onPress={cancelarPeriodoPersonalizado}
+            >
+              <Text style={styles.customActionText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
-      {/* ✅ CARD RESUMO */}
       <View style={styles.summaryCard}>
         <Text style={styles.summaryLabel}>Total no período</Text>
 
         <View style={styles.summaryInlineRow}>
-          <Text style={styles.summaryValue}>
-            {formatMoney(totalPeriodo)}
-          </Text>
+          <Text style={styles.summaryValue}>{formatMoney(totalPeriodo)}</Text>
 
           <Text style={styles.summaryInlineMeta}>
             • {textoRegistrosResumo}
@@ -667,91 +776,190 @@ const totalPeriodoBase = periodFilteredExpenses.reduce(
         </View>
       </View>
 
-      
-   {/* ✅ LISTA / VISÃO POR CATEGORIA */}
-{viewMode === "lancamentos" ? (
-
-
-  groupedByDate.length === 0 ? (
-    <View style={styles.emptyBox}>
-      <Text style={styles.emptyText}>
-        Nenhum registro encontrado neste filtro.
-      </Text>
-      <Text style={styles.subEmptyText}>
-        Tente outro período ou outra categoria.
-      </Text>
-    </View>
-  ) : (
-    <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
-      {groupedByDate.map((group) => {
-        const collapsed = isDateCollapsed(group.date);
-
-        return (
-          <View key={group.date} style={styles.groupBox}>
-            <TouchableOpacity
-              style={styles.groupHeader}
-              onPress={() => toggleDateCollapse(group.date)}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.groupTitle}>
-                {formatDateBR(group.date)}
-              </Text>
-
-              <View style={styles.groupHeaderRight}>
-                {mostrarResumoPorDia && (
-                  <Text style={styles.groupMeta}>
-                    {formatMoney(group.totalDia)}
-                    {group.qtdLancamentos > 1
-                      ? ` • ${group.qtdLancamentos} registros`
-                      : ""}
-                  </Text>
-                )}
-
-                <Text style={styles.toggleIcon}>
-                  {collapsed ? "▼" : "▲"}
-                </Text>
-              </View>
-            </TouchableOpacity>
-
-            {!collapsed &&
-              group.items.map((item) => (
-                <View key={item.id} style={styles.card}>
-                  <Text style={styles.value}>
-                    {formatMoney(Number(item.valor))}
-                  </Text>
-
-                  <Text style={styles.category}>{item.categoria}</Text>
-                </View>
-              ))}
+      {viewMode === "lancamentos" ? (
+        groupedByDate.length === 0 ? (
+          <View style={styles.emptyBox}>
+            <Text style={styles.emptyText}>
+              Nenhum registro encontrado neste filtro.
+            </Text>
+            <Text style={styles.subEmptyText}>
+              Tente outro período ou outra categoria.
+            </Text>
           </View>
-        );
-      })}
-    </ScrollView>
-  )
-) : groupedByCategory.length === 0 ? (
-  <View style={styles.emptyBox}>
-    <Text style={styles.emptyText}>
-      Nenhuma categoria encontrada neste filtro.
-    </Text>
-    <Text style={styles.subEmptyText}>
-      Ajuste o período ou a categoria selecionada.
-    </Text>
-  </View>
-) : (
-  <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
-    {groupedByCategory.map((group) => (
-      <View key={group.categoria} style={styles.card}>
-        <Text style={styles.value}>{group.categoria}</Text>
+        ) : (
+          <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
+            {groupedByDate.map((group) => {
+              const collapsed = isDateCollapsed(group.date);
 
-        <Text style={styles.categorySummary}>
-          {formatMoney(group.total)} •{" "}
-          {group.qtd === 1 ? "1 registro" : `${group.qtd} registros`} •{" "}
-          {group.percentual.toFixed(0)}% do período
-        </Text>
-      </View>
-    ))}
-  </ScrollView>
-)}
+              return (
+                <View key={group.date} style={styles.groupBox}>
+                  <TouchableOpacity
+                    style={styles.groupHeader}
+                    onPress={() => toggleDateCollapse(group.date)}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.groupTitle}>
+                      {formatDateBR(group.date)}
+                    </Text>
+
+                    <View style={styles.groupHeaderRight}>
+                      {mostrarResumoPorDia && (
+                        <Text style={styles.groupMeta}>
+                          {formatMoney(group.totalDia)}
+                          {group.qtdLancamentos > 1
+                            ? ` • ${group.qtdLancamentos} registros`
+                            : ""}
+                        </Text>
+                      )}
+
+                      <Text style={styles.toggleIcon}>
+                        {collapsed ? "▼" : "▲"}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  {!collapsed &&
+                    group.items.map((item) => {
+                      const isEditing = editingId === item.id;
+
+                      return (
+                        <View key={item.id} style={styles.card}>
+                          {isEditing ? (
+                            <>
+                              <Text style={styles.editLabel}>Valor</Text>
+                              <TextInput
+                                style={styles.editInput}
+                                value={editValor}
+                                onChangeText={setEditValor}
+                                keyboardType="decimal-pad"
+                                placeholder="Ex: 123,45"
+                              />
+
+                              <Text style={styles.editLabel}>Categoria</Text>
+                              <select
+                                value={editCategoria}
+                                onChange={(e: any) =>
+                                  setEditCategoria(e.target.value)
+                                }
+                                style={styles.editInput as any}
+                              >
+                                <option value="">Selecione a categoria</option>
+                                {CATEGORY_OPTIONS.filter(
+                                  (cat) => cat !== "Todas"
+                                ).map((cat) => (
+                                  <option key={cat} value={cat}>
+                                    {cat}
+                                  </option>
+                                ))}
+                              </select>
+
+                              <Text style={styles.editLabel}>Data</Text>
+                              <input
+                                type="date"
+                                value={editData}
+                                onChange={(e: any) =>
+                                  setEditData(e.target.value)
+                                }
+                                style={
+                                  {
+                                    width: "100%",
+                                    padding: "10px 12px",
+                                    borderRadius: 8,
+                                    border: "1px solid #D9DDE3",
+                                    backgroundColor: "#FFF",
+                                    color: "#333",
+                                    fontSize: "14px",
+                                    boxSizing: "border-box",
+                                    marginBottom: 10,
+                                  } as any
+                                }
+                              />
+
+                              <View style={styles.editActionsRow}>
+                                <TouchableOpacity
+                                  style={styles.saveEditButton}
+                                  onPress={() => salvarEdicao(item)}
+                                >
+                                  <Text style={styles.saveEditButtonText}>
+                                    💾 Salvar
+                                  </Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                  style={styles.cancelEditButton}
+                                  onPress={cancelarEdicao}
+                                >
+                                  <Text style={styles.cancelEditButtonText}>
+                                    Cancelar
+                                  </Text>
+                                </TouchableOpacity>
+                              </View>
+                            </>
+                          ) : (
+                            <View style={styles.cardHeaderRow}>
+                              <View style={{ flex: 1 }}>
+                                <Text style={styles.value}>
+                                  {formatMoney(item.valor)}
+                                </Text>
+
+                                <Text style={styles.category}>
+                                  {item.categoria}
+                                </Text>
+                              </View>
+
+                              <View style={styles.cardActionsRow}>
+                                <TouchableOpacity
+                                  style={styles.editButton}
+                                  onPress={() => iniciarEdicao(item)}
+                                >
+                                  <Text style={styles.editButtonText}>
+                                    ✏️ Editar
+                                  </Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                  style={styles.deleteButton}
+                                  onPress={() => excluirRegistro(item)}
+                                >
+                                  <Text style={styles.deleteButtonText}>
+                                    🗑️ Excluir
+                                  </Text>
+                                </TouchableOpacity>
+                              </View>
+                            </View>
+                          )}
+                        </View>
+                      );
+                    })}
+                </View>
+              );
+            })}
+          </ScrollView>
+        )
+      ) : groupedByCategory.length === 0 ? (
+        <View style={styles.emptyBox}>
+          <Text style={styles.emptyText}>
+            Nenhuma categoria encontrada neste filtro.
+          </Text>
+          <Text style={styles.subEmptyText}>
+            Ajuste o período ou a categoria selecionada.
+          </Text>
+        </View>
+      ) : (
+        <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
+          {groupedByCategory.map((group) => (
+            <View key={group.categoria} style={styles.card}>
+              <Text style={styles.value}>{group.categoria}</Text>
+
+              <Text style={styles.categorySummary}>
+                {formatMoney(group.total)} •{" "}
+                {group.qtd === 1 ? "1 registro" : `${group.qtd} registros`} •{" "}
+                {group.percentual.toFixed(0)}% do período
+              </Text>
+            </View>
+          ))}
+        </ScrollView>
+      )}
     </View>
   );
 }
@@ -772,54 +980,54 @@ const styles = StyleSheet.create({
   },
 
   topControlsWrap: {
-  flexDirection: "row",
-  flexWrap: "wrap",
-  justifyContent: "flex-start",
-  alignItems: "flex-start",
-  gap: 10,
-  marginBottom: 10,
-},
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+    gap: 10,
+    marginBottom: 10,
+  },
 
-topControlBlock: {
-  width: 180,
-},
+  topControlBlock: {
+    width: 180,
+  },
 
-topControlButton: {
-  backgroundColor: "#FFF",
-  borderWidth: 0.5,
-  borderColor: "#eee",
-  borderRadius: 10,
-  paddingVertical: 8,
-  paddingHorizontal: 12,
-  alignItems: "center",
-  justifyContent: "center",
-  minHeight: 40,
-},
+  topControlButton: {
+    backgroundColor: "#FFF",
+    borderWidth: 0.5,
+    borderColor: "#eee",
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 40,
+  },
 
-topControlText: {
-  color: "#555",
-  fontSize: 13,
-  fontWeight: "600",
-},
+  topControlText: {
+    color: "#555",
+    fontSize: 13,
+    fontWeight: "600",
+  },
 
-topActionButton: {
-  backgroundColor: "#FFF",
-  borderWidth: 0.5,
-  borderColor: "#eee",
-  borderRadius: 10,
-  paddingVertical: 8,
-  paddingHorizontal: 12,
-  alignItems: "center",
-  justifyContent: "center",
-  minHeight: 40,
-  width: 180,
-},
+  topActionButton: {
+    backgroundColor: "#FFF",
+    borderWidth: 0.5,
+    borderColor: "#eee",
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 40,
+    width: 180,
+  },
 
-topActionText: {
-  fontSize: 13,
-  color: "#555",
-  fontWeight: "600",
-},
+  topActionText: {
+    fontSize: 13,
+    color: "#555",
+    fontWeight: "600",
+  },
 
   customPeriodText: {
     textAlign: "center",
@@ -985,6 +1193,18 @@ topActionText: {
     borderColor: "#eee",
   },
 
+  cardHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+
+  cardActionsRow: {
+    flexDirection: "row",
+    gap: 8,
+    alignItems: "center",
+  },
+
   value: {
     fontSize: 18,
     fontWeight: "bold",
@@ -998,44 +1218,126 @@ topActionText: {
   },
 
   categorySummary: {
-  fontSize: 14,
-  color: "#555",
-  marginTop: 6,
-},
+    fontSize: 14,
+    color: "#555",
+    marginTop: 6,
+  },
+
+  editButton: {
+    backgroundColor: "#F0FAF5",
+    borderWidth: 0.5,
+    borderColor: "#BFE7D2",
+    borderRadius: 10,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+  },
+
+  editButtonText: {
+    color: "#0A8F55",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+
+  deleteButton: {
+    backgroundColor: "#FFF5F5",
+    borderWidth: 0.5,
+    borderColor: "#F3C2C2",
+    borderRadius: 10,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+  },
+
+  deleteButtonText: {
+    color: "#C0392B",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+
+  editLabel: {
+    fontSize: 13,
+    color: "#555",
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+
+  editInput: {
+    backgroundColor: "#F9FAFB",
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 10,
+    fontSize: 14,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+
+  editActionsRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 4,
+  },
+
+  saveEditButton: {
+    backgroundColor: "#0A8F55",
+    borderRadius: 10,
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+  },
+
+  saveEditButtonText: {
+    color: "#FFF",
+    fontSize: 13,
+    fontWeight: "700",
+  },
+
+  cancelEditButton: {
+    backgroundColor: "#FFF",
+    borderWidth: 0.5,
+    borderColor: "#ddd",
+    borderRadius: 10,
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+  },
+
+  cancelEditButtonText: {
+    color: "#555",
+    fontSize: 13,
+    fontWeight: "600",
+  },
 
   customInputGroup: {
-  width: "100%",
-  marginBottom: 10,
-},
-viewModeRow: {
-  flexDirection: "row",
-  gap: 10,
-  marginBottom: 10,
-},
+    width: "100%",
+    marginBottom: 10,
+  },
 
-viewModeButton: {
-  flex: 1,
-  backgroundColor: "#FFF",
-  borderWidth: 0.5,
-  borderColor: "#eee",
-  borderRadius: 10,
-  paddingVertical: 8,
-  paddingHorizontal: 12,
-  alignItems: "center",
-},
+  viewModeRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 10,
+  },
 
-viewModeButtonActive: {
-  borderColor: "#0A8F55",
-  borderWidth: 1,
-},
+  viewModeButton: {
+    flex: 1,
+    backgroundColor: "#FFF",
+    borderWidth: 0.5,
+    borderColor: "#eee",
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    alignItems: "center",
+  },
 
-viewModeText: {
-  fontSize: 13,
-  color: "#555",
-  fontWeight: "600",
-},
+  viewModeButtonActive: {
+    borderColor: "#0A8F55",
+    borderWidth: 1,
+  },
 
-viewModeTextActive: {
-  color: "#0A8F55",
-},
+  viewModeText: {
+    fontSize: 13,
+    color: "#555",
+    fontWeight: "600",
+  },
+
+  viewModeTextActive: {
+    color: "#0A8F55",
+  },
 });
