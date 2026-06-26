@@ -39,11 +39,55 @@ export default function Registrar() {
 
     const [dia, mes, ano] = partes;
 
-    return new Date(
+    const parsedDate = new Date(
       Number(ano),
       Number(mes) - 1,
       Number(dia)
     );
+
+    if (isNaN(parsedDate.getTime())) {
+      return new Date();
+    }
+
+    return parsedDate;
+  }
+
+  /* ✅ PARSE VALOR MONETÁRIO BR/PT-BR */
+  function parseValorMonetario(valorTexto: string) {
+    if (!valorTexto) return NaN;
+
+    let texto = valorTexto
+      .trim()
+      .replace(/[R$\s]/g, "");
+
+    if (!texto) return NaN;
+
+    /*
+      Regras:
+      - "123,55"   -> 123.55
+      - "1.234,56" -> 1234.56
+      - "123.55"   -> 123.55
+      - "1.234"    -> 1234
+    */
+
+    if (texto.includes(",")) {
+      texto = texto.replace(/\./g, "").replace(",", ".");
+    } else {
+      const partes = texto.split(".");
+
+      if (partes.length > 2) {
+        const decimal = partes.pop();
+        texto = partes.join("") + "." + decimal;
+      } else if (
+        partes.length === 2 &&
+        partes[1].length === 3 &&
+        partes[0].length <= 3
+      ) {
+        texto = partes.join("");
+      }
+    }
+
+    return Number(texto);
   }
 
   /* 🎤 animação */
@@ -95,9 +139,17 @@ export default function Registrar() {
 
       const parsed = parseSpeech(textoFalado);
 
-      if (parsed.valor !== null) setValor(String(parsed.valor));
+      if (parsed.valor !== null) {
+        const valorVoz = Number(parsed.valor);
+
+        if (Number.isFinite(valorVoz)) {
+          setValor(String(valorVoz).replace(".", ","));
+        }
+      }
+
       setCategoria(parsed.categoria);
       setData(parsed.data);
+      setDataTexto(formatarData(parsed.data));
 
       setState("confirm");
     };
@@ -113,22 +165,37 @@ export default function Registrar() {
   }
 
   async function salvarDespesa() {
-    if (!valor || !categoria) {
-      alert("Preencha valor e categoria");
+    const valorNumerico = parseValorMonetario(valor);
+
+    if (!Number.isFinite(valorNumerico) || valorNumerico <= 0) {
+      alert("Informe um valor válido para a despesa.");
       return;
     }
 
+    if (!categoria) {
+      alert("Selecione uma categoria.");
+      return;
+    }
+
+    const dataFinal =
+      data instanceof Date && !isNaN(data.getTime())
+        ? data
+        : new Date();
+
     await saveExpense({
       id: Date.now().toString(),
-      valor: Number(valor),
+      valor: Number(valorNumerico.toFixed(2)),
       categoria,
-      data: data.toISOString().split("T")[0],
+      data: dataFinal.toISOString().split("T")[0],
       createdAt: new Date().toISOString(),
     });
 
+    const hoje = new Date();
+
     setValor("");
     setCategoria("");
-    setData(new Date());
+    setData(hoje);
+    setDataTexto(formatarData(hoje));
     setState("idle");
 
     setTimeout(() => {
@@ -173,41 +240,41 @@ export default function Registrar() {
             ref={valorInputRef}
             style={styles.input}
             value={valor}
-            keyboardType="numeric"
+            keyboardType="decimal-pad"
             onChangeText={setValor}
+            placeholder="Ex: 123,45"
           />
 
           <Text style={styles.label}>Categoria</Text>
-          
-          
-<select
-  value={categoria}
-  onChange={(e) => setCategoria(e.target.value)}
-  style={styles.input}
->
-  <option value="">Selecione a categoria</option>
 
-  <option>Alimentação</option>
-  <option>Transporte</option>
-  <option>Moradia</option>
-  <option>Contas</option>
-  <option>Assinaturas</option>
-  <option>Saúde</option>
-  <option>Serviços</option>
-  <option>Cartão de crédito</option>
-  <option>Outros</option>
-</select>
+          <select
+            value={categoria}
+            onChange={(e) => setCategoria(e.target.value)}
+            style={styles.input}
+          >
+            <option value="">Selecione a categoria</option>
+
+            <option>Alimentação</option>
+            <option>Transporte</option>
+            <option>Moradia</option>
+            <option>Contas</option>
+            <option>Assinaturas</option>
+            <option>Saúde</option>
+            <option>Serviços</option>
+            <option>Cartão de crédito</option>
+            <option>Outros</option>
+          </select>
 
           <Text style={styles.label}>Data</Text>
           <TextInput
-  style={styles.input}
-  value={dataTexto}
-  onChangeText={(text) => {
-    setDataTexto(text);
-    setData(parseData(text));
-  }}
-  placeholder="dd/mm/aaaa"
-/>
+            style={styles.input}
+            value={dataTexto}
+            onChangeText={(text) => {
+              setDataTexto(text);
+              setData(parseData(text));
+            }}
+            placeholder="dd/mm/aaaa"
+          />
 
           {state === "confirm" ? (
             <>
@@ -266,16 +333,14 @@ const styles = StyleSheet.create({
   },
   label: { fontSize: 14, marginBottom: 4 },
   input: {
-  backgroundColor: "#F9FAFB",
-  padding: 12,
-  borderRadius: 10,
-  marginBottom: 12,
-  fontSize: 14,
-  borderWidth: 1,
-  borderColor: "#E5E7EB", // borda elegante
-
-}
-,
+    backgroundColor: "#F9FAFB",
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 12,
+    fontSize: 14,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
   voiceContainer: { alignItems: "center", marginBottom: 24 },
   micIcon: { fontSize: 48, marginBottom: 8 },
   voiceText: { fontSize: 16, color: "#0A8F55", marginBottom: 8 },
