@@ -26,8 +26,19 @@ export async function getAllExpenses(): Promise<Expense[]> {
  * Salva uma nova despesa
  */
 export async function saveExpense(expense: Expense): Promise<void> {
+  const safeValue = Number(expense.valor);
+
+  if (!Number.isFinite(safeValue) || safeValue <= 0) {
+    throw new Error("Valor inválido para despesa.");
+  }
+
   const expenses = await getAllExpenses();
-  expenses.push(expense);
+
+  expenses.push({
+    ...expense,
+    valor: Number(safeValue.toFixed(2)),
+  });
+
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
 }
 
