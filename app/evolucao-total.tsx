@@ -572,6 +572,37 @@ if (numericValue >= maxValue * 0.8) {
   ],
 };
 
+const barChartData = {
+  labels: safeChartLabels,
+  datasets: [
+    {
+      data: safeChartValues.map((value) => {
+        const numericValue = Number(value);
+
+        if (!Number.isFinite(numericValue)) {
+          return 0;
+        }
+
+        // Arredonda os valores exibidos no topo das colunas
+        return Number(numericValue.toFixed(0));
+      }),
+
+      colors: safeChartValues.map((value) => {
+        const numericValue = Number(value);
+
+        let color = "#CFE8DB"; // baixo
+
+        if (numericValue >= maxValue * 0.8) {
+          color = "#043D27"; // top
+        } else if (numericValue >= maxValue * 0.4) {
+          color = "#0A8F55"; // médio
+        }
+
+        return () => color;
+      }),
+    },
+  ],
+};
     
     const topLabelIndexes = safeChartValues
   .map((value, index) => ({
@@ -876,7 +907,7 @@ if (numericValue >= maxValue * 0.8) {
   />
 ) : (
   <BarChart
-    data={chartData}
+    data={barChartData}
     width={chartWidth}
     height={220}
     yAxisLabel="R$ "
