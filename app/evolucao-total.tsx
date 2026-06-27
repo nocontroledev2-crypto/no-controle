@@ -551,6 +551,12 @@ export default function EvolucaoTotal() {
  const safeChartValues = chartValues.length > 0 ? chartValues : [0];
 
  const isDenseChart = safeChartValues.length > 12;
+ const isBarBlockedOnMobile = isMobile && isDenseChart;
+ useEffect(() => {
+  if (isBarBlockedOnMobile && chartType === "bar") {
+    setChartType("line");
+  }
+}, [isBarBlockedOnMobile, chartType]);
 
 const shouldUseHorizontalScroll =
   !isDesktop && isDenseChart;
@@ -571,7 +577,7 @@ const chartWidth = shouldUseHorizontalScroll
   : baseChartWidth;
   const chartHeight = isMobile ? 210 : 220;
 
-  const showBarValuesOnTop = !isDenseChart;
+  const showBarValuesOnTop = !(isMobile && isDenseChart);
 
  const totalGrafico = chartValues.reduce((sum, value) => sum + value, 0);
  const todayValue = last7DaysData[6] ?? 0;
@@ -640,6 +646,14 @@ const barChartData = {
   .sort((a, b) => b.value - a.value)
   .slice(0, 5)
   .map((item) => item.index);
+
+  const mobileBarHighlights = topLabelIndexes
+  .filter((index) => Number(safeChartValues[index]) > 0)
+  .slice(0, 3)
+  .map((index) => ({
+    label: safeChartLabels[index],
+    value: Number(safeChartValues[index]),
+  }));
  
   
 
@@ -853,6 +867,7 @@ const barChartData = {
     </Text>
   </TouchableOpacity>
 
+  {!isBarBlockedOnMobile && (
   <TouchableOpacity
     style={[
       styles.chartTypeButton,
@@ -869,12 +884,19 @@ const barChartData = {
       📊 Colunas
     </Text>
   </TouchableOpacity>
+)}
+
+
 </View>
-    {shouldUseHorizontalScroll && (
+    
+ 
+
+{shouldUseHorizontalScroll && (
   <Text style={styles.scrollHint}>
     ↔ Arraste o gráfico para ver mais dias
   </Text>
 )}
+
     <View style={[styles.chartBox, isMobile && styles.chartBoxMobile]}>
     <ScrollView
     horizontal={shouldUseHorizontalScroll}
@@ -994,6 +1016,9 @@ const labelX = Math.min(
 }}
     fromZero
     showValuesOnTopOfBars={showBarValuesOnTop}
+
+   
+
     withCustomBarColorFromData
     flatColor
 
@@ -1263,6 +1288,7 @@ scrollHint: {
   color: "#888",
   marginBottom: 6,
 },
+
 
 
 });

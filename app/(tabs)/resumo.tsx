@@ -255,6 +255,45 @@ setExpenses(normalizedData);
     .sort((a, b) => b.valor - a.valor)
     .slice(0, 3);
 
+
+    function getInsightHoje() {
+  const quantidade = filtered.length;
+
+  if (quantidade === 0) {
+    return {
+      principal: "Nenhum gasto registrado hoje ainda.",
+      detalhe: "Quando registrar, seu painel vai mostrar os destaques do dia.",
+    };
+  }
+
+  const categoriaPrincipal = topCategorias[0]?.[0];
+  const valorCategoriaPrincipal = topCategorias[0]?.[1] || 0;
+  const maiorGasto = topGastos[0];
+
+  if (quantidade === 1) {
+    return {
+      principal: "Primeiro registro de hoje.",
+      detalhe: categoriaPrincipal
+        ? `Você começou o dia com ${categoriaPrincipal}: ${formatMoney(total)}.`
+        : `Valor registrado: ${formatMoney(total)}.`,
+    };
+  }
+
+  if (categoriaPrincipal && maiorGasto) {
+    return {
+      principal: `Hoje você registrou ${quantidade} gastos.`,
+      detalhe: `Categoria em destaque: ${categoriaPrincipal} (${formatMoney(
+        valorCategoriaPrincipal
+      )}). Maior gasto: ${formatMoney(maiorGasto.valor)}.`,
+    };
+  }
+
+  return {
+    principal: `Hoje você registrou ${quantidade} gastos.`,
+    detalhe: `Total do dia até agora: ${formatMoney(total)}.`,
+  };
+}
+
     function aplicarPeriodoPersonalizado() {
   if (!startDateInput || !endDateInput) {
     alert("Selecione a data inicial e a data final.");
@@ -475,7 +514,19 @@ function cancelarPeriodoPersonalizado() {
 </Card>
 
 
-        <Card title="📊 Média diária" value={formatMoney(media)} />
+        {period === "today" ? (
+  <Card title="🧭 Hoje em foco">
+    <Text style={styles.insightMain}>
+      {getInsightHoje().principal}
+    </Text>
+
+    <Text style={styles.insightDetail}>
+      {getInsightHoje().detalhe}
+    </Text>
+  </Card>
+) : (
+  <Card title="📊 Média diária" value={formatMoney(media)} />
+)}
       </View>
 
       <View style={styles.row}>
@@ -750,4 +801,19 @@ calendarButtonText: {
   color: "#555",
   fontWeight: "600",
 },
+
+insightMain: {
+  fontSize: 15,
+  fontWeight: "700",
+  color: "#333",
+  marginTop: 6,
+},
+
+insightDetail: {
+  fontSize: 12,
+  color: "#777",
+  marginTop: 6,
+  lineHeight: 16,
+},
+
 });

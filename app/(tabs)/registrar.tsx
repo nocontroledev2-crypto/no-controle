@@ -295,25 +295,25 @@ export default function Registrar() {
             </>
           ) : (
             <>
-              <TouchableOpacity
-                style={styles.voiceButton}
-                onPress={iniciarEscuta}
-              >
-                <Text style={styles.confirmText}>
-                  🎤 Falar despesa
-                </Text>
-              </TouchableOpacity>
-
               {valor && categoria && (
-                <TouchableOpacity
-                  style={styles.confirmButton}
-                  onPress={salvarDespesa}
-                >
-                  <Text style={styles.confirmText}>
-                    💾 Salvar despesa
-                  </Text>
-                </TouchableOpacity>
-              )}
+  <TouchableOpacity
+    style={styles.confirmButton}
+    onPress={salvarDespesa}
+  >
+    <Text style={styles.confirmText}>
+      💾 Salvar despesa
+    </Text>
+  </TouchableOpacity>
+)}
+
+<TouchableOpacity
+  style={styles.voiceButton}
+  onPress={iniciarEscuta}
+>
+  <Text style={styles.confirmText}>
+    🎤 Falar despesa
+  </Text>
+</TouchableOpacity>
             </>
           )}
         </>

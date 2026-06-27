@@ -709,6 +709,20 @@ export default function Historico() {
 
         {viewMode === "lancamentos" && (
           <>
+
+                 <TouchableOpacity
+                  style={[
+                  styles.topActionButton,
+                  isMobile && { width: "100%" },
+                  ]}
+                  onPress={recolherTudo}
+                  >
+             
+
+              <Text style={styles.topActionText}>▼ Recolher tudo</Text>
+            </TouchableOpacity>
+
+
             
              <TouchableOpacity
               style={[
@@ -722,17 +736,7 @@ export default function Historico() {
               <Text style={styles.topActionText}>▲ Expandir tudo</Text>
             </TouchableOpacity>
 
-                  <TouchableOpacity
-                  style={[
-                  styles.topActionButton,
-                  isMobile && { width: "100%" },
-                  ]}
-                  onPress={recolherTudo}
-                  >
-             
-
-              <Text style={styles.topActionText}>▼ Recolher tudo</Text>
-            </TouchableOpacity>
+            
           </>
         )}
       </View>
