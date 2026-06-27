@@ -5,6 +5,7 @@ import {
 } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -36,9 +37,12 @@ export default function EvolucaoTotal() {
   const [startDateInput, setStartDateInput] = useState("");
   const [endDateInput, setEndDateInput] = useState("");
 
-  const now = new Date();
-  const { width } = useWindowDimensions();
-  const chartWidth = width >= 768 ? width - 110 : width - 48;
+ const now = new Date();
+ const { width } = useWindowDimensions();
+
+ const isMobile = width < 480;
+ const isTablet = width >= 480 && width < 900;
+ const isDesktop = width >= 900;
 
   useFocusEffect(
     useCallback(() => {
@@ -543,8 +547,28 @@ export default function EvolucaoTotal() {
     chartValues = currentYearData;
   }
 
-  const safeChartLabels = chartLabels.length > 0 ? chartLabels : ["Sem dados"];
-  const safeChartValues = chartValues.length > 0 ? chartValues : [0];
+ const safeChartLabels = chartLabels.length > 0 ? chartLabels : ["Sem dados"];
+ const safeChartValues = chartValues.length > 0 ? chartValues : [0];
+
+ const isDenseChart = safeChartValues.length > 12;
+
+const shouldUseHorizontalScroll =
+  !isDesktop && isDenseChart;
+
+const baseChartWidth = isMobile
+  ? width - 24
+  : isTablet
+  ? Math.min(width - 48, 760)
+  : 860;
+
+const pointWidth =
+  chartType === "bar"
+    ? 42
+    : 34;
+
+const chartWidth = shouldUseHorizontalScroll
+  ? Math.max(baseChartWidth, safeChartValues.length * pointWidth)
+  : baseChartWidth;
 
  const totalGrafico = chartValues.reduce((sum, value) => sum + value, 0);
  const todayValue = last7DaysData[6] ?? 0;
@@ -656,8 +680,14 @@ const barChartData = {
     setEndDateInput("");
   }
 
-  return (
-    <View style={styles.container}>
+     return (
+     <View
+     style={[
+      styles.container,
+      isMobile && styles.containerMobile,
+      isDesktop && styles.containerDesktop,
+     ]}
+     >
       <TouchableOpacity onPress={() => router.back()}>
         <Text style={styles.backText}>← Voltar</Text>
       </TouchableOpacity>
@@ -838,8 +868,13 @@ const barChartData = {
   </TouchableOpacity>
 </View>
 
-<View style={styles.chartBox}>
-  {chartType === "line" ? (
+    <View style={styles.chartBox}>
+    <ScrollView
+    horizontal={shouldUseHorizontalScroll}
+    showsHorizontalScrollIndicator={shouldUseHorizontalScroll}
+    contentContainerStyle={styles.chartScrollContent}
+    >
+    {chartType === "line" ? (
 
     <LineChart
     data={chartData}
@@ -942,9 +977,10 @@ const barChartData = {
 
   />
 )}
-      </View>
-    </View>
-  );
+  </ScrollView>
+</View>
+</View>
+);
 }
 
 function labelPeriod(p: string) {
@@ -974,10 +1010,23 @@ function labelPeriod(p: string) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#F7F8FA",
-    padding: 16,
-  },
+  flex: 1,
+  backgroundColor: "#F7F8FA",
+  paddingHorizontal: 12,
+  paddingTop: 16,
+  width: "100%",
+},
+
+containerMobile: {
+  paddingHorizontal: 8,
+  paddingTop: 12,
+},
+
+containerDesktop: {
+  alignSelf: "center",
+  width: "100%",
+  maxWidth: 920,
+},
 
   backText: {
     fontSize: 14,
@@ -1082,16 +1131,20 @@ const styles = StyleSheet.create({
   backgroundColor: "#FFFFFF",
   borderRadius: 16,
   paddingVertical: 12,
-  alignItems: "center",
+  alignItems: "stretch",
   width: "100%",
   overflow: "hidden",
 
-  // ✅ sombra premium
   shadowColor: "#000",
   shadowOpacity: 0.05,
   shadowRadius: 8,
   elevation: 3,
 },
+
+ chartScrollContent: {
+  alignItems: "center",
+  justifyContent: "center",
+  }, 
 
   chart: {
     borderRadius: 16,
