@@ -569,6 +569,9 @@ const pointWidth =
 const chartWidth = shouldUseHorizontalScroll
   ? Math.max(baseChartWidth, safeChartValues.length * pointWidth)
   : baseChartWidth;
+  const chartHeight = isMobile ? 210 : 220;
+
+  const showBarValuesOnTop = !isDenseChart;
 
  const totalGrafico = chartValues.reduce((sum, value) => sum + value, 0);
  const todayValue = last7DaysData[6] ?? 0;
@@ -867,8 +870,12 @@ const barChartData = {
     </Text>
   </TouchableOpacity>
 </View>
-
-    <View style={styles.chartBox}>
+    {shouldUseHorizontalScroll && (
+  <Text style={styles.scrollHint}>
+    ↔ Arraste o gráfico para ver mais dias
+  </Text>
+)}
+    <View style={[styles.chartBox, isMobile && styles.chartBoxMobile]}>
     <ScrollView
     horizontal={shouldUseHorizontalScroll}
     showsHorizontalScrollIndicator={shouldUseHorizontalScroll}
@@ -879,7 +886,7 @@ const barChartData = {
     <LineChart
     data={chartData}
     width={chartWidth}
-    height={220}
+    height={chartHeight}
     yAxisLabel="R$ "
     chartConfig={{
       backgroundColor: "#FFFFFF",
@@ -944,7 +951,7 @@ const barChartData = {
   <BarChart
     data={barChartData}
     width={chartWidth}
-    height={220}
+    height={chartHeight}
     yAxisLabel="R$ "
     yAxisSuffix=""
     chartConfig={{
@@ -965,7 +972,7 @@ const barChartData = {
   },
 }}
     fromZero
-    showValuesOnTopOfBars
+    showValuesOnTopOfBars={showBarValuesOnTop}
     withCustomBarColorFromData
     flatColor
 
@@ -1223,4 +1230,18 @@ chartTypeText: {
 chartTypeTextActive: {
   color: "#0A8F55",
 },
+
+chartBoxMobile: {
+  paddingHorizontal: 4,
+  paddingVertical: 10,
+},
+
+scrollHint: {
+  textAlign: "center",
+  fontSize: 11,
+  color: "#888",
+  marginBottom: 6,
+},
+
+
 });
