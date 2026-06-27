@@ -922,22 +922,43 @@ const barChartData = {
         return null;
       }
 
-      return (
-        <SvgText
-          key={`dot-label-${index}`}
-          x={x}
-          y={y - 10}
-          fill={isTodayPoint ? "#0A8F55" : "#333"}
-          fontSize={isTodayPoint ? "11" : "10"}
-          fontWeight={isTodayPoint ? "700" : "600"}
-          textAnchor="middle"
-        >
-          {isTodayPoint
-            ? `HOJE ${formatShortMoney(value)}`
-            : formatShortMoney(value)}
-        </SvgText>
-      );
-    }}
+      
+    const isTooCloseToTop = y < 28;
+
+const rawLabelY = isTooCloseToTop ? y + 22 : y - 12;
+
+const labelY = Math.min(
+  Math.max(rawLabelY, 16),
+  chartHeight - 8
+);
+
+const horizontalPadding = isTodayPoint ? 56 : 40;
+
+const labelX = Math.min(
+  Math.max(x, horizontalPadding),
+  chartWidth - horizontalPadding
+);
+
+  return (
+    <SvgText
+      key={`dot-label-${index}`}
+      x={labelX}
+      y={labelY}
+      fill={isTodayPoint ? "#0A8F55" : "#333"}
+      fontSize={isTodayPoint ? "11" : "10"}
+      fontWeight={isTodayPoint ? "700" : "600"}
+      textAnchor="middle"
+    >
+      {isTodayPoint
+        ? `HOJE ${formatShortMoney(value)}`
+        : formatShortMoney(value)}
+    </SvgText>
+  );
+}}
+
+
+
+
     onDataPointClick={({ value, index }: any) => {
       setSelectedPoint({
         label: safeChartLabels[index] || "Ponto",

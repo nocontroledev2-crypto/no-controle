@@ -242,7 +242,7 @@ export default function Registrar() {
             value={valor}
             keyboardType="decimal-pad"
             onChangeText={setValor}
-            placeholder="Ex: 123,45"
+            placeholder="Digite o valor"
           />
 
           <Text style={styles.label}>Categoria</Text>
