@@ -833,8 +833,13 @@ const barChartData = {
       )}
 
       <View style={styles.totalRow}>
-  <Text style={styles.totalLabel}>Total no gráfico: </Text>
-  <Text style={styles.totalValue}>{formatMoney(totalGrafico)}</Text>
+  <Text style={styles.totalLabel}>
+    {period === "today" ? "Total últimos 7 dias: " : "Total no gráfico: "}
+  </Text>
+
+  <Text style={styles.totalValue}>
+    {formatMoney(totalGrafico)}
+  </Text>
 </View>
 
 {period === "today" && (

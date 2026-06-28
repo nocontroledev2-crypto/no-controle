@@ -1,16 +1,37 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
+
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
+
 import { getAllExpenses } from "../storage/expenseStorage";
 
 function parseDateSafe(dateStr: string) {
   const [ano, mes, dia] = dateStr.split("-");
   return new Date(Number(ano), Number(mes) - 1, Number(dia));
+}
+
+function getStartOfWeek(date: Date) {
+  const d = new Date(date);
+  const day = d.getDay(); // domingo = 0
+  const diff = day === 0 ? -6 : 1 - day; // segunda-feira como início
+  d.setDate(d.getDate() + diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function getEndOfWeek(date: Date) {
+  const start = getStartOfWeek(date);
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+  end.setHours(23, 59, 59, 999);
+  return end;
 }
 
 /* =============================== */
@@ -55,6 +76,8 @@ export default function Resumo() {
     
 
     const now = new Date();
+    const { width } = useWindowDimensions();
+    const isMobile = width < 480;
 
   
    useFocusEffect(
@@ -97,7 +120,9 @@ setExpenses(normalizedData);
 
   const filtered = useMemo(() => {
     return expenses.filter((e) => {
-      const d = parseDateSafe(e.data);
+        const d = parseDateSafe(e.data);
+        d.setHours(0, 0, 0, 0);
+        d.setHours(0, 0, 0, 0);
 
       
 
@@ -111,20 +136,21 @@ setExpenses(normalizedData);
 
 
       if (period === "week") {
-        const start = new Date(now);
-        start.setDate(now.getDate() - now.getDay());
-        const end = new Date(start);
-        end.setDate(start.getDate() + 6);
-        return d >= start && d <= end;
-      }
+        const start = getStartOfWeek(now);
+        const end = getEndOfWeek(now);
 
-      if (period === "weekPrev") {
-        const start = new Date(now);
-        start.setDate(now.getDate() - now.getDay() - 7);
-        const end = new Date(start);
-        end.setDate(start.getDate() + 6);
         return d >= start && d <= end;
-      }
+       }
+
+        if (period === "weekPrev") {
+        const weekReference = new Date(now);
+        weekReference.setDate(now.getDate() - 7);
+
+        const start = getStartOfWeek(weekReference);
+        const end = getEndOfWeek(weekReference);
+
+        return d >= start && d <= end;
+         }
 
       if (period === "month") {
         return (
@@ -178,12 +204,14 @@ setExpenses(normalizedData);
 
 
       if (period === "week") {
-        const start = new Date(now);
-        start.setDate(now.getDate() - now.getDay() - 7);
-        const end = new Date(start);
-        end.setDate(start.getDate() + 6);
-        return d >= start && d <= end;
-      }
+  const weekReference = new Date(now);
+  weekReference.setDate(now.getDate() - 7);
+
+  const start = getStartOfWeek(weekReference);
+  const end = getEndOfWeek(weekReference);
+
+  return d >= start && d <= end;
+}
 
       if (period === "month") {
         return (
@@ -323,7 +351,8 @@ function cancelarPeriodoPersonalizado() {
   /* ============================ */
 
   return (
-    <View style={styles.container}>
+  <View style={[styles.container, isMobile && styles.containerMobile]}>
+
       <Text style={styles.title}>NO CONTROLE</Text>
 
       {/* ✅ SELECTOR */}
@@ -471,10 +500,20 @@ function cancelarPeriodoPersonalizado() {
     
 
       {/* ✅ CARDS */}
+      
+      <ScrollView
+       style={styles.contentScroll}
+       contentContainerStyle={styles.contentScrollContainer}
+       showsVerticalScrollIndicator={false}
+       >
+
       <View style={styles.row}>
-        <Card
-  title="💰 Total gasto"
-  value={formatMoney(total)}
+      
+      <Card
+       title="💰 Total gasto"
+       value={formatMoney(total)}
+       style={styles.cardInRow}
+
      onPress={() =>
      router.push({
     pathname: "/evolucao-total",
@@ -515,7 +554,7 @@ function cancelarPeriodoPersonalizado() {
 
 
         {period === "today" ? (
-  <Card title="🧭 Hoje em foco">
+  <Card title="🧭 Hoje em foco" style={styles.cardInRow}>
     <Text style={styles.insightMain}>
       {getInsightHoje().principal}
     </Text>
@@ -525,13 +564,19 @@ function cancelarPeriodoPersonalizado() {
     </Text>
   </Card>
 ) : (
-  <Card title="📊 Média diária" value={formatMoney(media)} />
+  <Card
+  title="📊 Média diária"
+  value={formatMoney(media)}
+  style={styles.cardInRow}
+/>
 )}
       </View>
 
-      <View style={styles.row}>
+      <View style={[styles.row, isMobile && styles.rowMobileStack]}>
+        
         <Card
-   title={`🔥 Top ${topGastos.length} ${ topGastos.length <= 1 ? "maior gasto" : "maiores gastos"
+  style={[styles.cardInRow, isMobile && styles.cardFullWidth]}
+  title={`🔥 Top ${topGastos.length} ${ topGastos.length <= 1 ? "maior gasto" : "maiores gastos"
   }`}>  {topGastos.length === 0 ? (
     <Text style={styles.subText}>Nenhum gasto registrado</Text>
   ) : (
@@ -544,8 +589,8 @@ function cancelarPeriodoPersonalizado() {
 </Card>
 
         <Card
-  title={`🏷️ Top ${topCategorias.length} ${
-    topCategorias.length <= 1 ? "categoria" : "categorias"
+  style={[styles.cardInRow, isMobile && styles.cardFullWidth]}
+  title={`🏷️ Top ${topCategorias.length} ${topCategorias.length <= 1 ? "categoria" : "categorias"
   }`}
 
 >
@@ -568,7 +613,7 @@ function cancelarPeriodoPersonalizado() {
  period !== "monthPrev" &&
  period !== "lastYear" &&
  period !== "custom" && (
-  <Card title="💡 Insight do período">
+  <Card title="💡 Insight do período" style={styles.insightCard}>
     {total === 0 ? (
       <Text style={styles.subText}>
         Sem dados suficientes para análise
@@ -657,20 +702,21 @@ function cancelarPeriodoPersonalizado() {
     )}
   </Card>
 )}
+</ScrollView>
 </View>
-  );
+);
 }
 
      
 
 /* =============================== */
 
-function Card({ title, value, children, onPress }: any) {
+function Card({ title, value, children, onPress, style }: any) {
   const Container = onPress ? TouchableOpacity : View;
 
   return (
     <Container
-      style={styles.card}
+      style={[styles.card, style]}
       {...(onPress ? { onPress, activeOpacity: 0.8 } : {})}
     >
       <Text style={styles.cardTitle}>{title}</Text>
@@ -708,7 +754,16 @@ function labelPeriod(p: Period) {
 /* =============================== */
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#F7F8FA" },
+  container: {
+  flex: 1,
+  padding: 16,
+  backgroundColor: "#F7F8FA",
+},
+
+containerMobile: {
+  paddingHorizontal: 12,
+  paddingTop: 14,
+},
 
   title: {
     fontSize: 22,
@@ -735,15 +790,35 @@ const styles = StyleSheet.create({
 
   menuItem: { paddingVertical: 8 },
 
-  row: { flexDirection: "row", gap: 10 },
+  row: {
+  flexDirection: "row",
+  gap: 10,
+},
+
+rowMobileStack: {
+  flexDirection: "column",
+  gap: 0,
+},
 
   card: {
-    backgroundColor: "#FFF",
-    padding: 16,
-    borderRadius: 12,
-    flex: 1,
-    marginBottom: 12,
-  },
+  backgroundColor: "#FFF",
+  padding: 16,
+  borderRadius: 12,
+  marginBottom: 12,
+},
+
+cardInRow: {
+  flex: 1,
+},
+
+cardFullWidth: {
+  width: "100%",
+},
+
+insightCard: {
+  width: "100%",
+  minHeight: 0,
+},
 
   cardTitle: { fontSize: 14, color: "#666" },
 
@@ -814,6 +889,14 @@ insightDetail: {
   color: "#777",
   marginTop: 6,
   lineHeight: 16,
+},
+
+contentScroll: {
+  flex: 1,
+},
+
+contentScrollContainer: {
+  paddingBottom: 80,
 },
 
 });
