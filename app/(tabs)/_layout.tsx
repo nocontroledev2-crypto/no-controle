@@ -7,6 +7,9 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: "#0A8F55",
+        tabBarLabelStyle: {
+          fontSize: 11,
+        },
       }}
     >
       <Tabs.Screen
@@ -55,6 +58,16 @@ export default function TabsLayout() {
           title: "Simulador",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="calculator-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="conta"
+        options={{
+          title: "Conta",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person-circle-outline" size={size} color={color} />
           ),
         }}
       />
