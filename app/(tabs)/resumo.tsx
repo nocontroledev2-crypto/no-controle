@@ -613,7 +613,10 @@ function cancelarPeriodoPersonalizado() {
  period !== "monthPrev" &&
  period !== "lastYear" &&
  period !== "custom" && (
-  <Card title="💡 Insight do período" style={styles.insightCard}>
+  <Card
+  title="💡 Insight do período"
+  style={isMobile ? styles.insightCardMobile : styles.insightCard}
+>
     {total === 0 ? (
       <Text style={styles.subText}>
         Sem dados suficientes para análise
@@ -678,9 +681,9 @@ function cancelarPeriodoPersonalizado() {
         📈 Estimativa simples com base no ritmo atual:
       </Text>
 
-      <Text style={styles.cardValue}>
-        {formatMoney(projecao)}
-      </Text>
+      <Text style={[styles.cardValue, isMobile && styles.insightValueMobile]}>
+       {formatMoney(projecao)}
+       </Text>
 
       <Text style={styles.subText}>
         {textoPeriodo}
@@ -897,6 +900,17 @@ contentScroll: {
 
 contentScrollContainer: {
   paddingBottom: 80,
+},
+
+insightCardMobile: {
+  width: "100%",
+  padding: 14,
+  marginBottom: 10,
+},
+
+insightValueMobile: {
+  fontSize: 18,
+  marginTop: 4,
 },
 
 });
