@@ -588,5 +588,5 @@ resultValue: {
     color: "#4D6659",
     lineHeight: 18,
   },
-  /*teste8/
+  
 });
