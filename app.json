@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "app",
-    "slug": "app",
+    "name": "No Controle",
+    "slug": "no-controle",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "app",
+    "scheme": "nocontrole",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
