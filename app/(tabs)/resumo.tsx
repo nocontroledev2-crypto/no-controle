@@ -719,10 +719,22 @@ function Card({ title, value, children, onPress, style }: any) {
 
   return (
     <Container
-      style={[styles.card, style]}
+      style={[
+        styles.card,
+        onPress && styles.cardClickable,
+        style,
+      ]}
       {...(onPress ? { onPress, activeOpacity: 0.8 } : {})}
     >
-      <Text style={styles.cardTitle}>{title}</Text>
+      <View style={styles.cardTitleRow}>
+        <Text style={styles.cardTitle}>{title}</Text>
+
+        {onPress && (
+  <View style={styles.cardActionHint}>
+    <Text style={styles.cardActionHintText}>Ver evolução ›</Text>
+  </View>
+)}
+      </View>
 
       {value && <Text style={styles.cardValue}>{value}</Text>}
 
@@ -911,6 +923,33 @@ insightCardMobile: {
 insightValueMobile: {
   fontSize: 18,
   marginTop: 4,
+},
+
+cardClickable: {
+  borderWidth: 1,
+  borderColor: "#CFE8DB",
+},
+
+cardTitleRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+},
+
+cardActionHint: {
+  backgroundColor: "#F0FAF5",
+  borderWidth: 0.5,
+  borderColor: "#BFE7D2",
+  borderRadius: 999,
+  paddingVertical: 4,
+  paddingHorizontal: 8,
+  marginLeft: 8,
+},
+
+cardActionHintText: {
+  fontSize: 11,
+  color: "#0A8F55",
+  fontWeight: "700",
 },
 
 });
