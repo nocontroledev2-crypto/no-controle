@@ -609,20 +609,20 @@ export default function Historico() {
         </TouchableOpacity>
       </View>
 
-    <View
-      style={[
-      styles.topControlsWrap,
-      isMobile && {
-      flexDirection: "column",
+       <View
+  style={[
+    styles.topControlsWrap,
+    isMobile && {
       gap: 8,
-       },
-        ]}
-    >
+    },
+  ]}
+>
+
 
          <View
            style={[
            styles.topControlBlock,
-           isMobile && { width: "100%" },
+           isMobile && { width: "48%" },
            ]}
            >
 
@@ -674,7 +674,7 @@ export default function Historico() {
            <View
            style={[
            styles.topControlBlock,
-           isMobile && { width: "100%" },
+           isMobile && { width: "48%" },
            ]}
             >
 
@@ -713,7 +713,7 @@ export default function Historico() {
                  <TouchableOpacity
                   style={[
                   styles.topActionButton,
-                  isMobile && { width: "100%" },
+                  isMobile && { width: "48%" },
                   ]}
                   onPress={recolherTudo}
                   >
@@ -727,7 +727,7 @@ export default function Historico() {
              <TouchableOpacity
               style={[
               styles.topActionButton,
-              isMobile && { width: "100%" },
+              isMobile && { width: "48%" },
                ]}
                onPress={expandirTudo}
                >
