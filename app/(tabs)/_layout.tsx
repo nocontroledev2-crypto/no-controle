@@ -7,15 +7,25 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: "#0A8F55",
+        tabBarInactiveTintColor: "#888",
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 10,
+          fontWeight: "600",
+        },
+        tabBarStyle: {
+          height: 76,
+          paddingTop: 6,
+          paddingBottom: 10,
+        },
+        tabBarItemStyle: {
+          paddingVertical: 2,
         },
       }}
     >
       <Tabs.Screen
         name="home"
         options={{
-          title: "Home",
+          title: "Início",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home-outline" size={size} color={color} />
           ),
@@ -25,7 +35,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="registrar"
         options={{
-          title: "Registrar",
+          title: "Lançar",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="add-circle-outline" size={size} color={color} />
           ),
@@ -45,7 +55,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="historico"
         options={{
-          title: "Histórico",
+          title: "Hist.",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="time-outline" size={size} color={color} />
           ),
@@ -55,7 +65,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="simulador"
         options={{
-          title: "Simulador",
+          title: "Simular",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="calculator-outline" size={size} color={color} />
           ),
