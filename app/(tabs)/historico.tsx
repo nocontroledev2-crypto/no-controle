@@ -558,17 +558,16 @@ export default function Historico() {
      RENDER
   =============================== */
 
-  return (
-    
-   <View
-  style={[
-    styles.container,
-    {
+ return (
+  <ScrollView
+    style={styles.container}
+    contentContainerStyle={{
       paddingHorizontal: isMobile ? 12 : 16,
       paddingTop: isMobile ? 12 : 16,
-    },
-  ]}
->
+      paddingBottom: 140,
+    }}
+    showsVerticalScrollIndicator={false}
+  >
 
 
       <Text style={styles.title}>Histórico</Text>
@@ -843,7 +842,7 @@ export default function Historico() {
             </Text>
           </View>
         ) : (
-          <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
+          <View>
             {groupedByDate.map((group) => {
               const collapsed = isDateCollapsed(group.date);
 
@@ -990,7 +989,7 @@ export default function Historico() {
                 </View>
               );
             })}
-          </ScrollView>
+          </View>
         )
       ) : groupedByCategory.length === 0 ? (
         <View style={styles.emptyBox}>
@@ -1016,7 +1015,7 @@ export default function Historico() {
           ))}
         </ScrollView>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
