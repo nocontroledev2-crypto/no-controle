@@ -6,6 +6,12 @@ export default function Root({ children }: PropsWithChildren) {
     <html lang="pt-BR" translate="no" className="notranslate">
       <head>
         <meta charSet="utf-8" />
+
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
+
         <meta name="google" content="notranslate" />
         <meta httpEquiv="Content-Language" content="pt-BR" />
 
