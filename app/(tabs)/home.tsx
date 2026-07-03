@@ -1,6 +1,12 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { getAllExpenses } from "../storage/expenseStorage";
 
 export default function Home() {
@@ -134,8 +140,13 @@ export default function Home() {
     router.push("/(tabs)/registrar");
   }
 
-  return (
-    <View style={styles.container}>
+    return (
+  <ScrollView
+    style={styles.container}
+    contentContainerStyle={styles.content}
+    showsVerticalScrollIndicator={false}
+  >
+
       <Text style={styles.title}>No Controle</Text>
       <Text style={styles.subtitle}>Hoje</Text>
 
@@ -194,7 +205,7 @@ export default function Home() {
           🎤 Falar despesa
         </Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -206,6 +217,10 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#F7F8FA",
   },
+  content: {
+  paddingBottom: 140,
+  paddingTop: 10,
+},
 
   title: {
     fontSize: 28,
