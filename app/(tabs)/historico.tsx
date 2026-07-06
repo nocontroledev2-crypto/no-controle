@@ -1,7 +1,8 @@
 import { useFocusEffect } from "expo-router";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -73,6 +74,9 @@ export default function Historico() {
   const [editValor, setEditValor] = useState("");
   const [editCategoria, setEditCategoria] = useState("");
   const [editData, setEditData] = useState("");
+  const [selectedCategoryDetail, setSelectedCategoryDetail] = useState<string | null>(
+  null
+);
 
   const now = new Date();
 
@@ -502,12 +506,31 @@ export default function Historico() {
   }
 
   function abrirLancamentosDaCategoria(categoria: string) {
-  setCategoriaSelecionada(categoria);
-  setViewMode("lancamentos");
+  setSelectedCategoryDetail(categoria);
   setMenuCategoriaAberto(false);
   setMenuPeriodoAberto(false);
-  setCollapsedDates({});
 }
+
+function fecharDetalheCategoria() {
+  setSelectedCategoryDetail(null);
+}
+
+useEffect(() => {
+  if (!selectedCategoryDetail) return;
+  if (typeof window === "undefined") return;
+
+  function handleKeyDown(event: KeyboardEvent) {
+    if (event.key === "Escape") {
+      fecharDetalheCategoria();
+    }
+  }
+
+  window.addEventListener("keydown", handleKeyDown);
+
+  return () => {
+    window.removeEventListener("keydown", handleKeyDown);
+  };
+}, [selectedCategoryDetail]);
 
   /* ===============================
      PERSONALIZADO
@@ -561,6 +584,24 @@ export default function Historico() {
     filteredExpenses.length === 1
       ? "1 registro"
       : `${filteredExpenses.length} registros`;
+
+      const selectedCategoryItems = useMemo(() => {
+  if (!selectedCategoryDetail) return [];
+
+  return filteredExpenses
+    .filter((item) => item.categoria === selectedCategoryDetail)
+    .sort((a, b) => parseDateSafe(b.data).getTime() - parseDateSafe(a.data).getTime());
+}, [filteredExpenses, selectedCategoryDetail]);
+
+const selectedCategoryTotal = selectedCategoryItems.reduce(
+  (sum, item) => sum + Number(item.valor || 0),
+  0
+);
+
+const selectedCategoryCountText =
+  selectedCategoryItems.length === 1
+    ? "1 registro"
+    : `${selectedCategoryItems.length} registros`;
 
   /* ===============================
      RENDER
@@ -1011,31 +1052,104 @@ export default function Historico() {
       ) : (
         <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
           {groupedByCategory.map((group) => (
-  <TouchableOpacity
-    key={group.categoria}
-    style={[styles.card, styles.categoryCardClickable]}
-    activeOpacity={0.85}
-    onPress={() => abrirLancamentosDaCategoria(group.categoria)}
-  >
-    <View style={styles.categoryCardHeader}>
-      <Text style={[styles.value, styles.categoryCardTitle]}>
-        {group.categoria}
-      </Text>
-
-      <Text style={styles.categoryCardHint}>
-        Ver registros ›
-      </Text>
-    </View>
-
-    <Text style={styles.categorySummary}>
-      {formatMoney(group.total)} •{" "}
-      {group.qtd === 1 ? "1 registro" : `${group.qtd} registros`} •{" "}
-      {group.percentual.toFixed(0)}% do período
+ <TouchableOpacity
+  key={group.categoria}
+  style={[styles.card, styles.categoryCardClickable]}
+  activeOpacity={0.85}
+  onPress={() => abrirLancamentosDaCategoria(group.categoria)}
+>
+  <View style={styles.categoryCardHeader}>
+    <Text style={[styles.value, styles.categoryCardTitle]}>
+      {group.categoria}
     </Text>
-  </TouchableOpacity>
+
+    <Text style={styles.categoryCardHint}>
+      Ver registros ›
+    </Text>
+  </View>
+
+  <Text style={styles.categorySummary}>
+    {formatMoney(group.total)} •{" "}
+    {group.qtd === 1 ? "1 registro" : `${group.qtd} registros`} •{" "}
+    {group.percentual.toFixed(0)}% do período
+  </Text>
+</TouchableOpacity>
 ))}
         </ScrollView>
       )}
+     
+     <Modal
+  visible={!!selectedCategoryDetail}
+  transparent
+  animationType="fade"
+  onRequestClose={fecharDetalheCategoria}
+>
+  <View style={styles.modalOverlay}>
+    <View
+      style={[
+        styles.categoryDetailModal,
+        isMobile && styles.categoryDetailModalMobile,
+      ]}
+    >
+      <View style={styles.modalHeader}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.modalTitle}>
+            {selectedCategoryDetail}
+          </Text>
+
+          <Text style={styles.modalSubtitle}>
+            {labelPeriod(period)}
+          </Text>
+        </View>
+
+        <TouchableOpacity
+          style={styles.modalCloseButton}
+          onPress={fecharDetalheCategoria}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.modalCloseText}>Fechar</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.modalSummaryCard}>
+        <Text style={styles.modalSummaryLabel}>Total da categoria</Text>
+
+        <Text style={styles.modalSummaryValue}>
+          {formatMoney(selectedCategoryTotal)}
+        </Text>
+
+        <Text style={styles.modalSummaryMeta}>
+          {selectedCategoryCountText}
+        </Text>
+      </View>
+
+      <ScrollView
+        style={styles.modalList}
+        contentContainerStyle={styles.modalListContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {selectedCategoryItems.map((item) => (
+          <View key={item.id} style={styles.modalItem}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.modalItemValue}>
+                {formatMoney(item.valor)}
+              </Text>
+
+              <Text style={styles.modalItemDate}>
+                {formatDateBR(item.data)}
+              </Text>
+            </View>
+
+            <Text style={styles.modalItemCategory}>
+              {item.categoria}
+            </Text>
+          </View>
+        ))}
+      </ScrollView>
+    </View>
+  </View>
+</Modal>
+
     </ScrollView>
   );
 }
@@ -1437,6 +1551,130 @@ categoryCardHint: {
   fontSize: 12,
   color: "#0A8F55",
   fontWeight: "700",
+},
+
+modalOverlay: {
+  flex: 1,
+  backgroundColor: "rgba(0, 0, 0, 0.35)",
+  justifyContent: "center",
+  alignItems: "center",
+  padding: 16,
+},
+
+categoryDetailModal: {
+  width: "92%",
+  maxWidth: 540,
+  maxHeight: "82%",
+  backgroundColor: "#F7F8FA",
+  borderRadius: 18,
+  padding: 14,
+  borderWidth: 0.5,
+  borderColor: "#DDE3EA",
+},
+
+categoryDetailModalMobile: {
+  width: "96%",
+  maxHeight: "86%",
+},
+
+modalHeader: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 12,
+  marginBottom: 12,
+},
+
+modalTitle: {
+  fontSize: 18,
+  fontWeight: "800",
+  color: "#0A8F55",
+},
+
+modalSubtitle: {
+  fontSize: 12,
+  color: "#777",
+  marginTop: 2,
+},
+
+modalCloseButton: {
+  backgroundColor: "#FFFFFF",
+  borderWidth: 0.5,
+  borderColor: "#DDE3EA",
+  borderRadius: 999,
+  paddingVertical: 7,
+  paddingHorizontal: 12,
+},
+
+modalCloseText: {
+  fontSize: 12,
+  color: "#555",
+  fontWeight: "700",
+},
+
+modalSummaryCard: {
+  backgroundColor: "#FFFFFF",
+  borderRadius: 14,
+  padding: 12,
+  marginBottom: 10,
+  borderWidth: 0.5,
+  borderColor: "#E8EAEE",
+},
+
+modalSummaryLabel: {
+  fontSize: 12,
+  color: "#666",
+  marginBottom: 4,
+},
+
+modalSummaryValue: {
+  fontSize: 22,
+  fontWeight: "800",
+  color: "#0A8F55",
+},
+
+modalSummaryMeta: {
+  fontSize: 12,
+  color: "#777",
+  marginTop: 2,
+},
+
+modalList: {
+  flexGrow: 0,
+},
+
+modalListContent: {
+  paddingBottom: 8,
+},
+
+modalItem: {
+  backgroundColor: "#FFFFFF",
+  borderRadius: 12,
+  padding: 12,
+  marginBottom: 8,
+  borderWidth: 0.5,
+  borderColor: "#E8EAEE",
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 10,
+},
+
+modalItemValue: {
+  fontSize: 16,
+  fontWeight: "800",
+  color: "#0A8F55",
+},
+
+modalItemDate: {
+  fontSize: 12,
+  color: "#666",
+  marginTop: 3,
+},
+
+modalItemCategory: {
+  fontSize: 11,
+  color: "#777",
+  fontWeight: "600",
+  textAlign: "right",
 },
 
 });
