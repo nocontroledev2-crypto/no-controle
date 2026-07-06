@@ -124,8 +124,9 @@ export default function Simulador() {
   ).getDate();
 
   const diaAtual = Math.min(now.getDate(), diasNoMes);
+const diasRestantes = Math.max(diasNoMes - diaAtual, 0);
 
-  const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
+const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
 
   const projecaoGastosMes =
     totalMesAtual > 0 ? mediaDiariaAtual * diasNoMes : 0;
@@ -261,25 +262,38 @@ export default function Simulador() {
           {mensagem ? <Text style={styles.successText}>{mensagem}</Text> : null}
         </View>
 
-        <View style={styles.row}>
-          <View style={[styles.card, styles.cardInRow]}>
-            <Text style={styles.cardTitle}>💸 Gasto atual</Text>
-            <Text style={styles.cardValue}>{formatMoney(totalMesAtual)}</Text>
-            <Text style={styles.subText}>
-              Total registrado neste mês.
-            </Text>
-          </View>
+        <View style={[styles.row, isMobile && styles.rowMobile]}>
+  <View style={[styles.card, styles.cardInRow]}>
+    <Text style={styles.cardTitle}>💸 Gasto até hoje</Text>
 
-          <View style={[styles.card, styles.cardInRow]}>
-            <Text style={styles.cardTitle}>📈 Projeção</Text>
-            <Text style={styles.cardValue}>
-              {formatMoney(projecaoGastosMes)}
-            </Text>
-            <Text style={styles.subText}>
-              Estimativa até o fim do mês.
-            </Text>
-          </View>
-        </View>
+    <Text style={styles.cardValue}>
+      {formatMoney(totalMesAtual)}
+    </Text>
+
+    <Text style={styles.subText}>
+      Total de despesas já registradas neste mês.
+    </Text>
+  </View>
+
+  <View style={[styles.card, styles.cardInRow]}>
+    <Text style={styles.cardTitle}>🔮 Gasto previsto no mês</Text>
+
+    <Text style={[styles.cardValue, styles.forecastValue]}>
+      {formatMoney(projecaoGastosMes)}
+    </Text>
+
+    <Text style={styles.subText}>
+      Estimativa de despesas até o fim do mês, se mantiver o ritmo atual.
+    </Text>
+
+    <Text style={styles.formulaText}>
+      Ritmo atual: {formatMoney(mediaDiariaAtual)} por dia
+      {diasRestantes === 0
+        ? ". Hoje é o último dia do mês."
+        : ` • faltam ${diasRestantes} dias.`}
+    </Text>
+  </View>
+</View>
 
         <View
           style={[
@@ -305,7 +319,7 @@ export default function Simulador() {
           {rendaValida && (
             <>
               <View style={styles.resultLine}>
-                <Text style={styles.resultLabel}>Renda considerada</Text>
+                <Text style={styles.resultLabel}>Renda mensal informada</Text>
                 <Text style={styles.resultValue}>
                   {formatMoney(receitaConsiderada)}
                 </Text>
@@ -326,7 +340,7 @@ export default function Simulador() {
               </View>
 
               <View style={styles.resultLine}>
-                <Text style={styles.resultLabel}>Após meta</Text>
+                <Text style={styles.resultLabel}>Saldo após meta</Text>
                 <Text
                   style={[
                     styles.resultValue,
@@ -423,6 +437,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 10,
   },
+
+  rowMobile: {
+  flexDirection: "column",
+  gap: 0,
+},
 
   cardInRow: {
     flex: 1,
@@ -588,5 +607,16 @@ resultValue: {
     color: "#4D6659",
     lineHeight: 18,
   },
+
+  forecastValue: {
+  color: "#B7791F",
+},
+
+formulaText: {
+  fontSize: 12,
+  color: "#777",
+  lineHeight: 16,
+  marginTop: 4,
+},
   
 });
