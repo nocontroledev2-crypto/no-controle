@@ -501,6 +501,14 @@ export default function Historico() {
     setCollapsedDates(novoEstado);
   }
 
+  function abrirLancamentosDaCategoria(categoria: string) {
+  setCategoriaSelecionada(categoria);
+  setViewMode("lancamentos");
+  setMenuCategoriaAberto(false);
+  setMenuPeriodoAberto(false);
+  setCollapsedDates({});
+}
+
   /* ===============================
      PERSONALIZADO
   =============================== */
@@ -1003,16 +1011,29 @@ export default function Historico() {
       ) : (
         <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
           {groupedByCategory.map((group) => (
-            <View key={group.categoria} style={styles.card}>
-              <Text style={styles.value}>{group.categoria}</Text>
+  <TouchableOpacity
+    key={group.categoria}
+    style={[styles.card, styles.categoryCardClickable]}
+    activeOpacity={0.85}
+    onPress={() => abrirLancamentosDaCategoria(group.categoria)}
+  >
+    <View style={styles.categoryCardHeader}>
+      <Text style={[styles.value, styles.categoryCardTitle]}>
+        {group.categoria}
+      </Text>
 
-              <Text style={styles.categorySummary}>
-                {formatMoney(group.total)} •{" "}
-                {group.qtd === 1 ? "1 registro" : `${group.qtd} registros`} •{" "}
-                {group.percentual.toFixed(0)}% do período
-              </Text>
-            </View>
-          ))}
+      <Text style={styles.categoryCardHint}>
+        Ver registros ›
+      </Text>
+    </View>
+
+    <Text style={styles.categorySummary}>
+      {formatMoney(group.total)} •{" "}
+      {group.qtd === 1 ? "1 registro" : `${group.qtd} registros`} •{" "}
+      {group.percentual.toFixed(0)}% do período
+    </Text>
+  </TouchableOpacity>
+))}
         </ScrollView>
       )}
     </ScrollView>
@@ -1396,4 +1417,26 @@ const styles = StyleSheet.create({
   viewModeTextActive: {
     color: "#0A8F55",
   },
+
+categoryCardClickable: {
+  borderColor: "#CFE8DB",
+},
+
+categoryCardHeader: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 10,
+},
+
+categoryCardTitle: {
+  flex: 1,
+},
+
+categoryCardHint: {
+  fontSize: 12,
+  color: "#0A8F55",
+  fontWeight: "700",
+},
+
 });
