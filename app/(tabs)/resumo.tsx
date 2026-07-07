@@ -1,6 +1,5 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
-
 import {
   ScrollView,
   StyleSheet,
@@ -509,48 +508,20 @@ function cancelarPeriodoPersonalizado() {
 
       <View style={styles.row}>
       
+      
       <Card
-       title="💰 Total gasto"
-       value={formatMoney(total)}
-       style={styles.cardInRow}
-
-     onPress={() =>
-     router.push({
-    pathname: "/evolucao-total",
-    params: {
-    period: period,
-    },
-     })
-       }
->
-  {mostrarComparacao && (
-    <>
-      <Text style={[
-        styles.subText,
-        {
-          color:
-            diffTotal > 0
-              ? "#D9534F"
-              : diffTotal < 0
-              ? "#0A8F55"
-              : "#666",
-        }
-      ]}>
-        {previousTotal === 0
-          ? "Sem dados do período anterior."
-          : diffTotal === 0
-          ? "Mesmo valor do período anterior."
-          : diffTotal > 0
-          ? `⚠️ Você gastou ${formatMoney(diffTotal)} a mais`
-          : `✅ Você gastou ${formatMoney(Math.abs(diffTotal))} a menos`}
-      </Text>
-
-      {textoVariacao && (
-        <Text style={styles.subText}>{textoVariacao}</Text>
-      )}
-    </>
-  )}
-</Card>
+  title="💰 Total gasto"
+  value={formatMoney(total)}
+  style={styles.cardInRow}
+  onPress={() =>
+    router.push({
+      pathname: "/evolucao-total",
+      params: {
+        period: period,
+      },
+    })
+  }
+/>
 
 
         {period === "today" ? (
@@ -571,6 +542,42 @@ function cancelarPeriodoPersonalizado() {
 />
 )}
       </View>
+
+
+       {mostrarComparacao && (
+  <Card title="📈 Comparativo">
+    <Text
+      style={[
+        styles.comparativoPrincipal,
+        {
+          color:
+            diffTotal > 0
+              ? "#D9534F"
+              : diffTotal < 0
+              ? "#0A8F55"
+              : "#666",
+        },
+      ]}
+    >
+      {previousTotal === 0
+        ? "Sem dados do período anterior."
+        : diffTotal === 0
+        ? "Mesmo valor do período anterior."
+        : diffTotal > 0
+        ? `⚠️ Você gastou ${formatMoney(diffTotal)} a mais`
+        : `✅ Você gastou ${formatMoney(
+            Math.abs(diffTotal)
+          )} a menos`}
+    </Text>
+
+    {textoVariacao && (
+      <Text style={styles.comparativoSecundario}>
+        {textoVariacao}
+      </Text>
+    )}
+  </Card>
+)}
+
 
       <View style={[styles.row, isMobile && styles.rowMobileStack]}>
         
@@ -613,98 +620,35 @@ function cancelarPeriodoPersonalizado() {
  period !== "monthPrev" &&
  period !== "lastYear" &&
  period !== "custom" && (
+
+ 
   <Card
-  title="💡 Insight do período"
+  title="🔒 Projeções em aprendizado"
   style={isMobile ? styles.insightCardMobile : styles.insightCard}
 >
-    {total === 0 ? (
-      <Text style={styles.subText}>
-        Sem dados suficientes para análise
-      </Text>
-    ) : (
-      (() => {
-  const hoje = new Date();
+  
+  <Text style={styles.learningText}>
+  As projeções inteligentes serão liberadas após:
+</Text>
 
-  let diasPeriodo = 0;
-  let diasPassados = 0;
-  let textoPeriodo = "";
+  <Text style={styles.learningItem}>
+    ✅ 3 meses de histórico
+  </Text>
 
-  if (period === "week") {
-    diasPeriodo = 7;
+  <Text style={styles.learningItem}>
+    ✅ 12 registros lançados
+  </Text>
 
-    const diaSemana = hoje.getDay(); // 0 (domingo) a 6 (sábado)
-    diasPassados = diaSemana === 0 ? 7 : diaSemana; // ajustando domingo
+  <Text style={styles.learningItem}>
+    ✅ 3 categorias utilizadas
+  </Text>
 
-    textoPeriodo = "até o fim da semana";
-  }
 
-  else if (period === "month") {
-    const totalDiasMes = new Date(
-      hoje.getFullYear(),
-      hoje.getMonth() + 1,
-      0
-    ).getDate();
+</Card>
 
-    diasPeriodo = totalDiasMes;
-    diasPassados = hoje.getDate();
 
-    textoPeriodo = "até o fim do mês";
-  }
-
-  else if (period === "year") {
-    diasPeriodo = 365;
-
-    const inicioAno = new Date(hoje.getFullYear(), 0, 1);
-    const diasDesdeInicio =
-      Math.floor((hoje.getTime() - inicioAno.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-
-    diasPassados = diasDesdeInicio;
-
-    textoPeriodo = "até o fim do ano";
-  }
-
-  else if (period === "today") {
-    return (
-      <Text style={styles.subText}>
-        Sem projeção para apenas um dia
-      </Text>
-    );
-  }
-
-  const diasRestantes = diasPeriodo - diasPassados;
-
-  const projecao = total + media * diasRestantes;
-
-  return (
-    <>
-      <Text style={styles.subText}>
-        📈 Estimativa simples com base no ritmo atual:
-      </Text>
-
-      <Text style={[styles.cardValue, isMobile && styles.insightValueMobile]}>
-       {formatMoney(projecao)}
-       </Text>
-
-      <Text style={styles.subText}>
-        {textoPeriodo}
-      </Text>
-
-      {topCategorias.length > 0 && (
-        <Text style={styles.subText}>
-          💡 Se reduzir 20% dos gastos com{" "}
-          <Text style={{ fontWeight: "bold" }}>
-            {topCategorias[0][0]}
-          </Text>
-          , a economia estimada seria de{" "}
-          {formatMoney(topCategorias[0][1] * 0.2)}
-        </Text>
-      )}
-    </>
-  );
-})()
-    )}
-  </Card>
 )}
+
 </ScrollView>
 </View>
 );
@@ -951,5 +895,32 @@ cardActionHintText: {
   color: "#0A8F55",
   fontWeight: "700",
 },
+
+
+comparativoPrincipal: {
+  fontSize: 15,
+  fontWeight: "700",
+  marginTop: 4,
+},
+
+comparativoSecundario: {
+  fontSize: 13,
+  color: "#666",
+  marginTop: 8,
+},
+
+learningText: {
+  fontSize: 13,
+  color: "#555",
+  lineHeight: 18,
+  marginBottom: 8,
+},
+
+learningItem: {
+  fontSize: 14,
+  color: "#333",
+  marginBottom: 6,
+},
+
 
 });
