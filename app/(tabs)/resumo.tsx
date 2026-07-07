@@ -510,7 +510,7 @@ function cancelarPeriodoPersonalizado() {
       
       
       <Card
-  title="💰 Total gasto"
+  title="💰Total gasto"
   value={formatMoney(total)}
   style={styles.cardInRow}
   onPress={() =>
