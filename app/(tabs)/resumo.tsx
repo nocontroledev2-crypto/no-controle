@@ -670,20 +670,25 @@ function Card({ title, value, children, onPress, style }: any) {
       ]}
       {...(onPress ? { onPress, activeOpacity: 0.8 } : {})}
     >
-      <View style={styles.cardTitleRow}>
-        <Text style={styles.cardTitle}>{title}</Text>
+      
+    <View style={styles.cardHeader}>
+  <Text style={styles.cardTitle}>{title}</Text>
+</View>
 
-        {onPress && (
-  <View style={styles.cardActionHint}>
-    <Text style={styles.cardActionHintText}>Ver evolução ›</Text>
+{value && <Text style={styles.cardValue}>{value}</Text>}
+
+{onPress && (
+  <View style={styles.cardActionContainer}>
+    <View style={styles.cardActionHint}>
+      <Text style={styles.cardActionHintText}>
+        Ver evolução ›
+      </Text>
+    </View>
   </View>
 )}
-      </View>
 
-      {value && <Text style={styles.cardValue}>{value}</Text>}
-
-      {children}
-    </Container>
+{children}
+</Container>
   );
 }
 
@@ -874,10 +879,8 @@ cardClickable: {
   borderColor: "#CFE8DB",
 },
 
-cardTitleRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "space-between",
+cardHeader: {
+  marginBottom: 4,
 },
 
 cardActionHint: {
@@ -896,6 +899,10 @@ cardActionHintText: {
   fontWeight: "700",
 },
 
+cardActionContainer: {
+  marginTop: 10,
+  alignItems: "flex-start",
+},
 
 comparativoPrincipal: {
   fontSize: 15,
