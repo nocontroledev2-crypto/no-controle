@@ -627,14 +627,11 @@ const quantidadeCategorias =
 
 Período: ${labelPeriod(period)}
 
-💰 Total gasto:
-${formatMoney(totalPeriodo)}
+💰 Total gasto: ${formatMoney(totalPeriodo)}
 
-🏷️ Categorias:
-${quantidadeCategorias}
+🏷️ Categorias: ${quantidadeCategorias}
 
-📝 Registros:
-${filteredExpenses.length}
+📝 Registros: ${filteredExpenses.length}
 
 --------------------------------
 
