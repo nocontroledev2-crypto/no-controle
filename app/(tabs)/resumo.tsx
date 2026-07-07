@@ -623,7 +623,7 @@ function cancelarPeriodoPersonalizado() {
 
  
   <Card
-  title="🔒 Projeções em aprendizado"
+  title="🔒 Aprendendo seus hábitos..."
   style={isMobile ? styles.insightCardMobile : styles.insightCard}
 >
   
