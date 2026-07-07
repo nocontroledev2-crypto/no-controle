@@ -586,12 +586,41 @@ useEffect(() => {
       : `${filteredExpenses.length} registros`;
 
       async function compartilharRelatorio() {
-  const linhas = filteredExpenses.map(
-    (item) =>
-      `${formatDateBR(item.data)} • ${item.categoria} • ${formatMoney(
-        item.valor
-      )}`
-  );
+  const despesasOrdenadas = [...filteredExpenses].sort(
+  (a, b) =>
+    parseDateSafe(a.data).getTime() -
+    parseDateSafe(b.data).getTime()
+);
+
+const linhas = despesasOrdenadas.map(
+  (item) =>
+    `${formatDateBR(item.data)} • ${item.categoria} • ${formatMoney(
+      item.valor
+    )}`
+);
+
+const categoriasResumo: Record<string, number> = {};
+
+despesasOrdenadas.forEach((item) => {
+  categoriasResumo[item.categoria] =
+    (categoriasResumo[item.categoria] || 0) +
+    Number(item.valor || 0);
+});
+
+const categoriasOrdenadas = Object.entries(
+  categoriasResumo
+)
+  .sort((a, b) => b[1] - a[1]);
+
+const resumoCategorias = categoriasOrdenadas
+  .map(
+    ([categoria, total]) =>
+      `${categoria} • ${formatMoney(total)}`
+  )
+  .join("\n");
+
+const quantidadeCategorias =
+  categoriasOrdenadas.length;
 
   const relatorio = `
 📊 RELATÓRIO FINANCEIRO - NO CONTROLE
@@ -601,13 +630,21 @@ Período: ${labelPeriod(period)}
 💰 Total gasto:
 ${formatMoney(totalPeriodo)}
 
+🏷️ Categorias:
+${quantidadeCategorias}
+
 📝 Registros:
 ${filteredExpenses.length}
 
-🏷️ Categoria:
-${categoriaSelecionada}
+--------------------------------
+
+🏆 RESUMO POR CATEGORIA
+
+${resumoCategorias}
 
 --------------------------------
+
+📋 DETALHAMENTO COMPLETO
 
 ${linhas.join("\n")}
 
@@ -615,6 +652,8 @@ ${linhas.join("\n")}
 
 Gerado pelo No Controle
 `;
+
+  console.log(relatorio);
 
   try {
     if (
@@ -635,8 +674,13 @@ Gerado pelo No Controle
       "Relatório copiado para a área de transferência."
     );
   } catch (error) {
-    console.log(error);
-  }
+  console.error(error);
+
+  alert(
+    "Erro ao gerar relatório.\n\n" +
+    String(error)
+  );
+}
 }
 
 
