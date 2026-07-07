@@ -932,13 +932,13 @@ const selectedCategoryCountText =
     </Text>
 
     <TouchableOpacity
-      onPress={compartilharRelatorio}
-      style={styles.shareIconButton}
-    >
-      <Text style={styles.shareIcon}>
-        📤
-      </Text>
-    </TouchableOpacity>
+  onPress={compartilharRelatorio}
+  style={styles.shareChip}
+>
+  <Text style={styles.shareChipText}>
+    ↪ Compartilhar
+  </Text>
+</TouchableOpacity>
   </View>
 
   <View style={styles.summaryInlineRow}>
@@ -1759,13 +1759,19 @@ summaryHeader: {
   marginBottom: 6,
 },
 
-shareIconButton: {
-  paddingHorizontal: 6,
-  paddingVertical: 4,
+shareChip: {
+  backgroundColor: "#F0FAF5",
+  borderWidth: 0.5,
+  borderColor: "#BFE7D2",
+  borderRadius: 999,
+  paddingVertical: 5,
+  paddingHorizontal: 10,
 },
 
-shareIcon: {
-  fontSize: 18,
+shareChipText: {
+  color: "#0A8F55",
+  fontSize: 12,
+  fontWeight: "700",
 },
 
 });
