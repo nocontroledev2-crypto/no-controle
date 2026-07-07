@@ -9,7 +9,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  useWindowDimensions,
+  useWindowDimensions
 } from "react-native";
 
 import {
@@ -585,6 +585,61 @@ useEffect(() => {
       ? "1 registro"
       : `${filteredExpenses.length} registros`;
 
+      async function compartilharRelatorio() {
+  const linhas = filteredExpenses.map(
+    (item) =>
+      `${formatDateBR(item.data)} • ${item.categoria} • ${formatMoney(
+        item.valor
+      )}`
+  );
+
+  const relatorio = `
+📊 RELATÓRIO FINANCEIRO - NO CONTROLE
+
+Período: ${labelPeriod(period)}
+
+💰 Total gasto:
+${formatMoney(totalPeriodo)}
+
+📝 Registros:
+${filteredExpenses.length}
+
+🏷️ Categoria:
+${categoriaSelecionada}
+
+--------------------------------
+
+${linhas.join("\n")}
+
+--------------------------------
+
+Gerado pelo No Controle
+`;
+
+  try {
+    if (
+      typeof navigator !== "undefined" &&
+      navigator.share
+    ) {
+      await navigator.share({
+        title: "Relatório Financeiro - No Controle",
+        text: relatorio,
+      });
+
+      return;
+    }
+
+    await navigator.clipboard.writeText(relatorio);
+
+    alert(
+      "Relatório copiado para a área de transferência."
+    );
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
       const selectedCategoryItems = useMemo(() => {
   if (!selectedCategoryDetail) return [];
 
@@ -868,10 +923,29 @@ const selectedCategoryCountText =
         </View>
       )}
 
-      <View style={styles.summaryCard}>
-        <Text style={styles.summaryLabel}>Total no período</Text>
+      
 
-        <View style={styles.summaryInlineRow}>
+       <View style={styles.summaryCard}>
+  <View style={styles.summaryHeader}>
+    <Text style={styles.summaryLabel}>
+      Total no período
+    </Text>
+
+    <TouchableOpacity
+      onPress={compartilharRelatorio}
+      style={styles.shareIconButton}
+    >
+      <Text style={styles.shareIcon}>
+        📤
+      </Text>
+    </TouchableOpacity>
+  </View>
+
+  <View style={styles.summaryInlineRow}>
+
+
+
+
           <Text style={styles.summaryValue}>{formatMoney(totalPeriodo)}</Text>
 
           <Text style={styles.summaryInlineMeta}>
@@ -879,8 +953,9 @@ const selectedCategoryCountText =
           </Text>
         </View>
       </View>
+       
 
-      {viewMode === "lancamentos" ? (
+            {viewMode === "lancamentos" ? (
         groupedByDate.length === 0 ? (
           <View style={styles.emptyBox}>
             <Text style={styles.emptyText}>
@@ -1675,6 +1750,22 @@ modalItemCategory: {
   color: "#777",
   fontWeight: "600",
   textAlign: "right",
+},
+
+summaryHeader: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: 6,
+},
+
+shareIconButton: {
+  paddingHorizontal: 6,
+  paddingVertical: 4,
+},
+
+shareIcon: {
+  fontSize: 18,
 },
 
 });
