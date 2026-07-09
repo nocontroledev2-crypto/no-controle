@@ -1,4 +1,3 @@
-import { MASTER_CATEGORIES } from "../constants/categories";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -9,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { MASTER_CATEGORIES } from "../constants/categories";
 import { parseSpeech } from "../helpers/speechParser";
 import { saveExpense } from "../storage/expenseStorage";
 
@@ -20,6 +20,8 @@ export default function Registrar() {
   const [state, setState] = useState<RegistrarState>("idle");
   const [valor, setValor] = useState("");
   const [categoria, setCategoria] = useState("");
+  const [subcategoria, setSubcategoria] = useState("");
+  const [termoEncontrado, setTermoEncontrado] = useState("");
   const [data, setData] = useState(new Date());
   const [dataTexto, setDataTexto] = useState(formatarData(new Date()));
 
@@ -149,6 +151,8 @@ export default function Registrar() {
       }
 
       setCategoria(parsed.categoria);
+      setSubcategoria(parsed.subcategoria ?? "");
+      setTermoEncontrado(parsed.termoEncontrado ?? "");
       setData(parsed.data);
       setDataTexto(formatarData(parsed.data));
 
@@ -183,21 +187,25 @@ export default function Registrar() {
         ? data
         : new Date();
 
-    await saveExpense({
+      await saveExpense({
       id: Date.now().toString(),
       valor: Number(valorNumerico.toFixed(2)),
       categoria,
+      subcategoria,
+      termoEncontrado,
       data: dataFinal.toISOString().split("T")[0],
       createdAt: new Date().toISOString(),
-    });
+      });
 
     const hoje = new Date();
 
     setValor("");
-    setCategoria("");
-    setData(hoje);
-    setDataTexto(formatarData(hoje));
-    setState("idle");
+setCategoria("");
+setSubcategoria("");
+setTermoEncontrado("");
+setData(hoje);
+setDataTexto(formatarData(hoje));
+setState("idle");
 
     setTimeout(() => {
       valorInputRef.current?.focus();
@@ -250,7 +258,11 @@ export default function Registrar() {
 
           <select
   value={categoria}
-  onChange={(e) => setCategoria(e.target.value)}
+  onChange={(e) => {
+    setCategoria(e.target.value);
+    setSubcategoria("");
+    setTermoEncontrado("");
+  }}
   style={styles.input}
 >
   <option value="">Selecione a categoria</option>
@@ -261,6 +273,12 @@ export default function Registrar() {
     </option>
   ))}
 </select>
+
+     {subcategoria ? (
+     <Text style={styles.detailText}>
+      Detalhe identificado: {subcategoria}
+      </Text>
+      ) : null}
 
           <Text style={styles.label}>Data</Text>
           <TextInput
@@ -365,4 +383,11 @@ const styles = StyleSheet.create({
     color: "#2980B9",
     fontWeight: "600",
   },
+
+  detailText: {
+  fontSize: 13,
+  color: "#0A8F55",
+  marginBottom: 10,
+  fontWeight: "600",
+},
 });

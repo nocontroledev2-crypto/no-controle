@@ -6,6 +6,8 @@ export type Expense = {
   id: string;
   valor: number;
   categoria: string;
+  subcategoria?: string;
+  termoEncontrado?: string;
   data: string;
   createdAt: string;
 };
@@ -42,9 +44,11 @@ export async function getAllExpenses(): Promise<Expense[]> {
       const safeValue = Number(expense.valor);
 
       return {
-        ...expense,
-        valor: Number.isFinite(safeValue) ? safeValue : 0,
-      };
+  ...expense,
+  valor: Number.isFinite(safeValue) ? safeValue : 0,
+  subcategoria: expense.subcategoria ?? "",
+  termoEncontrado: expense.termoEncontrado ?? "",
+};
     });
   } catch {
     return [];
