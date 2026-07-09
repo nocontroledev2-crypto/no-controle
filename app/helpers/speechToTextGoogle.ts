@@ -1,6 +1,6 @@
 
 import * as FileSystem from "expo-file-system";
-import { GOOGLE_SPEECH_API_KEY } from "../../constants/google";
+import { GOOGLE_SPEECH_API_KEY } from "../constants/google";
 
 export async function speechToTextGoogle(
   audioUri: string

@@ -1,3 +1,4 @@
+import { MASTER_CATEGORIES } from "../constants/categories";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -248,22 +249,18 @@ export default function Registrar() {
           <Text style={styles.label}>Categoria</Text>
 
           <select
-            value={categoria}
-            onChange={(e) => setCategoria(e.target.value)}
-            style={styles.input}
-          >
-            <option value="">Selecione a categoria</option>
+  value={categoria}
+  onChange={(e) => setCategoria(e.target.value)}
+  style={styles.input}
+>
+  <option value="">Selecione a categoria</option>
 
-            <option>Alimentação</option>
-            <option>Transporte</option>
-            <option>Moradia</option>
-            <option>Contas</option>
-            <option>Assinaturas</option>
-            <option>Saúde</option>
-            <option>Serviços</option>
-            <option>Cartão de crédito</option>
-            <option>Outros</option>
-          </select>
+  {MASTER_CATEGORIES.map((cat: string) => (
+    <option key={cat} value={cat}>
+      {cat}
+    </option>
+  ))}
+</select>
 
           <Text style={styles.label}>Data</Text>
           <TextInput

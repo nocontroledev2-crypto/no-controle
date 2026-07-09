@@ -1,0 +1,16 @@
+export const MASTER_CATEGORIES = [
+  "Moradia",
+  "Contas da Casa",
+  "Alimentação",
+  "Transporte",
+  "Saúde",
+  "Educação",
+  "Lazer",
+  "Compras",
+  "Serviços",
+  "Pets",
+  "Família",
+  "Financeiro",
+  "Receitas",
+  "Outros",
+];
