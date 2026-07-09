@@ -590,6 +590,23 @@ export function normalizeCategoryText(text: string) {
     .trim();
 }
 
+function termMatchesText(normalizedText: string, normalizedTerm: string) {
+  if (!normalizedTerm) {
+    return false;
+  }
+
+  const paddedText = ` ${normalizedText} `;
+  const paddedTerm = ` ${normalizedTerm} `;
+
+  // Termos curtos como "gas", "oi", "99" precisam bater como palavra inteira.
+  // Isso evita "gas" bater dentro de "gasolina" e "oi" bater dentro de "foi".
+  if (normalizedTerm.length <= 3) {
+    return paddedText.includes(paddedTerm);
+  }
+
+  return normalizedText.includes(normalizedTerm);
+}
+
 export function findCategoryByText(text: string): CategoryDictionaryResult | null {
   const normalizedText = normalizeCategoryText(text);
 
@@ -597,17 +614,22 @@ export function findCategoryByText(text: string): CategoryDictionaryResult | nul
     return null;
   }
 
-  for (const rule of CATEGORY_DICTIONARY_RULES) {
-    for (const term of rule.termos) {
-      const normalizedTerm = normalizeCategoryText(term);
+  const allTerms = CATEGORY_DICTIONARY_RULES.flatMap((rule) =>
+    rule.termos.map((term) => ({
+      categoria: rule.categoria,
+      subcategoria: rule.subcategoria,
+      termoOriginal: term,
+      termoNormalizado: normalizeCategoryText(term),
+    }))
+  ).sort((a, b) => b.termoNormalizado.length - a.termoNormalizado.length);
 
-      if (normalizedText.includes(normalizedTerm)) {
-        return {
-          categoria: rule.categoria,
-          subcategoria: rule.subcategoria,
-          termoEncontrado: term,
-        };
-      }
+  for (const item of allTerms) {
+    if (termMatchesText(normalizedText, item.termoNormalizado)) {
+      return {
+        categoria: item.categoria,
+        subcategoria: item.subcategoria,
+        termoEncontrado: item.termoOriginal,
+      };
     }
   }
 
