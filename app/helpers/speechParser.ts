@@ -6,6 +6,8 @@ const numberWords: Record<string, number> = {
   zero: 0,
   um: 1,
   uma: 1,
+  primeiro: 1,
+  primeira: 1,
   dois: 2,
   duas: 2,
   tres: 3,
@@ -68,13 +70,14 @@ function normalize(text: string): string {
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^\w\s]/g, " ")
+    .replace(/[^\w\s/,.]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
 
 function parseNumberWordsText(text: string): number {
   const wordsToIgnore = ["e", "real", "reais", "centavo", "centavos", "de"];
+
   const tokens = normalize(text)
     .split(" ")
     .filter((word) => word && !wordsToIgnore.includes(word));
@@ -93,7 +96,6 @@ function parseNumberWordsText(text: string): number {
 function parseValue(rawText: string): number | null {
   const raw = rawText.toLowerCase();
 
-  // Exemplo: "120,35" ou "120.35"
   const decimalMatch = raw.match(/\d+[,.]\d{1,2}/);
 
   if (decimalMatch) {
@@ -102,7 +104,6 @@ function parseValue(rawText: string): number | null {
 
   const text = normalize(rawText);
 
-  // Exemplo: "120 e 35", "120 com 35", "120 reais e 35 centavos"
   const digitWithCents = text.match(
     /(\d+)\s*(?:reais?|real)?\s*(?:e|com)\s*(\d{1,2})\s*(?:centavos?|centavo)?/
   );
@@ -116,11 +117,11 @@ function parseValue(rawText: string): number | null {
     }
   }
 
-  // Exemplo: "cento e vinte reais e trinta e cinco centavos"
   if (text.includes("centavo")) {
     const partesReais = text.split(/reais|real/);
     const textoReais = partesReais[0] ?? "";
-    const textoCentavos = partesReais[1]?.replace(/centavos|centavo/g, "") ?? "";
+    const textoCentavos =
+      partesReais[1]?.replace(/centavos|centavo/g, "") ?? "";
 
     const reais = parseNumberWordsText(textoReais);
     const centavos = parseNumberWordsText(textoCentavos);
@@ -130,15 +131,12 @@ function parseValue(rawText: string): number | null {
     }
   }
 
-  // Exemplo com número simples: "120 copel"
   const digit = text.match(/\d+/);
 
   if (digit) {
     return Number(digit[0]);
   }
 
-  // Heurística para frase sem "reais/centavos":
-  // "cento e vinte e trinta e cinco" => 120,35
   const tokens = text
     .split(" ")
     .filter((word) => numberWords[word] !== undefined);
@@ -162,39 +160,139 @@ function parseValue(rawText: string): number | null {
 
 function parseDateFromSpeech(text: string): Date {
   const now = new Date();
+  const normalizedText = normalize(text);
+
+  if (normalizedText.includes("hoje")) {
+    return now;
+  }
+
+  if (normalizedText.includes("ontem")) {
+    const ontem = new Date(now);
+    ontem.setDate(now.getDate() - 1);
+    return ontem;
+  }
+
+  if (
+    normalizedText.includes("amanha") ||
+    normalizedText.includes("amanhã")
+  ) {
+    const amanha = new Date(now);
+    amanha.setDate(now.getDate() + 1);
+    return amanha;
+  }
 
   let day: number | null = null;
   let month: number | null = null;
   let year: number = now.getFullYear();
 
-  const fullMatch = text.match(/(\d{1,2})\s+de\s+([a-zç]+)/);
+  const dateSlashMatch = normalizedText.match(
+    /\b(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\b/
+  );
 
-  if (fullMatch) {
-    day = Number(fullMatch[1]);
-    const mesTexto = fullMatch[2];
+  if (dateSlashMatch) {
+    day = Number(dateSlashMatch[1]);
+    month = Number(dateSlashMatch[2]) - 1;
 
-    if (months[mesTexto] !== undefined) {
-      month = months[mesTexto];
+    if (dateSlashMatch[3]) {
+      const parsedYear = Number(dateSlashMatch[3]);
+      year = parsedYear < 100 ? 2000 + parsedYear : parsedYear;
     }
+
+    return new Date(year, month, day);
   }
 
-  const yearMatch = text.match(/\b(20\d{2})\b/);
+  const yearMatch = normalizedText.match(/\b(20\d{2})\b/);
 
   if (yearMatch) {
     year = Number(yearMatch[1]);
   }
 
-  if (day === null) {
-    const numbers = text.match(/\b\d{1,2}\b/g);
+  const monthNames = Object.keys(months);
 
-    if (numbers) {
-      for (const num of numbers) {
-        const n = Number(num);
+  for (const monthName of monthNames) {
+    const normalizedMonthName = normalize(monthName);
 
-        if (n > 0 && n <= 31) {
-          day = n;
-          break;
+    if (normalizedText.includes(normalizedMonthName)) {
+      month = months[monthName];
+      break;
+    }
+  }
+
+  if (month !== null) {
+    const selectedMonthName =
+      monthNames.find((monthName) => months[monthName] === month) ?? "";
+
+    const normalizedMonthName = normalize(selectedMonthName);
+
+    const numericDayWithMonth = normalizedText.match(
+      new RegExp(`\\b(\\d{1,2})\\s+de\\s+${normalizedMonthName}\\b`)
+    );
+
+    if (numericDayWithMonth) {
+      const parsedDay = Number(numericDayWithMonth[1]);
+
+      if (parsedDay > 0 && parsedDay <= 31) {
+        day = parsedDay;
+      }
+    }
+
+    if (day === null) {
+      const wordDayWithMonth = normalizedText.match(
+        new RegExp(
+          `\\bdia\\s+([a-z\\s]+?)\\s+de\\s+${normalizedMonthName}\\b`
+        )
+      );
+
+      if (wordDayWithMonth) {
+        const parsedDay = parseNumberWordsText(wordDayWithMonth[1]);
+
+        if (parsedDay > 0 && parsedDay <= 31) {
+          day = parsedDay;
         }
+      }
+    }
+
+    if (day === null) {
+      const beforeMonth = normalizedText.split(normalizedMonthName)[0];
+
+      const wordsBeforeMonth = beforeMonth
+        .replace(/\bdia\b/g, "")
+        .replace(/\bde\b/g, "")
+        .trim()
+        .split(" ")
+        .filter((word) => numberWords[word] !== undefined);
+
+      const lastPossibleDayWords = wordsBeforeMonth.slice(-3).join(" ");
+      const parsedDay = parseNumberWordsText(lastPossibleDayWords);
+
+      if (parsedDay > 0 && parsedDay <= 31) {
+        day = parsedDay;
+      }
+    }
+  }
+
+  if (day === null) {
+    const numericDayMatch = normalizedText.match(/\bdia\s+(\d{1,2})\b/);
+
+    if (numericDayMatch) {
+      const parsedDay = Number(numericDayMatch[1]);
+
+      if (parsedDay > 0 && parsedDay <= 31) {
+        day = parsedDay;
+      }
+    }
+  }
+
+  if (day === null) {
+    const wordDayMatch = normalizedText.match(
+      /\bdia\s+([a-z\s]+?)(?:\s+de|\s*$)/
+    );
+
+    if (wordDayMatch) {
+      const parsedDay = parseNumberWordsText(wordDayMatch[1]);
+
+      if (parsedDay > 0 && parsedDay <= 31) {
+        day = parsedDay;
       }
     }
   }
@@ -230,7 +328,7 @@ export function parseSpeech(textoFalado: string) {
       : matchMasterCategory(text),
     subcategoria: dictionaryMatch ? dictionaryMatch.subcategoria : "",
     termoEncontrado: dictionaryMatch ? dictionaryMatch.termoEncontrado : "",
-    data: parseDateFromSpeech(text),
+    data: parseDateFromSpeech(textoFalado),
     raw: textoFalado,
   };
 }
