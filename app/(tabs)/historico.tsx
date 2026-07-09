@@ -12,6 +12,7 @@ import {
   useWindowDimensions
 } from "react-native";
 
+import { MASTER_CATEGORIES } from "../constants/categories";
 import {
   Expense,
   deleteExpense,
@@ -32,18 +33,7 @@ type Period =
 
 type ViewMode = "lancamentos" | "categorias";
 
-const CATEGORY_OPTIONS = [
-  "Todas",
-  "Alimentação",
-  "Transporte",
-  "Moradia",
-  "Contas",
-  "Assinaturas",
-  "Saúde",
-  "Serviços",
-  "Cartão de crédito",
-  "Outros",
-];
+const CATEGORY_OPTIONS = ["Todas", ...MASTER_CATEGORIES];
 
 export default function Historico() {
   
@@ -276,11 +266,15 @@ export default function Historico() {
     }
 
     await updateExpense({
-      ...item,
-      valor: Number(valorNumerico.toFixed(2)),
-      categoria: editCategoria,
-      data: editData,
-    });
+  ...item,
+  valor: Number(valorNumerico.toFixed(2)),
+  categoria: editCategoria,
+  subcategoria:
+    editCategoria === item.categoria ? item.subcategoria ?? "" : "",
+  termoEncontrado:
+    editCategoria === item.categoria ? item.termoEncontrado ?? "" : "",
+  data: editData,
+});
 
     cancelarEdicao();
     await loadExpenses();
@@ -592,12 +586,13 @@ useEffect(() => {
     parseDateSafe(b.data).getTime()
 );
 
-const linhas = despesasOrdenadas.map(
-  (item) =>
-    `${formatDateBR(item.data)} • ${item.categoria} • ${formatMoney(
-      item.valor
-    )}`
-);
+const linhas = despesasOrdenadas.map((item) => {
+  const detalhe = item.subcategoria ? ` / ${item.subcategoria}` : "";
+
+  return `${formatDateBR(item.data)} • ${item.categoria}${detalhe} • ${formatMoney(
+    item.valor
+  )}`;
+});
 
 const categoriasResumo: Record<string, number> = {};
 
@@ -1122,9 +1117,16 @@ const selectedCategoryCountText =
                                   {formatMoney(item.valor)}
                                 </Text>
 
-                                <Text style={styles.category}>
-                                  {item.categoria}
-                                </Text>
+         <Text style={styles.category}>
+         {item.categoria}
+         </Text>
+
+         {item.subcategoria ? (
+         <Text style={styles.subcategory}>
+         Detalhe: {item.subcategoria}
+         </Text>
+         ) : null}
+                                
                               </View>
 
                               <View style={styles.cardActionsRow}>
@@ -1254,6 +1256,13 @@ const selectedCategoryCountText =
               <Text style={styles.modalItemDate}>
                 {formatDateBR(item.data)}
               </Text>
+
+             {item.subcategoria ? (
+             <Text style={styles.modalItemSubcategory}>
+             {item.subcategoria}
+             </Text>
+             ) : null}
+
             </View>
 
             <Text style={styles.modalItemCategory}>
@@ -1524,6 +1533,13 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 
+  subcategory: {
+  fontSize: 12,
+  color: "#0A8F55",
+  marginTop: 3,
+  fontWeight: "600",
+},
+
   categorySummary: {
     fontSize: 14,
     color: "#555",
@@ -1784,6 +1800,13 @@ modalItemDate: {
   fontSize: 12,
   color: "#666",
   marginTop: 3,
+},
+
+modalItemSubcategory: {
+  fontSize: 12,
+  color: "#0A8F55",
+  marginTop: 3,
+  fontWeight: "600",
 },
 
 modalItemCategory: {
