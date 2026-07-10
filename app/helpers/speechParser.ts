@@ -196,6 +196,21 @@ if (
   return depoisDeAmanha;
 }
 
+const daquiDiasMatch = normalizedText.match(
+  /daqui\s+(\d+)\s+dias?/
+);
+
+if (daquiDiasMatch) {
+  const dias = Number(daquiDiasMatch[1]);
+
+  if (!isNaN(dias)) {
+    const data = new Date(now);
+    data.setDate(now.getDate() + dias);
+
+    return data;
+  }
+}
+
 if (normalizedText.includes("semana passada")) {
   const data = new Date(now);
   data.setDate(now.getDate() - 7);
