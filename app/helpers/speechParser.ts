@@ -171,7 +171,14 @@ function parseDateFromSpeech(text: string): Date {
     ontem.setDate(now.getDate() - 1);
     return ontem;
   }
-
+if (
+  normalizedText.includes("anteontem") ||
+  normalizedText.includes("antes de ontem")
+) {
+  const anteontem = new Date(now);
+  anteontem.setDate(now.getDate() - 2);
+  return anteontem;
+}
   if (
     normalizedText.includes("amanha") ||
     normalizedText.includes("amanhã")
@@ -180,6 +187,87 @@ function parseDateFromSpeech(text: string): Date {
     amanha.setDate(now.getDate() + 1);
     return amanha;
   }
+if (
+  normalizedText.includes("depois de amanha") ||
+  normalizedText.includes("depois de amanhã")
+) {
+  const depoisDeAmanha = new Date(now);
+  depoisDeAmanha.setDate(now.getDate() + 2);
+  return depoisDeAmanha;
+}
+
+if (normalizedText.includes("semana passada")) {
+  const data = new Date(now);
+  data.setDate(now.getDate() - 7);
+  return data;
+}
+
+if (
+  normalizedText.includes("semana que vem")
+) {
+  const data = new Date(now);
+  data.setDate(now.getDate() + 7);
+  return data;
+}
+if (
+  normalizedText.includes("mes passado") ||
+  normalizedText.includes("mês passado")
+) {
+  const data = new Date(now);
+  data.setMonth(now.getMonth() - 1);
+  return data;
+}
+
+if (
+  normalizedText.includes("mes que vem") ||
+  normalizedText.includes("mês que vem")
+) {
+  const data = new Date(now);
+  data.setMonth(now.getMonth() + 1);
+  return data;
+}
+const proximosDiasSemana = [
+  { termo: "proxima segunda", dia: 1 },
+  { termo: "próxima segunda", dia: 1 },
+
+  { termo: "proxima terca", dia: 2 },
+  { termo: "próxima terça", dia: 2 },
+
+  { termo: "proxima quarta", dia: 3 },
+  { termo: "próxima quarta", dia: 3 },
+
+  { termo: "proxima quinta", dia: 4 },
+  { termo: "próxima quinta", dia: 4 },
+
+  { termo: "proxima sexta", dia: 5 },
+  { termo: "próxima sexta", dia: 5 },
+
+  { termo: "proximo sabado", dia: 6 },
+  { termo: "próximo sábado", dia: 6 },
+
+  { termo: "proximo domingo", dia: 0 },
+  { termo: "próximo domingo", dia: 0 },
+];
+
+for (const item of proximosDiasSemana) {
+  if (normalizedText.includes(item.termo)) {
+    const data = new Date(now);
+
+    let diasAAdicionar =
+      (item.dia - now.getDay() + 7) % 7;
+
+    if (diasAAdicionar === 0) {
+      diasAAdicionar = 7;
+    }
+
+    data.setDate(
+      now.getDate() + diasAAdicionar
+    );
+
+    return data;
+  }
+}
+  
 
   let day: number | null = null;
   let month: number | null = null;

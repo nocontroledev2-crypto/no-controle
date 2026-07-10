@@ -594,25 +594,64 @@ const linhas = despesasOrdenadas.map((item) => {
   )}`;
 });
 
-const categoriasResumo: Record<string, number> = {};
+const categoriasDetalhadas: Record<
+  string,
+  {
+    total: number;
+    subcategorias: Record<string, number>;
+  }
+> = {};
 
 despesasOrdenadas.forEach((item) => {
-  categoriasResumo[item.categoria] =
-    (categoriasResumo[item.categoria] || 0) +
+  const categoria = item.categoria || "Outros";
+  const subcategoria = item.subcategoria || "Sem detalhe";
+
+  if (!categoriasDetalhadas[categoria]) {
+    categoriasDetalhadas[categoria] = {
+      total: 0,
+      subcategorias: {},
+    };
+  }
+
+  categoriasDetalhadas[categoria].total += Number(
+    item.valor || 0
+  );
+
+  categoriasDetalhadas[categoria].subcategorias[
+    subcategoria
+  ] =
+    (categoriasDetalhadas[categoria].subcategorias[
+      subcategoria
+    ] || 0) +
     Number(item.valor || 0);
 });
 
 const categoriasOrdenadas = Object.entries(
-  categoriasResumo
-)
-  .sort((a, b) => b[1] - a[1]);
+  categoriasDetalhadas
+).sort(
+  (a, b) =>
+    b[1].total - a[1].total
+);
 
 const resumoCategorias = categoriasOrdenadas
-  .map(
-    ([categoria, total]) =>
-      `${categoria} • ${formatMoney(total)}`
-  )
-  .join("\n");
+  .map(([categoria, info]) => {
+    const subcategoriasTexto = Object.entries(
+      info.subcategorias
+    )
+      .sort((a, b) => b[1] - a[1])
+      .map(
+        ([subcategoria, total]) =>
+          `• ${subcategoria} • ${formatMoney(total)}`
+      )
+      .join("\n");
+
+    return `${categoria} • ${formatMoney(
+      info.total
+    )}
+
+${subcategoriasTexto}`;
+  })
+  .join("\n\n--------------------------------\n\n");
 
 const quantidadeCategorias =
   categoriasOrdenadas.length;
