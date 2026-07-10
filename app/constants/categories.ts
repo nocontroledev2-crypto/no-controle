@@ -2,6 +2,7 @@ export const MASTER_CATEGORIES = [
   "Moradia",
   "Contas da Casa",
   "Alimentação",
+  "Assinaturas",
   "Transporte",
   "Saúde",
   "Educação",
