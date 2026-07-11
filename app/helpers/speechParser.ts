@@ -211,6 +211,40 @@ if (daquiDiasMatch) {
   }
 }
 
+const daquiNumeroMatch = normalizedText.match(
+  /daqui\s+(?:a\s+)?(\d+)\s+dias?/
+);
+
+if (daquiNumeroMatch) {
+  const dias = Number(daquiNumeroMatch[1]);
+
+  if (!isNaN(dias)) {
+    const data = new Date(now);
+
+    data.setDate(now.getDate() + dias);
+
+    return data;
+  }
+}
+
+const daquiTextoMatch = normalizedText.match(
+  /daqui\s+(?:a\s+)?([a-z\s]+?)\s+dias?/
+);
+
+if (daquiTextoMatch) {
+  const dias = parseNumberWordsText(
+    daquiTextoMatch[1]
+  );
+
+  if (dias > 0) {
+    const data = new Date(now);
+
+    data.setDate(now.getDate() + dias);
+
+    return data;
+  }
+}
+
 if (normalizedText.includes("semana passada")) {
   const data = new Date(now);
   data.setDate(now.getDate() - 7);

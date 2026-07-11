@@ -390,6 +390,28 @@ export const CATEGORY_DICTIONARY_RULES: CategoryRule[] = [
   },
 
   {
+  categoria: "Lazer",
+  subcategoria: "Balada",
+  termos: [
+    "balada",
+    "festa",
+    "boate",
+    "night",
+    "na noite",
+    "noitada",
+    "show",
+    "barzinho",
+    "bar",
+    "pub",
+    "cervejaria",
+    "open bar",
+    "role",
+    "rolê",
+    "evento"
+  ],
+},
+
+  {
   categoria: "Educação",
   subcategoria: "Cursos",
   termos: [
@@ -636,6 +658,8 @@ export const CATEGORY_DICTIONARY_RULES: CategoryRule[] = [
   termos: [
     "mercado livre",
     "mercadolivre",
+    "shopi",
+    "shopii",
     "shopee",
     "amazon",
     "amazon brasil",
