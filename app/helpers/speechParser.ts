@@ -105,8 +105,8 @@ function parseValue(rawText: string): number | null {
   const text = normalize(rawText);
 
   const digitWithCents = text.match(
-    /(\d+)\s*(?:reais?|real)?\s*(?:e|com)\s*(\d{1,2})\s*(?:centavos?|centavo)?/
-  );
+  /(\d+)\s*(?:reais?|real|brl)?\s*(?:e|com)\s*(\d{1,2})\s*(?:centavos?|centavo)?/
+);
 
   if (digitWithCents) {
     const reais = Number(digitWithCents[1]);
@@ -130,6 +130,19 @@ function parseValue(rawText: string): number | null {
       return Number((reais + centavos / 100).toFixed(2));
     }
   }
+
+const brlWithCents = text.match(
+  /(\d+)\s*brl\s*e\s*(\d{1,2})/
+);
+
+if (brlWithCents) {
+  const reais = Number(brlWithCents[1]);
+  const centavos = Number(brlWithCents[2]);
+
+  return Number(
+    (reais + centavos / 100).toFixed(2)
+  );
+}
 
   const digit = text.match(/\d+/);
 
