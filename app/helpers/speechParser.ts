@@ -96,13 +96,58 @@ function parseNumberWordsText(text: string): number {
 function parseValue(rawText: string): number | null {
   const raw = rawText.toLowerCase();
 
-  const decimalMatch = raw.match(/\d+[,.]\d{1,2}/);
+/*
+  Valores digitados em formato brasileiro:
+  - "1.254,78" -> 1254.78
+  - "12.345,67" -> 12345.67
+*/
+const brDecimalWithThousandsMatch = raw.match(
+  /\b\d{1,3}(?:\.\d{3})+,\d{1,2}\b/
+);
 
-  if (decimalMatch) {
-    return Number(decimalMatch[0].replace(",", "."));
-  }
+if (brDecimalWithThousandsMatch) {
+  return Number(
+    brDecimalWithThousandsMatch[0]
+      .replace(/\./g, "")
+      .replace(",", ".")
+  );
+}
 
-  const text = normalize(rawText);
+/*
+  Valores digitados em formato brasileiro sem milhar:
+  - "1254,78" -> 1254.78
+*/
+const brDecimalMatch = raw.match(/\b\d+,\d{1,2}\b/);
+
+if (brDecimalMatch) {
+  return Number(brDecimalMatch[0].replace(",", "."));
+}
+
+/*
+  Valores digitados em formato internacional:
+  - "1254.78" -> 1254.78
+*/
+const dotDecimalMatch = raw.match(/\b\d+\.\d{1,2}\b/);
+
+if (dotDecimalMatch) {
+  return Number(dotDecimalMatch[0]);
+}
+
+/*
+  Valor inteiro com separador de milhar:
+  - "1.254" -> 1254
+*/
+const brIntegerWithThousandsMatch = raw.match(
+  /\b\d{1,3}(?:\.\d{3})+\b/
+);
+
+if (brIntegerWithThousandsMatch) {
+  return Number(
+    brIntegerWithThousandsMatch[0].replace(/\./g, "")
+  );
+}
+
+const text = normalize(rawText);
 
   const digitWithCents = text.match(
   /(\d+)\s*(?:reais?|real|brl)?\s*(?:e|com)\s*(\d{1,2})\s*(?:centavos?|centavo)?/
