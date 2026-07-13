@@ -138,8 +138,7 @@ export default function Registrar() {
     recognition.onresult = (event: any) => {
       const textoFalado = event.results[0][0].transcript;
          console.log(textoFalado);
-         alert(textoFalado);
-      setState("processing");
+       
 
       const parsed = parseSpeech(textoFalado);
 
