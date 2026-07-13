@@ -56,6 +56,16 @@ const [data, setData] = useState(new Date());
     return parsedDate;
   }
 
+  function normalizarCategoriaDetectada(categoriaTexto?: string) {
+  const categoriaLimpa = (categoriaTexto ?? "").trim();
+
+  if (MASTER_CATEGORIES.includes(categoriaLimpa)) {
+    return categoriaLimpa;
+  }
+
+  return "";
+}
+
   /* ✅ PARSE VALOR MONETÁRIO BR/PT-BR */
   function parseValorMonetario(valorTexto: string) {
     if (!valorTexto) return NaN;
@@ -186,8 +196,10 @@ function entenderTextoDigitado() {
     setValor(valorTexto);
   }
 
-  setCategoria(parsed.categoria);
-  setSubcategoria(parsed.subcategoria ?? "");
+  const categoriaDetectada = normalizarCategoriaDetectada(parsed.categoria);
+
+setCategoria(categoriaDetectada);
+setSubcategoria(categoriaDetectada ? parsed.subcategoria ?? "" : "");
   setTermoEncontrado(parsed.termoEncontrado ?? "");
   setData(parsed.data);
   setDataTexto(formatarData(parsed.data));
@@ -306,12 +318,17 @@ setState("idle");
 
           <select
   value={categoria}
-  onChange={(e) => {
-    setCategoria(e.target.value);
+  onChange={(e: any) => {
+    const categoriaSelecionada =
+      e?.currentTarget?.value ??
+      e?.target?.value ??
+      "";
+
+    setCategoria(categoriaSelecionada);
     setSubcategoria("");
     setTermoEncontrado("");
   }}
-  style={styles.input}
+  style={styles.input as any}
 >
   <option value="">Selecione a categoria</option>
 
