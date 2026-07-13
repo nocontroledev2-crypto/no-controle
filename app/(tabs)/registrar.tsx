@@ -18,11 +18,12 @@ export default function Registrar() {
   const router = useRouter();
 
   const [state, setState] = useState<RegistrarState>("idle");
-  const [valor, setValor] = useState("");
-  const [categoria, setCategoria] = useState("");
-  const [subcategoria, setSubcategoria] = useState("");
-  const [termoEncontrado, setTermoEncontrado] = useState("");
-  const [data, setData] = useState(new Date());
+  const [textoInteligente, setTextoInteligente] = useState("");
+const [valor, setValor] = useState("");
+const [categoria, setCategoria] = useState("");
+const [subcategoria, setSubcategoria] = useState("");
+const [termoEncontrado, setTermoEncontrado] = useState("");
+const [data, setData] = useState(new Date());
   const [dataTexto, setDataTexto] = useState(formatarData(new Date()));
 
   const recognitionRef = useRef<any>(null);
@@ -168,7 +169,31 @@ export default function Registrar() {
     recognitionRef.current?.stop();
     setState("idle");
   }
+function entenderTextoDigitado() {
+  const texto = textoInteligente.trim();
 
+  if (!texto) {
+    alert("Digite uma despesa para o No Controle entender.");
+    return;
+  }
+
+  setState("processing");
+
+  const parsed = parseSpeech(texto);
+
+  if (parsed.valor !== null) {
+    const valorTexto = String(parsed.valor).replace(".", ",");
+    setValor(valorTexto);
+  }
+
+  setCategoria(parsed.categoria);
+  setSubcategoria(parsed.subcategoria ?? "");
+  setTermoEncontrado(parsed.termoEncontrado ?? "");
+  setData(parsed.data);
+  setDataTexto(formatarData(parsed.data));
+
+  setState("confirm");
+}
   async function salvarDespesa() {
     const valorNumerico = parseValorMonetario(valor);
 
@@ -199,7 +224,8 @@ export default function Registrar() {
 
     const hoje = new Date();
 
-    setValor("");
+    setTextoInteligente("");
+setValor("");
 setCategoria("");
 setSubcategoria("");
 setTermoEncontrado("");
@@ -244,6 +270,28 @@ setState("idle");
 
       {(state === "idle" || state === "confirm") && (
         <>
+        <Text style={styles.label}>Digite sua despesa</Text>
+
+<TextInput
+  style={styles.smartInput}
+  value={textoInteligente}
+  onChangeText={setTextoInteligente}
+  placeholder="Ex: Ontem gastei 250 reais no Carrefour"
+  multiline
+/>
+
+<TouchableOpacity
+  style={styles.smartButton}
+  onPress={entenderTextoDigitado}
+>
+  <Text style={styles.confirmText}>
+    ✨ Entender despesa
+  </Text>
+</TouchableOpacity>
+
+<Text style={styles.smartHint}>
+  Você pode escrever como fala: “Mês que vem vou pagar Netflix 250 reais”.
+</Text>
           <Text style={styles.label}>Valor</Text>
           <TextInput
             ref={valorInputRef}
@@ -389,5 +437,30 @@ const styles = StyleSheet.create({
   color: "#0A8F55",
   marginBottom: 10,
   fontWeight: "600",
+},
+
+smartInput: {
+  backgroundColor: "#F9FAFB",
+  padding: 12,
+  borderRadius: 10,
+  marginBottom: 10,
+  fontSize: 16,
+  borderWidth: 1,
+  borderColor: "#E5E7EB",
+  minHeight: 70,
+  textAlignVertical: "top",
+},
+
+smartButton: {
+  backgroundColor: "#0A8F55",
+  padding: 14,
+  borderRadius: 10,
+  marginBottom: 8,
+},
+
+smartHint: {
+  fontSize: 12,
+  color: "#666",
+  marginBottom: 14,
 },
 });
