@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import { MASTER_CATEGORIES } from "../constants/categories";
+import { getSubcategoriesByMaster } from "../constants/subcategories";
 import { parseSpeech } from "../helpers/speechParser";
 import { saveExpense } from "../storage/expenseStorage";
 
@@ -24,6 +25,7 @@ const [valor, setValor] = useState("");
 const [categoria, setCategoria] = useState("");
 const [menuCategoriaAberto, setMenuCategoriaAberto] = useState(false);
 const [subcategoria, setSubcategoria] = useState("");
+const [menuSubcategoriaAberto, setMenuSubcategoriaAberto] = useState(false);
 const [termoEncontrado, setTermoEncontrado] = useState("");
 const [data, setData] = useState(new Date());
   const [dataTexto, setDataTexto] = useState(formatarData(new Date()));
@@ -83,7 +85,16 @@ function selecionarCategoriaManual(categoriaSelecionada: string) {
   setSubcategoria("");
   setTermoEncontrado("");
   setMenuCategoriaAberto(false);
+  setMenuSubcategoriaAberto(false);
 }
+function selecionarSubcategoriaManual(subcategoriaSelecionada: string) {
+  setSubcategoria(subcategoriaSelecionada);
+  setTermoEncontrado("");
+  setMenuSubcategoriaAberto(false);
+}
+
+const subcategoriasDisponiveis = getSubcategoriesByMaster(categoria);
+
   /* ✅ PARSE VALOR MONETÁRIO BR/PT-BR */
   function parseValorMonetario(valorTexto: string) {
     if (!valorTexto) return NaN;
@@ -185,6 +196,7 @@ setCategoria(categoriaDetectada);
 setSubcategoria(categoriaDetectada ? parsed.subcategoria ?? "" : "");
 setTermoEncontrado(categoriaDetectada ? parsed.termoEncontrado ?? "" : "");
 setMenuCategoriaAberto(false);
+setMenuSubcategoriaAberto(false);
       setData(parsed.data);
       setDataTexto(formatarData(parsed.data));
 
@@ -219,9 +231,10 @@ function entenderTextoDigitado() {
 
   const categoriaDetectada = normalizarCategoriaDetectada(parsed.categoria);
 
-setCategoria(categoriaDetectada);
-setSubcategoria(categoriaDetectada ? parsed.subcategoria ?? "" : "");
+  setCategoria(categoriaDetectada);
+  setSubcategoria(categoriaDetectada ? parsed.subcategoria ?? "" : "");
   setTermoEncontrado(parsed.termoEncontrado ?? "");
+  setMenuSubcategoriaAberto(false);
   setData(parsed.data);
   setDataTexto(formatarData(parsed.data));
 
@@ -393,11 +406,63 @@ setState("idle");
   </View>
 ) : null}
 
-     {subcategoria ? (
-     <Text style={styles.detailText}>
-      Detalhe identificado: {subcategoria}
+     {categoria && subcategoriasDisponiveis.length > 0 ? (
+  <>
+    <Text style={styles.label}>Subcategoria</Text>
+
+    <TouchableOpacity
+      style={styles.categorySelectButton}
+      onPress={() => setMenuSubcategoriaAberto(!menuSubcategoriaAberto)}
+      activeOpacity={0.85}
+    >
+      <Text
+        style={[
+          styles.categorySelectText,
+          !subcategoria && styles.categoryPlaceholder,
+        ]}
+      >
+        {subcategoria || "Selecione a subcategoria"}
       </Text>
-      ) : null}
+
+      <Text style={styles.categorySelectArrow}>
+        {menuSubcategoriaAberto ? "▲" : "▼"}
+      </Text>
+    </TouchableOpacity>
+
+    {menuSubcategoriaAberto ? (
+      <View style={styles.categoryMenu}>
+        <ScrollView
+          style={styles.categoryMenuScroll}
+          showsVerticalScrollIndicator={false}
+        >
+          {subcategoriasDisponiveis.map((sub: string) => (
+            <TouchableOpacity
+              key={sub}
+              style={styles.categoryMenuItem}
+              onPress={() => selecionarSubcategoriaManual(sub)}
+              activeOpacity={0.8}
+            >
+              <Text
+                style={[
+                  styles.categoryMenuItemText,
+                  subcategoria === sub && styles.categoryMenuItemTextActive,
+                ]}
+              >
+                {sub}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+    ) : null}
+  </>
+) : null}
+
+{subcategoria ? (
+  <Text style={styles.detailText}>
+    Detalhe identificado: {subcategoria}
+  </Text>
+) : null}
 
           <Text style={styles.label}>Data</Text>
           <TextInput

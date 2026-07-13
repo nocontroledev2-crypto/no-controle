@@ -74,27 +74,29 @@ export const SUBCATEGORIES_BY_MASTER: Record<string, string[]> = {
   ],
 
   "Lazer": [
-    "Cinema",
-    "Streaming",
-    "Viagem",
-    "Passeios",
-    "Eventos",
-    "Jogos",
-    "Shows",
-    "Bar",
-    "Clube",
-  ],
+  "Cinema",
+  "Viagem",
+  "Passeios",
+  "Eventos",
+  "Jogos",
+  "Balada",
+  "Shows",
+  "Bar",
+  "Clube",
+],
 
   "Compras": [
-    "Roupas",
-    "Calçados",
-    "Acessórios",
-    "Presentes",
-    "Eletrônicos",
-    "Casa",
-    "Beleza",
-    "Perfumaria",
-  ],
+  "Compras Online",
+  "Roupas",
+  "Calçados",
+  "Acessórios",
+  "Presentes",
+  "Eletrônicos",
+  "Casa",
+  "Beleza",
+  "Perfumaria",
+],
+
 
   "Serviços": [
     "Mecânico",
@@ -125,16 +127,17 @@ export const SUBCATEGORIES_BY_MASTER: Record<string, string[]> = {
   ],
 
   "Financeiro": [
-    "Cartão de Crédito",
-    "Empréstimo",
-    "Financiamento",
-    "Juros",
-    "Tarifas Bancárias",
-    "Investimentos",
-    "Impostos",
-    "Pix",
-    "Saque",
-  ],
+  "Banco",
+  "Cartão de Crédito",
+  "Empréstimo",
+  "Financiamento",
+  "Juros",
+  "Tarifas Bancárias",
+  "Investimentos",
+  "Impostos",
+  "Pix",
+  "Saque",
+],
 
   "Receitas": [
     "Salário",
@@ -145,6 +148,16 @@ export const SUBCATEGORIES_BY_MASTER: Record<string, string[]> = {
     "Rendimento",
     "Outras Receitas",
   ],
+  
+"Assinaturas": [
+  "Streaming",
+  "Música",
+  "TV por Assinatura",
+  "Software",
+  "Aplicativos",
+  "Jogos",
+  "Outras Assinaturas",
+],
 
   "Outros": [
     "Outros",
