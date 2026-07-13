@@ -2,6 +2,7 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -21,6 +22,7 @@ export default function Registrar() {
   const [textoInteligente, setTextoInteligente] = useState("");
 const [valor, setValor] = useState("");
 const [categoria, setCategoria] = useState("");
+const [menuCategoriaAberto, setMenuCategoriaAberto] = useState(false);
 const [subcategoria, setSubcategoria] = useState("");
 const [termoEncontrado, setTermoEncontrado] = useState("");
 const [data, setData] = useState(new Date());
@@ -80,6 +82,7 @@ function selecionarCategoriaManual(categoriaSelecionada: string) {
   setCategoria(categoriaSelecionada);
   setSubcategoria("");
   setTermoEncontrado("");
+  setMenuCategoriaAberto(false);
 }
   /* ✅ PARSE VALOR MONETÁRIO BR/PT-BR */
   function parseValorMonetario(valorTexto: string) {
@@ -181,6 +184,7 @@ function selecionarCategoriaManual(categoriaSelecionada: string) {
 setCategoria(categoriaDetectada);
 setSubcategoria(categoriaDetectada ? parsed.subcategoria ?? "" : "");
 setTermoEncontrado(categoriaDetectada ? parsed.termoEncontrado ?? "" : "");
+setMenuCategoriaAberto(false);
       setData(parsed.data);
       setDataTexto(formatarData(parsed.data));
 
@@ -333,24 +337,51 @@ setState("idle");
 
           <Text style={styles.label}>Categoria</Text>
 
-          <select
-  value={categoria}
-  onChange={(e: any) => {
-    selecionarCategoriaManual(e.target.value);
-  }}
-  onInput={(e: any) => {
-    selecionarCategoriaManual(e.target.value);
-  }}
-  style={styles.input as any}
+          <TouchableOpacity
+  style={styles.categorySelectButton}
+  onPress={() => setMenuCategoriaAberto(!menuCategoriaAberto)}
+  activeOpacity={0.85}
 >
-  <option value="">Selecione a categoria</option>
+  <Text
+    style={[
+      styles.categorySelectText,
+      !categoria && styles.categoryPlaceholder,
+    ]}
+  >
+    {categoria || "Selecione a categoria"}
+  </Text>
 
-  {MASTER_CATEGORIES.map((cat: string) => (
-    <option key={cat} value={cat}>
-      {cat}
-    </option>
-  ))}
-</select>
+  <Text style={styles.categorySelectArrow}>
+    {menuCategoriaAberto ? "▲" : "▼"}
+  </Text>
+</TouchableOpacity>
+
+{menuCategoriaAberto ? (
+  <View style={styles.categoryMenu}>
+    <ScrollView
+      style={styles.categoryMenuScroll}
+      showsVerticalScrollIndicator={false}
+    >
+      {MASTER_CATEGORIES.map((cat: string) => (
+        <TouchableOpacity
+          key={cat}
+          style={styles.categoryMenuItem}
+          onPress={() => selecionarCategoriaManual(cat)}
+          activeOpacity={0.8}
+        >
+          <Text
+            style={[
+              styles.categoryMenuItemText,
+              categoria === cat && styles.categoryMenuItemTextActive,
+            ]}
+          >
+            {cat}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </ScrollView>
+  </View>
+) : null}
 
      {subcategoria ? (
      <Text style={styles.detailText}>
@@ -493,4 +524,64 @@ smartHint: {
   color: "#666",
   marginBottom: 14,
 },
+categorySelectButton: {
+  backgroundColor: "#F9FAFB",
+  padding: 12,
+  borderRadius: 10,
+  marginBottom: 8,
+  fontSize: 16,
+  borderWidth: 1,
+  borderColor: "#E5E7EB",
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+},
+
+categorySelectText: {
+  fontSize: 16,
+  color: "#111827",
+  flex: 1,
+},
+
+categoryPlaceholder: {
+  color: "#9CA3AF",
+},
+
+categorySelectArrow: {
+  fontSize: 12,
+  color: "#555",
+  marginLeft: 8,
+},
+
+categoryMenu: {
+  backgroundColor: "#FFF",
+  borderWidth: 1,
+  borderColor: "#E5E7EB",
+  borderRadius: 10,
+  marginBottom: 12,
+  maxHeight: 220,
+  overflow: "hidden",
+},
+
+categoryMenuScroll: {
+  maxHeight: 220,
+},
+
+categoryMenuItem: {
+  paddingVertical: 11,
+  paddingHorizontal: 12,
+  borderBottomWidth: 0.5,
+  borderBottomColor: "#F0F0F0",
+},
+
+categoryMenuItemText: {
+  fontSize: 15,
+  color: "#333",
+},
+
+categoryMenuItemTextActive: {
+  color: "#0A8F55",
+  fontWeight: "700",
+},
+
 });
