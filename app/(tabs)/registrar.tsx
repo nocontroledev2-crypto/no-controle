@@ -56,16 +56,31 @@ const [data, setData] = useState(new Date());
     return parsedDate;
   }
 
-  function normalizarCategoriaDetectada(categoriaTexto?: string) {
-  const categoriaLimpa = (categoriaTexto ?? "").trim();
-
-  if (MASTER_CATEGORIES.includes(categoriaLimpa)) {
-    return categoriaLimpa;
-  }
-
-  return "";
+  function normalizarTextoBase(texto: string) {
+  return texto
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
 }
 
+function normalizarCategoriaDetectada(categoriaTexto?: string) {
+  const categoriaLimpa = (categoriaTexto ?? "").trim();
+
+  const categoriaEncontrada = MASTER_CATEGORIES.find(
+    (cat) =>
+      normalizarTextoBase(cat) === normalizarTextoBase(categoriaLimpa)
+  );
+
+  return categoriaEncontrada ?? "";
+}
+
+
+function selecionarCategoriaManual(categoriaSelecionada: string) {
+  setCategoria(categoriaSelecionada);
+  setSubcategoria("");
+  setTermoEncontrado("");
+}
   /* ✅ PARSE VALOR MONETÁRIO BR/PT-BR */
   function parseValorMonetario(valorTexto: string) {
     if (!valorTexto) return NaN;
@@ -161,9 +176,11 @@ const [data, setData] = useState(new Date());
         }
       }
 
-      setCategoria(parsed.categoria);
-      setSubcategoria(parsed.subcategoria ?? "");
-      setTermoEncontrado(parsed.termoEncontrado ?? "");
+      const categoriaDetectada = normalizarCategoriaDetectada(parsed.categoria);
+
+setCategoria(categoriaDetectada);
+setSubcategoria(categoriaDetectada ? parsed.subcategoria ?? "" : "");
+setTermoEncontrado(categoriaDetectada ? parsed.termoEncontrado ?? "" : "");
       setData(parsed.data);
       setDataTexto(formatarData(parsed.data));
 
@@ -319,14 +336,10 @@ setState("idle");
           <select
   value={categoria}
   onChange={(e: any) => {
-    const categoriaSelecionada =
-      e?.currentTarget?.value ??
-      e?.target?.value ??
-      "";
-
-    setCategoria(categoriaSelecionada);
-    setSubcategoria("");
-    setTermoEncontrado("");
+    selecionarCategoriaManual(e.target.value);
+  }}
+  onInput={(e: any) => {
+    selecionarCategoriaManual(e.target.value);
   }}
   style={styles.input as any}
 >
