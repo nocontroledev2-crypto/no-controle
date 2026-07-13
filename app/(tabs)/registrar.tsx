@@ -277,8 +277,13 @@ setState("idle");
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Registrar despesa</Text>
+  <ScrollView
+    style={styles.container}
+    contentContainerStyle={styles.contentContainer}
+    keyboardShouldPersistTaps="handled"
+    showsVerticalScrollIndicator={false}
+  >
+    <Text style={styles.title}>Registrar despesa</Text>
 
       {/* 🎤 ESCUTA */}
       {state === "listening" && (
@@ -303,28 +308,33 @@ setState("idle");
 
       {(state === "idle" || state === "confirm") && (
         <>
-        <Text style={styles.label}>Digite sua despesa</Text>
+        {state === "idle" && (
+  <>
+    <Text style={styles.label}>Digite sua despesa</Text>
 
-<TextInput
-  style={styles.smartInput}
-  value={textoInteligente}
-  onChangeText={setTextoInteligente}
-  placeholder="Ex: Ontem gastei 250 reais no Carrefour"
-  multiline
-/>
+    <TextInput
+      style={styles.smartInput}
+      value={textoInteligente}
+      onChangeText={setTextoInteligente}
+      placeholder="Digite aqui. Ex: Ontem gastei 250 reais no Carrefour"
+      placeholderTextColor="#9CA3AF"
+      multiline
+    />
 
-<TouchableOpacity
-  style={styles.smartButton}
-  onPress={entenderTextoDigitado}
->
-  <Text style={styles.confirmText}>
-    ✨ Entender despesa
-  </Text>
-</TouchableOpacity>
+    <TouchableOpacity
+      style={styles.smartButton}
+      onPress={entenderTextoDigitado}
+    >
+      <Text style={styles.confirmText}>
+        ✨ Entender despesa
+      </Text>
+    </TouchableOpacity>
 
-<Text style={styles.smartHint}>
-  Você pode escrever como fala: “Mês que vem vou pagar Netflix 250 reais”.
-</Text>
+    <Text style={styles.smartHint}>
+      Você pode escrever como fala. Ex: “Mês que vem vou pagar Netflix 250 reais”.
+    </Text>
+  </>
+)}
           <Text style={styles.label}>Valor</Text>
           <TextInput
             ref={valorInputRef}
@@ -442,13 +452,21 @@ setState("idle");
           )}
         </>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
 /* 🎨 estilos mantidos */
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#F2F2F2" },
+  container: {
+  flex: 1,
+  backgroundColor: "#F2F2F2",
+},
+
+contentContainer: {
+  padding: 20,
+  paddingBottom: 180,
+},
   title: {
     fontSize: 24,
     fontWeight: "bold",
