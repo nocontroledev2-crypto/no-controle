@@ -191,7 +191,7 @@ export default function Simulador() {
     if (limiteSeguro >= 0) {
       return {
         titulo: "Você está no controle",
-        detalhe: `Depois dos gastos já registrados até o momento, e da sua meta, ainda existe uma margem segura para este mês.`,
+        detalhe: `Depois dos gastos já registrados até o momento e da sua meta, ainda existe uma margem segura para este mês.`,
         tipo: "positivo",
       };
     }
@@ -327,10 +327,16 @@ export default function Simulador() {
             </Text>
 
             <Text style={styles.subText}>
-              {limiteSeguro >= 0
-                ? "Esse é o limite aproximado para continuar dentro da sua renda e ainda respeitar sua meta."
-                : "Você já ultrapassou o limite seguro considerando sua renda e meta informadas."}
-            </Text>
+  {limiteSeguro >= 0
+    ? "Esse é o limite aproximado para continuar dentro da sua renda e ainda respeitar sua meta."
+    : "Você já ultrapassou o limite seguro considerando sua renda e meta informadas."}
+</Text>
+
+{limiteSeguro >= 0 ? (
+  <Text style={styles.reserveHint}>
+    💡 Você já tem sua reserva de emergência? Se ainda não tem, esse pode ser um ótimo momento para começar.
+  </Text>
+) : null}
           </View>
         ) : null}
 
@@ -545,12 +551,15 @@ const styles = StyleSheet.create({
   },
 
   resultLine: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: 10,
-    marginTop: 8,
-  },
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: 10,
+  marginTop: 8,
+  width: "100%",
+  maxWidth: 520,
+  alignSelf: "flex-start",
+},
 
   resultLabel: {
     fontSize: 13,
@@ -619,4 +628,13 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     marginBottom: 4,
   },
+
+  reserveHint: {
+  fontSize: 12,
+  color: "#4D6659",
+  lineHeight: 17,
+  marginTop: 6,
+},
+
+
 });
