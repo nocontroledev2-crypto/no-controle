@@ -635,19 +635,34 @@ const categoriasOrdenadas = Object.entries(
 
 const resumoCategorias = categoriasOrdenadas
   .map(([categoria, info]) => {
+    const percentualCategoria =
+      totalPeriodo > 0
+        ? (info.total / totalPeriodo) * 100
+        : 0;
+
     const subcategoriasTexto = Object.entries(
       info.subcategorias
     )
       .sort((a, b) => b[1] - a[1])
-      .map(
-        ([subcategoria, total]) =>
-          `• ${subcategoria} • ${formatMoney(total)}`
-      )
+      .map(([subcategoria, total]) => {
+        const percentualSubcategoria =
+          info.total > 0
+            ? (total / info.total) * 100
+            : 0;
+
+        return `• ${subcategoria} • ${formatMoney(
+          total
+        )} • ${percentualSubcategoria.toFixed(
+          0
+        )}% da categoria`;
+      })
       .join("\n");
 
     return `${categoria} • ${formatMoney(
       info.total
-    )}
+    )} • ${percentualCategoria.toFixed(
+      0
+    )}% do período
 
 ${subcategoriasTexto}`;
   })
