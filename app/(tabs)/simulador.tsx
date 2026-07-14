@@ -191,7 +191,7 @@ export default function Simulador() {
     if (limiteSeguro >= 0) {
       return {
         titulo: "Você está no controle",
-        detalhe: `Depois dos gastos já registrados e da sua meta, ainda existe uma margem segura para este mês.`,
+        detalhe: `Depois dos gastos já registrados até o momento, e da sua meta, ainda existe uma margem segura para este mês.`,
         tipo: "positivo",
       };
     }
