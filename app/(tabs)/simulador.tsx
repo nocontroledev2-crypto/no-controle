@@ -198,7 +198,7 @@ export default function Simulador() {
 
     return {
       titulo: "Seu dinheiro pode acabar antes do fim do mês",
-      detalhe: `Com os gastos já registrados e sua meta informada, você já passou ${formatMoney(
+      detalhe: `Com os gastos já registrados até o momento, e sua meta informada, você já passou ${formatMoney(
         Math.abs(limiteSeguro)
       )} do limite seguro do mês.`,
       tipo: "risco",
@@ -287,24 +287,28 @@ export default function Simulador() {
           <Text style={styles.resultDetail}>{status.detalhe}</Text>
         </View>
 
-        <View style={styles.metricLine}>
-  <Text style={styles.metricLabel}>Renda mensal</Text>
-  <View style={styles.metricDots} />
-  <Text style={styles.metricValue}>
-    {rendaValida ? formatMoney(receitaConsiderada) : "Não informada"}
-  </Text>
-</View>
+       <View style={styles.card}>
+  <Text style={styles.cardTitle}>📊 Raio-X do mês</Text>
 
-<View style={styles.metricLine}>
-  <Text style={styles.metricLabel}>Gasto até hoje</Text>
-  <View style={styles.metricDots} />
-  <Text style={styles.metricValue}>{formatMoney(totalMesAtual)}</Text>
-</View>
+  <View style={styles.metricLine}>
+    <Text style={styles.metricLabel}>Renda mensal</Text>
+    <View style={styles.metricDots} />
+    <Text style={styles.metricValue}>
+      {rendaValida ? formatMoney(receitaConsiderada) : "Não informada"}
+    </Text>
+  </View>
 
-<View style={styles.metricLine}>
-  <Text style={styles.metricLabel}>Meta de economia</Text>
-  <View style={styles.metricDots} />
-  <Text style={styles.metricValue}>{formatMoney(metaConsiderada)}</Text>
+  <View style={styles.metricLine}>
+    <Text style={styles.metricLabel}>Gasto até hoje</Text>
+    <View style={styles.metricDots} />
+    <Text style={styles.metricValue}>{formatMoney(totalMesAtual)}</Text>
+  </View>
+
+  <View style={styles.metricLine}>
+    <Text style={styles.metricLabel}>Meta de economia</Text>
+    <View style={styles.metricDots} />
+    <Text style={styles.metricValue}>{formatMoney(metaConsiderada)}</Text>
+  </View>
 </View>
 
         {rendaValida ? (
