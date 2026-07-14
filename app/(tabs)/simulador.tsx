@@ -375,48 +375,53 @@ export default function Simulador() {
         ) : null}
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>🎯 Onde agir agora</Text>
+  <Text style={styles.cardTitle}>🎯 Ponto de atenção do mês</Text>
 
-          {currentMonthExpenses.length === 0 ? (
-            <Text style={styles.subText}>
-              Registre algumas despesas para o simulador apontar onde seu dinheiro está indo.
-            </Text>
-          ) : categoriaMaisPesada ? (
-            <>
-              <Text style={styles.subText}>
-                A maior oportunidade de economia neste mês está em:
-              </Text>
+  {currentMonthExpenses.length === 0 ? (
+    <Text style={styles.subText}>
+      Registre algumas despesas para o simulador apontar onde seu dinheiro está indo.
+    </Text>
+  ) : categoriaMaisPesada ? (
+    <>
+      <Text style={styles.subText}>
+        Até agora, a categoria que mais pesou nos seus gastos foi:
+      </Text>
 
-              <Text style={styles.bigCategoryText}>{categoriaMaisPesada[0]}</Text>
+      <Text style={styles.bigCategoryText}>{categoriaMaisPesada[0]}</Text>
 
-              <Text style={styles.subText}>
-                Total gasto:{" "}
-                <Text style={styles.boldText}>
-                  {formatMoney(categoriaMaisPesada[1])}
-                </Text>
-              </Text>
+      <Text style={styles.subText}>
+        Total gasto:{" "}
+        <Text style={styles.boldText}>
+          {formatMoney(categoriaMaisPesada[1])}
+        </Text>
+      </Text>
 
-              <Text style={styles.subText}>
-                Participação nos gastos:{" "}
-                <Text style={styles.boldText}>
-                  {percentualCategoriaMaisPesada.toFixed(0)}%
-                </Text>
-              </Text>
+      <Text style={styles.subText}>
+        Representa{" "}
+        <Text style={styles.boldText}>
+          {percentualCategoriaMaisPesada.toFixed(0)}%
+        </Text>{" "}
+        dos gastos registrados neste mês.
+      </Text>
 
-              <Text style={styles.subText}>
-                Se reduzir 20% nessa categoria, você pode economizar cerca de{" "}
-                <Text style={styles.boldText}>
-                  {formatMoney(economiaSimuladaCategoria)}
-                </Text>
-                .
-              </Text>
-            </>
-          ) : (
-            <Text style={styles.subText}>
-              Ainda não há categoria suficiente para gerar sugestão.
-            </Text>
-          )}
-        </View>
+      <Text style={styles.subText}>
+        Para os próximos gastos, tente reduzir essa categoria em 20%.
+      </Text>
+
+      <Text style={styles.subText}>
+        Isso poderia preservar cerca de{" "}
+        <Text style={styles.boldText}>
+          {formatMoney(economiaSimuladaCategoria)}
+        </Text>{" "}
+        no seu orçamento.
+      </Text>
+    </>
+      ) : (
+       <Text style={styles.subText}>
+      Ainda não há categoria suficiente para gerar sugestão.
+      </Text>
+      )}
+       </View>
 
         {!historicoSuficiente ? (
           <View style={styles.noteCard}>
@@ -675,18 +680,18 @@ metricLine: {
   alignItems: "center",
   marginTop: 8,
   width: "100%",
-  maxWidth: 420,
+  maxWidth: 330,
 },
 
 metricLabel: {
   fontSize: 13,
   color: "#666",
-  width: 130,
+  width: 115,
 },
 
 metricDots: {
   flex: 1,
-  maxWidth: 120,
+  maxWidth: 70,
   borderBottomWidth: 1,
   borderBottomColor: "#D9E2DD",
   borderStyle: "dotted",
@@ -698,7 +703,7 @@ metricValue: {
   fontSize: 13,
   fontWeight: "800",
   color: "#333",
-  minWidth: 115,
+  minWidth: 105,
   textAlign: "right",
 },
 
