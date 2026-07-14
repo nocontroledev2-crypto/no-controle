@@ -688,6 +688,22 @@ export const CATEGORY_DICTIONARY_RULES: CategoryRule[] = [
     "picachu",
   ],
 },
+{
+  categoria: "Compras",
+  subcategoria: "Presentes",
+  termos: [
+    "presente",
+    "presentes",
+    "lembranca",
+    "lembranças",
+    "lembrancinha",
+    "lembrancinhas",
+    "lembranca de viagem",
+    "lembrança de viagem",
+    "gift",
+  ],
+},
+
 
   {
     categoria: "Família",
