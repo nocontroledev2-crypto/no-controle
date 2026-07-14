@@ -704,6 +704,21 @@ export const CATEGORY_DICTIONARY_RULES: CategoryRule[] = [
   ],
 },
 
+{
+  categoria: "Compras",
+  subcategoria: "Brinquedos",
+  termos: [
+    "brinquedo",
+    "brinquedos",
+    "boneca",
+    "boneco",
+    "lego",
+    "carrinho",
+    "hot wheels",
+    "jogo infantil",
+  ],
+},
+
 
   {
     categoria: "Família",
