@@ -117,20 +117,6 @@ export default function Simulador() {
     );
   }, [currentMonthExpenses]);
 
-  const diasNoMes = new Date(
-    now.getFullYear(),
-    now.getMonth() + 1,
-    0
-  ).getDate();
-
-  const diaAtual = Math.min(now.getDate(), diasNoMes);
-const diasRestantes = Math.max(diasNoMes - diaAtual, 0);
-
-const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
-
-  const projecaoGastosMes =
-    totalMesAtual > 0 ? mediaDiariaAtual * diasNoMes : 0;
-
   const rendaNumerica = parseValorMonetario(rendaMensal);
   const metaNumerica = parseValorMonetario(metaEconomia);
 
@@ -140,8 +126,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
   const receitaConsiderada = rendaValida ? rendaNumerica : 0;
   const metaConsiderada = metaValida ? metaNumerica : 0;
 
-  const saldoPrevisto = receitaConsiderada - projecaoGastosMes;
-  const sobraAposMeta = saldoPrevisto - metaConsiderada;
+  const limiteSeguro = receitaConsiderada - metaConsiderada - totalMesAtual;
 
   const porCategoria = useMemo(() => {
     const map: Record<string, number> = {};
@@ -156,45 +141,66 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
 
   const categoriaMaisPesada = porCategoria[0];
 
+  const percentualCategoriaMaisPesada =
+    categoriaMaisPesada && totalMesAtual > 0
+      ? (categoriaMaisPesada[1] / totalMesAtual) * 100
+      : 0;
+
   const economiaSimuladaCategoria = categoriaMaisPesada
     ? categoriaMaisPesada[1] * 0.2
     : 0;
+
+  const mesesComHistorico = useMemo(() => {
+    const meses = new Set<string>();
+
+    expenses.forEach((item) => {
+      const d = parseDateSafe(item.data);
+      meses.add(`${d.getFullYear()}-${d.getMonth()}`);
+    });
+
+    return meses.size;
+  }, [expenses]);
+
+  const categoriasUtilizadas = useMemo(() => {
+    const categorias = new Set<string>();
+
+    expenses.forEach((item) => {
+      if (item.categoria) {
+        categorias.add(item.categoria);
+      }
+    });
+
+    return categorias.size;
+  }, [expenses]);
+
+  const registrosTotais = expenses.length;
+
+  const historicoSuficiente =
+    mesesComHistorico >= 3 && registrosTotais >= 12 && categoriasUtilizadas >= 3;
 
   function getStatusSimulador() {
     if (!rendaValida) {
       return {
         titulo: "Informe sua renda mensal",
         detalhe:
-          "Com a renda mensal, o No Controle consegue simular seu fechamento do mês.",
+          "Com a renda mensal, o No Controle consegue mostrar sua situação do mês com mais clareza.",
         tipo: "neutro",
       };
     }
 
-    if (sobraAposMeta >= 0) {
+    if (limiteSeguro >= 0) {
       return {
         titulo: "Você está no controle",
-        detalhe: `No ritmo atual, você pode fechar o mês mantendo sua meta de ${formatMoney(
-          metaConsiderada
-        )}.`,
+        detalhe: `Depois dos gastos já registrados e da sua meta, ainda existe uma margem segura para este mês.`,
         tipo: "positivo",
       };
     }
 
-    if (saldoPrevisto >= 0) {
-      return {
-        titulo: "Atenção à sua meta",
-        detalhe: `Você deve fechar o mês no positivo, mas pode faltar ${formatMoney(
-          Math.abs(sobraAposMeta)
-        )} para alcançar sua meta.`,
-        tipo: "alerta",
-      };
-    }
-
     return {
-      titulo: "Risco de fechar negativo",
-      detalhe: `No ritmo atual, seus gastos podem ultrapassar sua renda em ${formatMoney(
-        Math.abs(saldoPrevisto)
-      )}.`,
+      titulo: "Seu dinheiro pode acabar antes do fim do mês",
+      detalhe: `Com os gastos já registrados e sua meta informada, você já passou ${formatMoney(
+        Math.abs(limiteSeguro)
+      )} do limite seguro do mês.`,
       tipo: "risco",
     };
   }
@@ -235,7 +241,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
         <Text style={styles.title}>Simulador</Text>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>🧮 Planeje seu mês</Text>
+          <Text style={styles.cardTitle}>🧠 Consultor Financeiro Pessoal</Text>
 
           <Text style={styles.label}>Renda mensal</Text>
           <TextInput
@@ -262,121 +268,107 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
           {mensagem ? <Text style={styles.successText}>{mensagem}</Text> : null}
         </View>
 
-        <View style={[styles.row, isMobile && styles.rowMobile]}>
-  <View style={[styles.card, styles.cardInRow]}>
-    <Text style={styles.cardTitle}>💸 Gasto até hoje</Text>
-
-    <Text style={styles.cardValue}>
-      {formatMoney(totalMesAtual)}
-    </Text>
-
-    <Text style={styles.subText}>
-      Total de despesas já registradas neste mês.
-    </Text>
-  </View>
-
-  <View style={[styles.card, styles.cardInRow]}>
-    <Text style={styles.cardTitle}>🔮 Gasto previsto no mês</Text>
-
-    <Text style={[styles.cardValue, styles.forecastValue]}>
-      {formatMoney(projecaoGastosMes)}
-    </Text>
-
-    <Text style={styles.subText}>
-      Estimativa de despesas até o fim do mês, se mantiver o ritmo atual.
-    </Text>
-
-    <Text style={styles.formulaText}>
-      Ritmo atual: {formatMoney(mediaDiariaAtual)} por dia
-      {diasRestantes === 0
-        ? ". Hoje é o último dia do mês."
-        : ` • faltam ${diasRestantes} dias.`}
-    </Text>
-  </View>
-</View>
-
         <View
           style={[
             styles.resultCard,
             status.tipo === "positivo" && styles.resultPositive,
-            status.tipo === "alerta" && styles.resultAlert,
             status.tipo === "risco" && styles.resultRisk,
           ]}
         >
           <Text style={styles.resultTitle}>
             {status.tipo === "positivo"
               ? "✅ "
-              : status.tipo === "alerta"
-              ? "⚠️ "
               : status.tipo === "risco"
-              ? "🚨 "
+              ? "⚠️ "
               : "ℹ️ "}
             {status.titulo}
           </Text>
 
           <Text style={styles.resultDetail}>{status.detalhe}</Text>
-
-          {rendaValida && (
-            <>
-              <View style={styles.resultLine}>
-                <Text style={styles.resultLabel}>Renda mensal informada</Text>
-                <Text style={styles.resultValue}>
-                  {formatMoney(receitaConsiderada)}
-                </Text>
-              </View>
-
-              <View style={styles.resultLine}>
-                <Text style={styles.resultLabel}>Saldo previsto</Text>
-                <Text
-                  style={[
-                    styles.resultValue,
-                    saldoPrevisto >= 0
-                      ? styles.positiveText
-                      : styles.negativeText,
-                  ]}
-                >
-                  {formatMoney(saldoPrevisto)}
-                </Text>
-              </View>
-
-              <View style={styles.resultLine}>
-                <Text style={styles.resultLabel}>Saldo após meta</Text>
-                <Text
-                  style={[
-                    styles.resultValue,
-                    sobraAposMeta >= 0
-                      ? styles.positiveText
-                      : styles.negativeText,
-                  ]}
-                >
-                  {formatMoney(sobraAposMeta)}
-                </Text>
-              </View>
-            </>
-          )}
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>🎯 Sugestão inteligente</Text>
+          <Text style={styles.cardTitle}>📊 Raio-X do mês</Text>
+
+          <View style={styles.resultLine}>
+            <Text style={styles.resultLabel}>Renda mensal</Text>
+            <Text style={styles.resultValue}>
+              {rendaValida ? formatMoney(receitaConsiderada) : "Não informada"}
+            </Text>
+          </View>
+
+          <View style={styles.resultLine}>
+            <Text style={styles.resultLabel}>Gasto até hoje</Text>
+            <Text style={styles.resultValue}>{formatMoney(totalMesAtual)}</Text>
+          </View>
+
+          <View style={styles.resultLine}>
+            <Text style={styles.resultLabel}>Meta de economia</Text>
+            <Text style={styles.resultValue}>{formatMoney(metaConsiderada)}</Text>
+          </View>
+        </View>
+
+        {rendaValida ? (
+          <View
+            style={[
+              styles.card,
+              limiteSeguro >= 0 ? styles.safeCard : styles.riskCard,
+            ]}
+          >
+            <Text style={styles.cardTitle}>💰 Quanto ainda posso gastar?</Text>
+
+            <Text
+              style={[
+                styles.safeLimitValue,
+                limiteSeguro >= 0 ? styles.positiveText : styles.negativeText,
+              ]}
+            >
+              {formatMoney(limiteSeguro)}
+            </Text>
+
+            <Text style={styles.subText}>
+              {limiteSeguro >= 0
+                ? "Esse é o limite aproximado para continuar dentro da sua renda e ainda respeitar sua meta."
+                : "Você já ultrapassou o limite seguro considerando sua renda e meta informadas."}
+            </Text>
+          </View>
+        ) : null}
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>🎯 Onde agir agora</Text>
 
           {currentMonthExpenses.length === 0 ? (
             <Text style={styles.subText}>
-              Registre algumas despesas para o simulador gerar sugestões com base
-              no seu comportamento real.
+              Registre algumas despesas para o simulador apontar onde seu dinheiro está indo.
             </Text>
           ) : categoriaMaisPesada ? (
             <>
               <Text style={styles.subText}>
-                Sua categoria com maior impacto neste mês é{" "}
-                <Text style={styles.boldText}>{categoriaMaisPesada[0]}</Text>,
-                com {formatMoney(categoriaMaisPesada[1])}.
+                A maior oportunidade de economia neste mês está em:
+              </Text>
+
+              <Text style={styles.bigCategoryText}>{categoriaMaisPesada[0]}</Text>
+
+              <Text style={styles.subText}>
+                Total gasto:{" "}
+                <Text style={styles.boldText}>
+                  {formatMoney(categoriaMaisPesada[1])}
+                </Text>
+              </Text>
+
+              <Text style={styles.subText}>
+                Participação nos gastos:{" "}
+                <Text style={styles.boldText}>
+                  {percentualCategoriaMaisPesada.toFixed(0)}%
+                </Text>
               </Text>
 
               <Text style={styles.subText}>
                 Se reduzir 20% nessa categoria, você pode economizar cerca de{" "}
                 <Text style={styles.boldText}>
                   {formatMoney(economiaSimuladaCategoria)}
-                </Text>.
+                </Text>
+                .
               </Text>
             </>
           ) : (
@@ -386,12 +378,38 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
           )}
         </View>
 
+        {!historicoSuficiente ? (
+          <View style={styles.noteCard}>
+            <Text style={styles.noteTitle}>🔒 Ainda aprendendo seus hábitos</Text>
+
+            <Text style={styles.noteText}>
+              As projeções inteligentes serão liberadas quando houver histórico suficiente.
+            </Text>
+
+            <Text style={styles.noteText}>
+              Necessário: 3 meses de histórico, 12 registros e 3 categorias utilizadas.
+            </Text>
+
+            <Text style={styles.noteText}>
+              Hoje: {mesesComHistorico} mês(es), {registrosTotais} registro(s) e{" "}
+              {categoriasUtilizadas} categoria(s).
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.noteCard}>
+            <Text style={styles.noteTitle}>✅ Histórico suficiente</Text>
+
+            <Text style={styles.noteText}>
+              O No Controle já possui base mínima para liberar projeções mais inteligentes nas próximas versões.
+            </Text>
+          </View>
+        )}
+
         <View style={styles.noteCard}>
           <Text style={styles.noteTitle}>📌 Versão MVP</Text>
           <Text style={styles.noteText}>
-            Esta simulação usa uma estimativa simples baseada no ritmo atual de
-            gastos do mês. Futuramente, o No Controle poderá considerar renda
-            recorrente, gastos fixos, metas por categoria e cenários avançados.
+            Esta versão foca em clareza: mostrar sua situação, quanto ainda pode gastar e onde agir primeiro.
+            Futuramente, o No Controle poderá simular cenários, metas por categoria e estratégias avançadas.
           </Text>
         </View>
       </ScrollView>
@@ -431,20 +449,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderWidth: 0.5,
     borderColor: "#E8EAEE",
-  },
-
-  row: {
-    flexDirection: "row",
-    gap: 10,
-  },
-
-  rowMobile: {
-  flexDirection: "column",
-  gap: 0,
-},
-
-  cardInRow: {
-    flex: 1,
   },
 
   cardTitle: {
@@ -496,13 +500,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 
-  cardValue: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#0A8F55",
-    marginBottom: 4,
-  },
-
   subText: {
     fontSize: 13,
     color: "#666",
@@ -529,11 +526,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3FBF7",
   },
 
-  resultAlert: {
-    borderColor: "#F3D58A",
-    backgroundColor: "#FFF8E6",
-  },
-
   resultRisk: {
     borderColor: "#F3C2C2",
     backgroundColor: "#FFF5F5",
@@ -550,33 +542,45 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#555",
     lineHeight: 18,
-    marginBottom: 12,
   },
 
-   resultLine: {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-  gap: 10,
-  marginTop: 6,
-  width: "100%",
-  maxWidth: 520,
-  alignSelf: "flex-start",
-},
+  resultLine: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 10,
+    marginTop: 8,
+  },
 
-resultLabel: {
-  fontSize: 13,
-  color: "#666",
-  flex: 1,
-},
+  resultLabel: {
+    fontSize: 13,
+    color: "#666",
+    flex: 1,
+  },
 
-resultValue: {
-  fontSize: 13,
-  fontWeight: "700",
-  color: "#333",
-  textAlign: "right",
-  minWidth: 110,
-},
+  resultValue: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#333",
+    textAlign: "right",
+    minWidth: 120,
+  },
+
+  safeCard: {
+    borderColor: "#BFE7D2",
+    backgroundColor: "#F3FBF7",
+  },
+
+  riskCard: {
+    borderColor: "#F3C2C2",
+    backgroundColor: "#FFF5F5",
+  },
+
+  safeLimitValue: {
+    fontSize: 28,
+    fontWeight: "900",
+    marginBottom: 8,
+  },
 
   positiveText: {
     color: "#0A8F55",
@@ -584,6 +588,13 @@ resultValue: {
 
   negativeText: {
     color: "#C0392B",
+  },
+
+  bigCategoryText: {
+    fontSize: 22,
+    fontWeight: "900",
+    color: "#0A8F55",
+    marginBottom: 8,
   },
 
   noteCard: {
@@ -606,17 +617,6 @@ resultValue: {
     fontSize: 13,
     color: "#4D6659",
     lineHeight: 18,
+    marginBottom: 4,
   },
-
-  forecastValue: {
-  color: "#B7791F",
-},
-
-formulaText: {
-  fontSize: 12,
-  color: "#777",
-  lineHeight: 16,
-  marginTop: 4,
-},
-  
 });
