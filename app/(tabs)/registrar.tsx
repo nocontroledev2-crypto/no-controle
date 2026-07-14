@@ -1,3 +1,5 @@
+AMigão, não sei se realmente está na ordem certa, então segue o código completo abaixo do Registrar, ok?
+
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -177,7 +179,7 @@ const subcategoriasDisponiveis = getSubcategoriesByMaster(categoria);
 
     recognition.onresult = (event: any) => {
       const textoFalado = event.results[0][0].transcript;
-         console.log(textoFalado);
+         
        
 
       const parsed = parseSpeech(textoFalado);
@@ -197,8 +199,8 @@ setSubcategoria(categoriaDetectada ? parsed.subcategoria ?? "" : "");
 setTermoEncontrado(categoriaDetectada ? parsed.termoEncontrado ?? "" : "");
 setMenuCategoriaAberto(false);
 setMenuSubcategoriaAberto(false);
-      setData(parsed.data);
-      setDataTexto(formatarData(parsed.data));
+setData(parsed.data);
+setDataTexto(formatarData(parsed.data));
 
       setState("confirm");
     };
@@ -323,6 +325,25 @@ setState("idle");
         <>
         {state === "idle" && (
   <>
+    <View style={styles.voiceFirstBox}>
+      <Text style={styles.voiceFirstTitle}>🎤 Fala Inteligente</Text>
+
+      <TouchableOpacity
+        style={styles.voiceButton}
+        onPress={iniciarEscuta}
+      >
+        <Text style={styles.confirmText}>
+          🎤 Falar despesa
+        </Text>
+      </TouchableOpacity>
+
+      <Text style={styles.voiceFirstHint}>
+        Fale naturalmente. Ex: “Ontem gastei 322 reais no restaurante”.
+      </Text>
+    </View>
+
+    <Text style={styles.sectionLabel}>✍️ Digitação Inteligente</Text>
+
     <Text style={styles.label}>Digite sua despesa</Text>
 
     <TextInput
@@ -348,6 +369,9 @@ setState("idle");
     </Text>
   </>
 )}
+{state === "idle" ? (
+  <Text style={styles.sectionLabel}>🧾 Preencher manualmente</Text>
+) : null}
           <Text style={styles.label}>Valor</Text>
           <TextInput
             ref={valorInputRef}
@@ -505,14 +529,7 @@ setState("idle");
   </TouchableOpacity>
 )}
 
-<TouchableOpacity
-  style={styles.voiceButton}
-  onPress={iniciarEscuta}
->
-  <Text style={styles.confirmText}>
-    🎤 Falar despesa
-  </Text>
-</TouchableOpacity>
+
             </>
           )}
         </>
@@ -665,6 +682,38 @@ categoryMenuItemText: {
 categoryMenuItemTextActive: {
   color: "#0A8F55",
   fontWeight: "700",
+},
+
+voiceFirstBox: {
+  backgroundColor: "#FFFFFF",
+  borderRadius: 14,
+  padding: 14,
+  marginBottom: 14,
+  borderWidth: 0.5,
+  borderColor: "#DDE3EA",
+},
+
+voiceFirstTitle: {
+  fontSize: 16,
+  fontWeight: "800",
+  color: "#0A8F55",
+  marginBottom: 8,
+  textAlign: "center",
+},
+
+voiceFirstHint: {
+  fontSize: 12,
+  color: "#666",
+  marginTop: 8,
+  textAlign: "center",
+},
+
+sectionLabel: {
+  fontSize: 15,
+  fontWeight: "800",
+  color: "#333",
+  marginTop: 8,
+  marginBottom: 8,
 },
 
 });
