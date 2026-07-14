@@ -68,6 +68,7 @@ export default function Historico() {
   null
 );
 
+  const [showReportModal, setShowReportModal] = useState(false);
   const now = new Date();
 
   /* ===============================
@@ -578,107 +579,105 @@ useEffect(() => {
     filteredExpenses.length === 1
       ? "1 registro"
       : `${filteredExpenses.length} registros`;
-
-      async function compartilharRelatorio() {
+     
+     function gerarRelatorioTexto() {
   const despesasOrdenadas = [...filteredExpenses].sort(
-  (a, b) =>
-    parseDateSafe(a.data).getTime() -
-    parseDateSafe(b.data).getTime()
-);
-
-const linhas = despesasOrdenadas.map((item) => {
-  const detalhe = item.subcategoria ? ` / ${item.subcategoria}` : "";
-
-  return `${formatDateBR(item.data)} • ${item.categoria}${detalhe} • ${formatMoney(
-    item.valor
-  )}`;
-});
-
-const categoriasDetalhadas: Record<
-  string,
-  {
-    total: number;
-    subcategorias: Record<string, number>;
-  }
-> = {};
-
-despesasOrdenadas.forEach((item) => {
-  const categoria = item.categoria || "Outros";
-  const subcategoria = item.subcategoria || "Sem detalhe";
-
-  if (!categoriasDetalhadas[categoria]) {
-    categoriasDetalhadas[categoria] = {
-      total: 0,
-      subcategorias: {},
-    };
-  }
-
-  categoriasDetalhadas[categoria].total += Number(
-    item.valor || 0
+    (a, b) =>
+      parseDateSafe(a.data).getTime() -
+      parseDateSafe(b.data).getTime()
   );
 
-  categoriasDetalhadas[categoria].subcategorias[
-    subcategoria
-  ] =
-    (categoriasDetalhadas[categoria].subcategorias[
+  const linhas = despesasOrdenadas.map((item) => {
+    const detalhe = item.subcategoria
+      ? ` / ${item.subcategoria}`
+      : "";
+
+    return `${formatDateBR(item.data)} • ${item.categoria}${detalhe} • ${formatMoney(
+      item.valor
+    )}`;
+  });
+
+  const categoriasDetalhadas: Record<
+    string,
+    {
+      total: number;
+      subcategorias: Record<string, number>;
+    }
+  > = {};
+
+  despesasOrdenadas.forEach((item) => {
+    const categoria = item.categoria || "Outros";
+    const subcategoria = item.subcategoria || "Sem detalhe";
+
+    if (!categoriasDetalhadas[categoria]) {
+      categoriasDetalhadas[categoria] = {
+        total: 0,
+        subcategorias: {},
+      };
+    }
+
+    categoriasDetalhadas[categoria].total += Number(
+      item.valor || 0
+    );
+
+    categoriasDetalhadas[categoria].subcategorias[
       subcategoria
-    ] || 0) +
-    Number(item.valor || 0);
-});
+    ] =
+      (categoriasDetalhadas[categoria].subcategorias[
+        subcategoria
+      ] || 0) +
+      Number(item.valor || 0);
+  });
 
-const categoriasOrdenadas = Object.entries(
-  categoriasDetalhadas
-).sort(
-  (a, b) =>
-    b[1].total - a[1].total
-);
+  const categoriasOrdenadas = Object.entries(
+    categoriasDetalhadas
+  ).sort(
+    (a, b) =>
+      b[1].total - a[1].total
+  );
 
-const resumoCategorias = categoriasOrdenadas
-  .map(([categoria, info]) => {
-    const percentualCategoria =
-      totalPeriodo > 0
-        ? (info.total / totalPeriodo) * 100
-        : 0;
+  const resumoCategorias = categoriasOrdenadas
+    .map(([categoria, info]) => {
+      const percentualCategoria =
+        totalPeriodo > 0
+          ? (info.total / totalPeriodo) * 100
+          : 0;
 
-    const subcategoriasTexto = Object.entries(
-      info.subcategorias
-    )
-      .sort((a, b) => b[1] - a[1])
-      .map(([subcategoria, total]) => {
-        const percentualSubcategoria =
-          info.total > 0
-            ? (total / info.total) * 100
-            : 0;
+      const subcategoriasTexto = Object.entries(
+        info.subcategorias
+      )
+        .sort((a, b) => b[1] - a[1])
+        .map(([subcategoria, total]) => {
+          const percentualSubcategoria =
+            info.total > 0
+              ? (total / info.total) * 100
+              : 0;
 
-        return `• ${subcategoria} • ${formatMoney(
-          total
-        )} • ${percentualSubcategoria.toFixed(
-          0
-        )}% da categoria`;
-      })
-      .join("\n");
+          return `• ${subcategoria} • ${formatMoney(
+            total
+          )} • ${percentualSubcategoria.toFixed(
+            0
+          )}% da categoria`;
+        })
+        .join("\n");
 
-    return `${categoria} • ${formatMoney(
-      info.total
-    )} • ${percentualCategoria.toFixed(
-      0
-    )}% do período
+      return `${categoria} • ${formatMoney(
+        info.total
+      )} • ${percentualCategoria.toFixed(
+        0
+      )}% do período
 
 ${subcategoriasTexto}`;
-  })
-  .join("\n\n--------------------------------\n\n");
+    })
+    .join("\n\n--------------------------------\n\n");
 
-const quantidadeCategorias =
-  categoriasOrdenadas.length;
-
-  const relatorio = `
-📊 RELATÓRIO FINANCEIRO - NO CONTROLE
+  return `📊 RELATÓRIO FINANCEIRO - NO CONTROLE
 
 Período: ${labelPeriod(period)}
 
 💰 Total gasto: ${formatMoney(totalPeriodo)}
 
-🏷️ Categorias: ${quantidadeCategorias}
+🏷️ Categorias: ${categoriasOrdenadas.length}
 
 📝 Registros: ${filteredExpenses.length}
 
@@ -696,8 +695,12 @@ ${linhas.join("\n")}
 
 --------------------------------
 
-Gerado pelo No Controle
-`;
+Gerado pelo No Controle`;
+}
+
+
+      async function compartilharRelatorio() {
+  const relatorio = gerarRelatorioTexto();
 
   console.log(relatorio);
 
@@ -720,13 +723,13 @@ Gerado pelo No Controle
       "Relatório copiado para a área de transferência."
     );
   } catch (error) {
-  console.error(error);
+    console.error(error);
 
-  alert(
-    "Erro ao gerar relatório.\n\n" +
-    String(error)
-  );
-}
+    alert(
+      "Erro ao gerar relatório.\n\n" +
+      String(error)
+    );
+  }
 }
 
 
@@ -1021,11 +1024,19 @@ const selectedCategoryCountText =
       Total no período
     </Text>
 
-    <TouchableOpacity
-  onPress={compartilharRelatorio}
-  style={styles.shareChip}
->
-  <Text style={styles.shareChipText}>
+    <View style={{ flexDirection: "row", gap: 8 }}>
+  <TouchableOpacity
+    onPress={() => setShowReportModal(true)}
+    style={styles.reportChip}
+  >
+    
+</View>
+  <Text style={styles.reportChipText}>
+    📊 Ver relatório
+  </Text>
+</TouchableOpacity> 
+
+<Text style={styles.shareChipText}>
     ↪ Compartilhar
   </Text>
 </TouchableOpacity>
@@ -1249,7 +1260,50 @@ const selectedCategoryCountText =
 ))}
         </ScrollView>
       )}
-     
+     <Modal
+  visible={showReportModal}
+  transparent
+  animationType="fade"
+  onRequestClose={() => setShowReportModal(false)}
+>
+  <View style={styles.modalOverlay}>
+    <View
+      style={[
+        styles.reportModal,
+        isMobile && styles.reportModalMobile,
+      ]}
+    >
+      <View style={styles.modalHeader}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.modalTitle}>
+            Relatório Financeiro
+          </Text>
+
+          <Text style={styles.modalSubtitle}>
+            {labelPeriod(period)}
+          </Text>
+        </View>
+
+        <TouchableOpacity
+          style={styles.modalCloseButton}
+          onPress={() => setShowReportModal(false)}
+        >
+          <Text style={styles.modalCloseText}>
+            Fechar
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.reportPreviewText}>
+          {gerarRelatorioTexto()}
+        </Text>
+      </ScrollView>
+    </View>
+  </View>
+</Modal>
      <Modal
   visible={!!selectedCategoryDetail}
   transparent
@@ -1890,6 +1944,45 @@ shareChipText: {
   color: "#0A8F55",
   fontSize: 12,
   fontWeight: "700",
+},
+
+reportChip: {
+  backgroundColor: "#EEF7FF",
+  borderWidth: 0.5,
+  borderColor: "#BFD9F3",
+  borderRadius: 999,
+  paddingVertical: 5,
+  paddingHorizontal: 10,
+  marginRight: 8,
+},
+
+reportChipText: {
+  color: "#2563EB",
+  fontSize: 12,
+  fontWeight: "700",
+},
+
+reportModal: {
+  width: "95%",
+  maxWidth: 760,
+  height: "90%",
+  backgroundColor: "#F7F8FA",
+  borderRadius: 18,
+  padding: 16,
+  borderWidth: 0.5,
+  borderColor: "#DDE3EA",
+},
+
+reportModalMobile: {
+  width: "96%",
+  height: "92%",
+},
+
+reportPreviewText: {
+  fontSize: 13,
+  color: "#333",
+  lineHeight: 22,
+  paddingBottom: 20,
 },
 
 });
