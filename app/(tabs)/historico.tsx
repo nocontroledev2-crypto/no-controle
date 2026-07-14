@@ -1025,35 +1025,36 @@ const selectedCategoryCountText =
     </Text>
 
     <View style={{ flexDirection: "row", gap: 8 }}>
-  <TouchableOpacity
-    onPress={() => setShowReportModal(true)}
-    style={styles.reportChip}
-  >
-    
-</View>
-  <Text style={styles.reportChipText}>
-    📊 Ver relatório
-  </Text>
-</TouchableOpacity> 
+      <TouchableOpacity
+        onPress={() => setShowReportModal(true)}
+        style={styles.reportChip}
+      >
+        <Text style={styles.reportChipText}>
+          📊 Ver relatório
+        </Text>
+      </TouchableOpacity>
 
-<Text style={styles.shareChipText}>
-    ↪ Compartilhar
-  </Text>
-</TouchableOpacity>
+      <TouchableOpacity
+        onPress={compartilharRelatorio}
+        style={styles.shareChip}
+      >
+        <Text style={styles.shareChipText}>
+          ↪ Compartilhar
+        </Text>
+      </TouchableOpacity>
+    </View>
   </View>
 
   <View style={styles.summaryInlineRow}>
+    <Text style={styles.summaryValue}>
+      {formatMoney(totalPeriodo)}
+    </Text>
 
-
-
-
-          <Text style={styles.summaryValue}>{formatMoney(totalPeriodo)}</Text>
-
-          <Text style={styles.summaryInlineMeta}>
-            • {textoRegistrosResumo}
-          </Text>
-        </View>
-      </View>
+    <Text style={styles.summaryInlineMeta}>
+      • {textoRegistrosResumo}
+    </Text>
+  </View>
+</View>
        
 
             {viewMode === "lancamentos" ? (
