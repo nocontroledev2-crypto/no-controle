@@ -130,13 +130,21 @@ export default function Simulador() {
   const metaNumerica = parseValorMonetario(metaEconomia);
 
   const rendaValida = Number.isFinite(rendaNumerica) && rendaNumerica > 0;
-  const metaValida = Number.isFinite(metaNumerica) && metaNumerica >= 0;
+  const metaValida =
+  metaEconomia.trim() === ""
+    ? true
+    : Number.isFinite(metaNumerica) && metaNumerica >= 0;
   const simulacaoAlterada =
     rendaMensal.trim() !== rendaMensalSalva.trim() ||
     metaEconomia.trim() !== metaEconomiaSalva.trim();
 
   const receitaConsiderada = rendaValida ? rendaNumerica : 0;
-  const metaConsiderada = metaValida ? metaNumerica : 0;
+  const metaConsiderada =
+  metaEconomia.trim() === ""
+    ? 0
+    : metaValida
+    ? metaNumerica
+    : 0;
 
   const limiteSeguro = receitaConsiderada - metaConsiderada - totalMesAtual;
 
@@ -209,7 +217,7 @@ export default function Simulador() {
     }
 
     return {
-  titulo: "Atenção: você já passou do limite seguro do mês",
+  titulo: "Sua renda já não cobre os gastos registrados",
   detalhe: `Com os gastos já registrados até o momento e sua meta informada, faltam ${formatMoney(
     Math.abs(limiteSeguro)
   )} para voltar ao limite seguro deste mês.`,
@@ -225,10 +233,7 @@ export default function Simulador() {
       return;
     }
 
-    if (!metaValida) {
-      alert("Informe uma meta de economia válida. Se não tiver meta, use 0.");
-      return;
-    }
+    
 
     const config: SimulatorConfig = {
       rendaMensal: rendaMensal.trim(),
