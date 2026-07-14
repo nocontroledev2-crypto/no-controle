@@ -278,6 +278,12 @@ setExpenses(normalizedData);
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3);
 
+   function getPercentualCategoria(valor: number) {
+  if (total <= 0) return 0;
+
+  return (valor / total) * 100;
+}
+
   const topGastos = [...filtered]
     .sort((a, b) => b.valor - a.valor)
     .slice(0, 3);
@@ -292,6 +298,8 @@ setExpenses(normalizedData);
       detalhe: "Quando registrar, seu painel vai mostrar os destaques do dia.",
     };
   }
+
+
 
   const categoriaPrincipal = topCategorias[0]?.[0];
   const valorCategoriaPrincipal = topCategorias[0]?.[1] || 0;
@@ -607,10 +615,11 @@ function cancelarPeriodoPersonalizado() {
     </Text>
   ) : (
     topCategorias.map(([cat, val]) => (
-      <Text key={cat}>
-        • {cat} — {formatMoney(val)}
-      </Text>
-    ))
+  <Text key={cat}>
+    • {cat} — {formatMoney(val)} (
+    {getPercentualCategoria(val).toFixed(0)}%)
+  </Text>
+))
   )}
 </Card>
       </View>
