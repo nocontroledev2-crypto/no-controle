@@ -1,5 +1,3 @@
-AMigão, não sei se realmente está na ordem certa, então segue o código completo abaixo do Registrar, ok?
-
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
