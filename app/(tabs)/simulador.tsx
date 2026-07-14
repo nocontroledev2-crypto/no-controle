@@ -287,26 +287,25 @@ export default function Simulador() {
           <Text style={styles.resultDetail}>{status.detalhe}</Text>
         </View>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>📊 Raio-X do mês</Text>
+        <View style={styles.metricLine}>
+  <Text style={styles.metricLabel}>Renda mensal</Text>
+  <View style={styles.metricDots} />
+  <Text style={styles.metricValue}>
+    {rendaValida ? formatMoney(receitaConsiderada) : "Não informada"}
+  </Text>
+</View>
 
-          <View style={styles.resultLine}>
-            <Text style={styles.resultLabel}>Renda mensal</Text>
-            <Text style={styles.resultValue}>
-              {rendaValida ? formatMoney(receitaConsiderada) : "Não informada"}
-            </Text>
-          </View>
+<View style={styles.metricLine}>
+  <Text style={styles.metricLabel}>Gasto até hoje</Text>
+  <View style={styles.metricDots} />
+  <Text style={styles.metricValue}>{formatMoney(totalMesAtual)}</Text>
+</View>
 
-          <View style={styles.resultLine}>
-            <Text style={styles.resultLabel}>Gasto até hoje</Text>
-            <Text style={styles.resultValue}>{formatMoney(totalMesAtual)}</Text>
-          </View>
-
-          <View style={styles.resultLine}>
-            <Text style={styles.resultLabel}>Meta de economia</Text>
-            <Text style={styles.resultValue}>{formatMoney(metaConsiderada)}</Text>
-          </View>
-        </View>
+<View style={styles.metricLine}>
+  <Text style={styles.metricLabel}>Meta de economia</Text>
+  <View style={styles.metricDots} />
+  <Text style={styles.metricValue}>{formatMoney(metaConsiderada)}</Text>
+</View>
 
         {rendaValida ? (
           <View
@@ -326,7 +325,7 @@ export default function Simulador() {
               {formatMoney(limiteSeguro)}
             </Text>
 
-            <Text style={styles.subText}>
+           <Text style={styles.subText}>
   {limiteSeguro >= 0
     ? "Esse é o limite aproximado para continuar dentro da sua renda e ainda respeitar sua meta."
     : "Você já ultrapassou o limite seguro considerando sua renda e meta informadas."}
@@ -334,9 +333,13 @@ export default function Simulador() {
 
 {limiteSeguro >= 0 ? (
   <Text style={styles.reserveHint}>
-    💡 Você já tem sua reserva de emergência? Se ainda não tem, esse pode ser um ótimo momento para começar.
+    💡 Você já tem sua reserva de emergência? Se ainda não tem, esse pode ser um bom momento para começar a construir uma.
   </Text>
-) : null}
+) : (
+  <Text style={styles.debtWarningHint}>
+    💡 Evite cobrir esse valor com cheque especial ou limite do cartão. Os juros podem crescer rápido. Se precisar, procure negociar antes que a dívida aumente.
+  </Text>
+)}
           </View>
         ) : null}
 
@@ -636,5 +639,40 @@ const styles = StyleSheet.create({
   marginTop: 6,
 },
 
+metricLine: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginTop: 8,
+  maxWidth: 620,
+},
+
+metricLabel: {
+  fontSize: 13,
+  color: "#666",
+},
+
+metricDots: {
+  flex: 1,
+  borderBottomWidth: 1,
+  borderBottomColor: "#D9E2DD",
+  borderStyle: "dotted",
+  marginHorizontal: 8,
+  marginTop: 6,
+},
+
+metricValue: {
+  fontSize: 13,
+  fontWeight: "800",
+  color: "#333",
+  minWidth: 110,
+  textAlign: "right",
+},
+
+debtWarningHint: {
+  fontSize: 12,
+  color: "#8A4B00",
+  lineHeight: 17,
+  marginTop: 6,
+},
 
 });
