@@ -67,6 +67,8 @@ export default function Simulador() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [rendaMensal, setRendaMensal] = useState("");
   const [metaEconomia, setMetaEconomia] = useState("");
+  const [rendaMensalSalva, setRendaMensalSalva] = useState("");
+  const [metaEconomiaSalva, setMetaEconomiaSalva] = useState("");
   const [mensagem, setMensagem] = useState("");
 
   const now = new Date();
@@ -89,10 +91,17 @@ export default function Simulador() {
         setExpenses(normalizedData);
 
         if (savedConfig) {
-          const parsed: SimulatorConfig = JSON.parse(savedConfig);
-          setRendaMensal(parsed.rendaMensal || "");
-          setMetaEconomia(parsed.metaEconomia || "");
-        }
+         const parsed: SimulatorConfig = JSON.parse(savedConfig);
+
+         const rendaSalva = parsed.rendaMensal || "";
+         const metaSalva = parsed.metaEconomia || "";
+
+         setRendaMensal(rendaSalva);
+         setMetaEconomia(metaSalva);
+         setRendaMensalSalva(rendaSalva);
+         setMetaEconomiaSalva(metaSalva);
+          }
+
       }
 
       load();
@@ -122,6 +131,9 @@ export default function Simulador() {
 
   const rendaValida = Number.isFinite(rendaNumerica) && rendaNumerica > 0;
   const metaValida = Number.isFinite(metaNumerica) && metaNumerica >= 0;
+  const simulacaoAlterada =
+    rendaMensal.trim() !== rendaMensalSalva.trim() ||
+    metaEconomia.trim() !== metaEconomiaSalva.trim();
 
   const receitaConsiderada = rendaValida ? rendaNumerica : 0;
   const metaConsiderada = metaValida ? metaNumerica : 0;
@@ -197,12 +209,12 @@ export default function Simulador() {
     }
 
     return {
-      titulo: "Seu dinheiro pode acabar antes do fim do mês",
-      detalhe: `Com os gastos já registrados até o momento, e sua meta informada, você já passou ${formatMoney(
-        Math.abs(limiteSeguro)
-      )} do limite seguro do mês.`,
-      tipo: "risco",
-    };
+  titulo: "Atenção: você já passou do limite seguro do mês",
+  detalhe: `Com os gastos já registrados até o momento e sua meta informada, faltam ${formatMoney(
+    Math.abs(limiteSeguro)
+  )} para voltar ao limite seguro deste mês.`,
+  tipo: "risco",
+};
   }
 
   const status = getStatusSimulador();
@@ -224,7 +236,8 @@ export default function Simulador() {
     };
 
     await AsyncStorage.setItem(SIMULATOR_CONFIG_KEY, JSON.stringify(config));
-
+    setRendaMensalSalva(config.rendaMensal);
+    setMetaEconomiaSalva(config.metaEconomia);
     setMensagem("Simulação salva com sucesso.");
 
     setTimeout(() => {
@@ -248,7 +261,7 @@ export default function Simulador() {
             style={styles.input}
             value={rendaMensal}
             onChangeText={setRendaMensal}
-            placeholder="Ex: 5000,00"
+            placeholder="Ex: 5.000,00"
             keyboardType="decimal-pad"
           />
 
@@ -261,9 +274,18 @@ export default function Simulador() {
             keyboardType="decimal-pad"
           />
 
-          <TouchableOpacity style={styles.saveButton} onPress={salvarConfiguracao}>
-            <Text style={styles.saveButtonText}>💾 Salvar simulação</Text>
-          </TouchableOpacity>
+          <TouchableOpacity
+           style={[
+           styles.saveButton,
+           !simulacaoAlterada && styles.saveButtonDisabled,
+           ]}
+           onPress={simulacaoAlterada ? salvarConfiguracao : undefined}
+           disabled={!simulacaoAlterada}
+           >
+           <Text style={styles.saveButtonText}>
+           {simulacaoAlterada ? "💾 Salvar simulação" : "✅ Simulação salva"}
+           </Text>
+           </TouchableOpacity>
 
           {mensagem ? <Text style={styles.successText}>{mensagem}</Text> : null}
         </View>
@@ -318,7 +340,11 @@ export default function Simulador() {
               limiteSeguro >= 0 ? styles.safeCard : styles.riskCard,
             ]}
           >
-            <Text style={styles.cardTitle}>💰 Quanto ainda posso gastar?</Text>
+            <Text style={styles.cardTitle}>
+             {limiteSeguro >= 0
+             ? "💰 Quanto ainda posso gastar?"
+             : "🚨 Limite seguro estourado"}
+             </Text>
 
             <Text
               style={[
@@ -344,6 +370,7 @@ export default function Simulador() {
     💡 Evite cobrir esse valor com cheque especial ou limite do cartão. Os juros podem crescer rápido. Se precisar, procure negociar antes que a dívida aumente.
   </Text>
 )}
+
           </View>
         ) : null}
 
@@ -647,16 +674,19 @@ metricLine: {
   flexDirection: "row",
   alignItems: "center",
   marginTop: 8,
-  maxWidth: 620,
+  width: "100%",
+  maxWidth: 420,
 },
 
 metricLabel: {
   fontSize: 13,
   color: "#666",
+  width: 130,
 },
 
 metricDots: {
   flex: 1,
+  maxWidth: 120,
   borderBottomWidth: 1,
   borderBottomColor: "#D9E2DD",
   borderStyle: "dotted",
@@ -668,7 +698,7 @@ metricValue: {
   fontSize: 13,
   fontWeight: "800",
   color: "#333",
-  minWidth: 110,
+  minWidth: 115,
   textAlign: "right",
 },
 
@@ -678,5 +708,9 @@ debtWarningHint: {
   lineHeight: 17,
   marginTop: 6,
 },
+
+ saveButtonDisabled: {
+  backgroundColor: "#A7CDBB",
+ },
 
 });
