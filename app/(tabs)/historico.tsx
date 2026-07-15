@@ -671,7 +671,7 @@ ${subcategoriasTexto}`;
     })
     .join("\n\n--------------------------------\n\n");
 
-  return `📊 RELATÓRIO FINANCEIRO - NO CONTROLE
+  return `📊 RELATÓRIO FIN. - NO CONTROLE
 
 Período: ${labelPeriod(period)}
 
