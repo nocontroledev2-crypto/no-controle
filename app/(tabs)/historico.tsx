@@ -671,11 +671,7 @@ ${subcategoriasTexto}`;
     })
     .join("\n\n--------------------------------\n\n");
 
-  return `📊 RELATÓRIO FINANCEIRO. - NO CONTROLE
-
-Período: ${labelPeriod(period)}
-
-💰 Total gasto: ${formatMoney(totalPeriodo)}
+  return `💰 Total gasto: ${formatMoney(totalPeriodo)}
 
 🏷️ Categorias: ${categoriasOrdenadas.length}
 
@@ -1879,12 +1875,12 @@ modalCloseButton: {
   borderWidth: 0.5,
   borderColor: "#DDE3EA",
   borderRadius: 999,
-  paddingVertical: 7,
-  paddingHorizontal: 12,
+  paddingVertical: 5,
+  paddingHorizontal: 9,
 },
 
 modalCloseText: {
-  fontSize: 12,
+  fontSize: 11,
   color: "#555",
   fontWeight: "700",
 },
@@ -2003,7 +1999,7 @@ reportChipText: {
 reportModal: {
   width: "95%",
   maxWidth: 760,
-  height: "90%",
+  height: "92%",
   backgroundColor: "#F7F8FA",
   borderRadius: 18,
   padding: 16,
@@ -2013,7 +2009,7 @@ reportModal: {
 
 reportModalMobile: {
   width: "96%",
-  height: "92%",
+  height: "94%",
 },
 
 reportPreviewText: {
@@ -2027,20 +2023,20 @@ reportActionButton: {
   borderWidth: 0.5,
   borderColor: "#BFE7D2",
   borderRadius: 999,
-  paddingVertical: 7,
-  paddingHorizontal: 12,
+  paddingVertical: 5,
+  paddingHorizontal: 9,
 },
 
 reportActionText: {
   color: "#0A8F55",
-  fontSize: 12,
+  fontSize: 11,
   fontWeight: "700",
 },
 reportLine: {
   fontSize: 13,
   color: "#333",
-  lineHeight: 22,
-  marginBottom: 4,
+  lineHeight: 20,
+  marginBottom: 2,
 },
 reportButtonsRow: {
   flexDirection: "row",
