@@ -643,29 +643,54 @@ useEffect(() => {
           ? (info.total / totalPeriodo) * 100
           : 0;
 
-      const subcategoriasTexto = Object.entries(
-        info.subcategorias
-      )
-        .sort((a, b) => b[1] - a[1])
-        .map(([subcategoria, total]) => {
-          const percentualSubcategoria =
-            info.total > 0
-              ? (total / info.total) * 100
-              : 0;
+      const subcategoriasEntries = Object.entries(
+  info.subcategorias
+).sort((a, b) => b[1] - a[1]);
 
-          return `• ${subcategoria} • ${formatMoney(
-            total
-          )} • ${percentualSubcategoria.toFixed(
-            0
-          )}% da categoria`;
-        })
-        .join("\n");
+const temSomenteUmaSubcategoria =
+  subcategoriasEntries.length === 1;
 
-      return `${categoria} • ${formatMoney(
-        info.total
-      )} • ${percentualCategoria.toFixed(
-        0
-      )}% do período
+const unicaSubcategoria =
+  temSomenteUmaSubcategoria
+    ? subcategoriasEntries[0][0]
+    : "";
+
+      if (temSomenteUmaSubcategoria) {
+  if (unicaSubcategoria === "Sem detalhe") {
+    return `${categoria} • ${formatMoney(
+      info.total
+    )} • ${percentualCategoria.toFixed(
+      0
+    )}% do período`;
+  }
+
+  return `${categoria} • ${formatMoney(
+    info.total
+  )} • ${unicaSubcategoria} • ${percentualCategoria.toFixed(
+    0
+  )}% do período`;
+}
+
+const subcategoriasTexto = subcategoriasEntries
+  .map(([subcategoria, total]) => {
+    const percentualSubcategoria =
+      info.total > 0
+        ? (total / info.total) * 100
+        : 0;
+
+    return `• ${subcategoria} • ${formatMoney(
+      total
+    )} • ${percentualSubcategoria.toFixed(
+      0
+    )}% da categoria`;
+  })
+  .join("\n");
+
+return `${categoria} • ${formatMoney(
+  info.total
+)} • ${percentualCategoria.toFixed(
+  0
+)}% do período
 
 ${subcategoriasTexto}`;
     })
