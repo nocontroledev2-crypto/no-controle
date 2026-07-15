@@ -1261,7 +1261,7 @@ const selectedCategoryCountText =
 ))}
         </ScrollView>
       )}
-     <Modal
+    <Modal
   visible={showReportModal}
   transparent
   animationType="fade"
@@ -1274,6 +1274,7 @@ const selectedCategoryCountText =
         isMobile && styles.reportModalMobile,
       ]}
     >
+      {/* ✅ CABEÇALHO FIXO */}
       <View style={styles.modalHeader}>
         <View style={{ flex: 1 }}>
           <Text style={styles.modalTitle}>
@@ -1285,48 +1286,58 @@ const selectedCategoryCountText =
           </Text>
         </View>
 
-        <View style={{ flexDirection: "row", gap: 8 }}>
-  <TouchableOpacity
-    style={styles.reportActionButton}
-    onPress={() => {
-      compartilharRelatorio();
-    }}
-  >
-    <Text style={styles.reportActionText}>
-      ↪ Compartilhar
-    </Text>
-  </TouchableOpacity>
+        <View style={{ flexDirection: "row", gap: 6 }}>
+          <TouchableOpacity
+            style={styles.reportActionButton}
+            onPress={compartilharRelatorio}
+          >
+            <Text style={styles.reportActionText}>
+              ↪ Compartilhar
+            </Text>
+          </TouchableOpacity>
 
-  <TouchableOpacity
-    style={styles.reportActionButton}
-    onPress={() => {
-      if (typeof window !== "undefined") {
-        window.print();
-      }
-    }}
-  >
-    <Text style={styles.reportActionText}>
-      🖨️ Imprimir
-    </Text>
-  </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.reportActionButton}
+            onPress={() => {
+              if (typeof window !== "undefined") {
+                window.print();
+              }
+            }}
+          >
+            <Text style={styles.reportActionText}>
+              🖨️ Imprimir
+            </Text>
+          </TouchableOpacity>
 
-  <TouchableOpacity
-    style={styles.modalCloseButton}
-    onPress={() => setShowReportModal(false)}
-  >
-    <Text style={styles.modalCloseText}>
-      Fechar
-    </Text>
-  </TouchableOpacity>
-</View>
+          <TouchableOpacity
+            style={styles.modalCloseButton}
+            onPress={() => setShowReportModal(false)}
+          >
+            <Text style={styles.modalCloseText}>
+              Fechar
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
+      {/* ✅ CONTEÚDO ROLÁVEL */}
       <ScrollView
-        showsVerticalScrollIndicator={false}
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          paddingBottom: 24,
+        }}
+        showsVerticalScrollIndicator={true}
       >
-        <Text style={styles.reportPreviewText}>
-          {gerarRelatorioTexto()}
-        </Text>
+        {gerarRelatorioTexto()
+          .split("\n")
+          .map((linha, index) => (
+            <Text
+              key={index}
+              style={styles.reportLine}
+            >
+              {linha}
+            </Text>
+          ))}
       </ScrollView>
     </View>
   </View>
@@ -2024,6 +2035,12 @@ reportActionText: {
   color: "#0A8F55",
   fontSize: 12,
   fontWeight: "700",
+},
+reportLine: {
+  fontSize: 13,
+  color: "#333",
+  lineHeight: 22,
+  marginBottom: 4,
 },
 
 
