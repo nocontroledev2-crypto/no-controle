@@ -671,7 +671,7 @@ ${subcategoriasTexto}`;
     })
     .join("\n\n--------------------------------\n\n");
 
-  return `📊 RELATÓRIO FIN. - NO CONTROLE
+  return `📊 RELATÓRIO FINANCEIRO. - NO CONTROLE
 
 Período: ${labelPeriod(period)}
 
@@ -1278,7 +1278,7 @@ const selectedCategoryCountText =
       <View style={styles.modalHeader}>
         <View style={{ flex: 1 }}>
           <Text style={styles.modalTitle}>
-            Relatório Financeiro
+            RelatóriO F.
           </Text>
 
           <Text style={styles.modalSubtitle}>
