@@ -1285,14 +1285,40 @@ const selectedCategoryCountText =
           </Text>
         </View>
 
-        <TouchableOpacity
-          style={styles.modalCloseButton}
-          onPress={() => setShowReportModal(false)}
-        >
-          <Text style={styles.modalCloseText}>
-            Fechar
-          </Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: "row", gap: 8 }}>
+  <TouchableOpacity
+    style={styles.reportActionButton}
+    onPress={() => {
+      compartilharRelatorio();
+    }}
+  >
+    <Text style={styles.reportActionText}>
+      ↪ Compartilhar
+    </Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    style={styles.reportActionButton}
+    onPress={() => {
+      if (typeof window !== "undefined") {
+        window.print();
+      }
+    }}
+  >
+    <Text style={styles.reportActionText}>
+      🖨️ Imprimir
+    </Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    style={styles.modalCloseButton}
+    onPress={() => setShowReportModal(false)}
+  >
+    <Text style={styles.modalCloseText}>
+      Fechar
+    </Text>
+  </TouchableOpacity>
+</View>
       </View>
 
       <ScrollView
@@ -1985,5 +2011,20 @@ reportPreviewText: {
   lineHeight: 22,
   paddingBottom: 20,
 },
+reportActionButton: {
+  backgroundColor: "#F0FAF5",
+  borderWidth: 0.5,
+  borderColor: "#BFE7D2",
+  borderRadius: 999,
+  paddingVertical: 7,
+  paddingHorizontal: 12,
+},
+
+reportActionText: {
+  color: "#0A8F55",
+  fontSize: 12,
+  fontWeight: "700",
+},
+
 
 });
