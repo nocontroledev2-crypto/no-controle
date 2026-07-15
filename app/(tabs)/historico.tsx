@@ -636,6 +636,59 @@ useEffect(() => {
       b[1].total - a[1].total
   );
 
+    const insights: string[] = [];
+
+if (categoriasOrdenadas.length > 0) {
+  const [categoriaTop, infoTop] =
+    categoriasOrdenadas[0];
+
+  const percentualTop =
+    totalPeriodo > 0
+      ? (infoTop.total / totalPeriodo) * 100
+      : 0;
+
+  insights.push(
+    `${categoriaTop} foi sua maior categoria de gasto (${percentualTop.toFixed(
+      0
+    )}% do período).`
+  );
+}
+
+if (categoriasOrdenadas.length >= 2) {
+  const top2 =
+    categoriasOrdenadas[0][1].total +
+    categoriasOrdenadas[1][1].total;
+
+  const percentualTop2 =
+    totalPeriodo > 0
+      ? (top2 / totalPeriodo) * 100
+      : 0;
+
+  insights.push(
+    `As duas maiores categorias concentram ${percentualTop2.toFixed(
+      0
+    )}% das despesas.`
+  );
+}
+
+if (categoriasOrdenadas.length >= 3) {
+  const top3 =
+    categoriasOrdenadas[0][1].total +
+    categoriasOrdenadas[1][1].total +
+    categoriasOrdenadas[2][1].total;
+
+  const percentualTop3 =
+    totalPeriodo > 0
+      ? (top3 / totalPeriodo) * 100
+      : 0;
+
+  insights.push(
+    `As três maiores categorias representam ${percentualTop3.toFixed(
+      0
+    )}% dos gastos do período.`
+  );
+}
+
   const resumoCategorias = categoriasOrdenadas
     .map(([categoria, info]) => {
       const percentualCategoria =
@@ -704,9 +757,13 @@ ${subcategoriasTexto}`;
 
 --------------------------------
 
-🏆 RESUMO POR CATEGORIA
+💡 INSIGHTS DO PERÍODO
 
-${resumoCategorias}
+${insights.map((i) => `• ${i}`).join("\n")}
+
+--------------------------------
+
+🏆 RESUMO POR CATEGORIA
 
 --------------------------------
 
