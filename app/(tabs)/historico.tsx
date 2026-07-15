@@ -1350,15 +1350,25 @@ const selectedCategoryCountText =
         showsVerticalScrollIndicator={true}
       >
         {gerarRelatorioTexto()
-          .split("\n")
-          .map((linha, index) => (
-            <Text
-              key={index}
-              style={styles.reportLine}
-            >
-              {linha}
-            </Text>
-          ))}
+  .split("\n")
+  .map((linha, index) => {
+    const ehCategoria =
+      linha.includes("• R$") &&
+      linha.includes("% do período");
+
+    return (
+      <Text
+        key={index}
+        style={
+          ehCategoria
+            ? styles.reportCategoryLine
+            : styles.reportLine
+        }
+      >
+        {linha}
+      </Text>
+    );
+  })}
       </ScrollView>
     </View>
   </View>
@@ -2062,6 +2072,14 @@ reportLine: {
   color: "#333",
   lineHeight: 20,
   marginBottom: 2,
+},
+
+reportCategoryLine: {
+  fontSize: 13,
+  color: "#333",
+  lineHeight: 20,
+  marginBottom: 2,
+  fontWeight: "700",
 },
 reportButtonsRow: {
   flexDirection: "row",
