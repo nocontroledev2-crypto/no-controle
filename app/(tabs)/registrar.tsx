@@ -499,10 +499,9 @@ setState("idle");
             }}
             placeholder="dd/mm/aaaa"
           />
+         </View>
 
-          {state === "confirm" ? (
-            </View>
-            )}
+          
             
             <>
               <TouchableOpacity
