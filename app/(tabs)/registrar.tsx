@@ -382,12 +382,20 @@ export default function Registrar() {
 
             <Text style={styles.label}>Categoria</Text>
 
-            <View style={styles.categoryDropdownWrapper}>
+            <View
+  style={[
+    styles.categoryDropdownWrapper,
+    menuCategoriaAberto && styles.categoryDropdownWrapperOpen,
+  ]}
+>
   <TouchableOpacity
-    style={styles.categorySelectButton}
-    onPress={() => setMenuCategoriaAberto(!menuCategoriaAberto)}
-    activeOpacity={0.85}
-  >
+  style={styles.categorySelectButton}
+  onPress={() => {
+    setMenuCategoriaAberto(!menuCategoriaAberto);
+    setMenuSubcategoriaAberto(false);
+  }}
+  activeOpacity={0.85}
+>
     <Text
       style={[
         styles.categorySelectText,
@@ -440,14 +448,20 @@ export default function Registrar() {
               <>
                 <Text style={styles.label}>Subcategoria</Text>
 
-                <View style={styles.categoryDropdownWrapper}>
+                <View
+  style={[
+    styles.categoryDropdownWrapper,
+    menuSubcategoriaAberto && styles.categoryDropdownWrapperOpen,
+  ]}
+>
   <TouchableOpacity
-    style={styles.categorySelectButton}
-    onPress={() =>
-      setMenuSubcategoriaAberto(!menuSubcategoriaAberto)
-    }
-    activeOpacity={0.85}
-  >
+  style={styles.categorySelectButton}
+  onPress={() => {
+    setMenuSubcategoriaAberto(!menuSubcategoriaAberto);
+    setMenuCategoriaAberto(false);
+  }}
+  activeOpacity={0.85}
+>
     <Text
       style={[
         styles.categorySelectText,
@@ -741,13 +755,14 @@ const styles = StyleSheet.create({
   },
 
   sectionCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 14,
-    borderWidth: 0.5,
-    borderColor: "#DDE3EA",
-  },
+  backgroundColor: "#FFFFFF",
+  borderRadius: 14,
+  padding: 14,
+  marginBottom: 14,
+  borderWidth: 0.5,
+  borderColor: "#DDE3EA",
+  overflow: "visible",
+},
 
 sectionCardOnTop: {
   zIndex: 3000,
@@ -756,8 +771,13 @@ sectionCardOnTop: {
 
 categoryDropdownWrapper: {
   position: "relative",
-  zIndex: 2500,
+  zIndex: 1,
   marginBottom: 8,
+},
+
+categoryDropdownWrapperOpen: {
+  zIndex: 9000,
+  elevation: 20,
 },
 
 categoryMenuFloating: {
@@ -771,8 +791,8 @@ categoryMenuFloating: {
   borderRadius: 12,
   maxHeight: 320,
   overflow: "hidden",
-  zIndex: 5000,
-  elevation: 16,
+  zIndex: 10000,
+  elevation: 30,
   shadowColor: "#000",
   shadowOffset: {
     width: 0,
