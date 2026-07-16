@@ -199,7 +199,7 @@ export default function Conta() {
         <Text style={styles.title}>Minha Conta</Text>
 
         <View style={styles.heroCard}>
-          <Text style={styles.heroTitle}>👤 Meu No Controle</Text>
+          <Text style={styles.heroTitle}>👤 Sua jornada no No Controle</Text>
 
           <Text style={styles.heroText}>
             Este é o espaço para proteger sua jornada financeira, acompanhar seus dados
@@ -362,8 +362,11 @@ const styles = StyleSheet.create({
   },
 
   scrollContent: {
-    paddingBottom: 90,
-  },
+  paddingBottom: 90,
+  width: "100%",
+  maxWidth: 820,
+  alignSelf: "center",
+},
 
   title: {
     fontSize: 22,
