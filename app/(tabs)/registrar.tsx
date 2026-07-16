@@ -324,14 +324,14 @@ setState("idle");
         {state === "idle" && (
   <>
     <View style={styles.voiceFirstBox}>
-      <Text style={styles.voiceFirstTitle}>🎤 Fala Inteligente</Text>
+      
 
       <TouchableOpacity
         style={styles.voiceButton}
         onPress={iniciarEscuta}
       >
         <Text style={styles.confirmText}>
-          🎤 Falar despesa
+          🎤 Fala Inteligente
         </Text>
       </TouchableOpacity>
 
@@ -339,7 +339,7 @@ setState("idle");
         Fale naturalmente. Ex: “Ontem gastei 322 reais no restaurante”.
       </Text>
     </View>
-
+    <View style={styles.sectionCard}>
     <Text style={styles.sectionLabel}>✍️ Digitação Inteligente</Text>
 
     <Text style={styles.label}>Digite sua despesa</Text>
@@ -348,7 +348,7 @@ setState("idle");
       style={styles.smartInput}
       value={textoInteligente}
       onChangeText={setTextoInteligente}
-      placeholder="Digite aqui. Ex: Ontem gastei 250 reais no Carrefour"
+      placeholder="Digite sua despesa"
       placeholderTextColor="#9CA3AF"
       multiline
     />
@@ -365,11 +365,14 @@ setState("idle");
     <Text style={styles.smartHint}>
       Você pode escrever como fala. Ex: “Mês que vem vou pagar Netflix 250 reais”.
     </Text>
+    </View>
   </>
 )}
-{state === "idle" ? (
-  <Text style={styles.sectionLabel}>🧾 Preencher manualmente</Text>
-) : null}
+{state === "idle" && (
+  <View style={styles.sectionCard}>
+    <Text style={styles.sectionLabel}>
+      🧾 Preencher manualmente
+    </Text>
           <Text style={styles.label}>Valor</Text>
           <TextInput
             ref={valorInputRef}
@@ -498,6 +501,9 @@ setState("idle");
           />
 
           {state === "confirm" ? (
+            </View>
+            )}
+            
             <>
               <TouchableOpacity
                 style={styles.confirmButton}
@@ -712,6 +718,15 @@ sectionLabel: {
   color: "#333",
   marginTop: 8,
   marginBottom: 8,
+},
+
+sectionCard: {
+  backgroundColor: "#FFFFFF",
+  borderRadius: 14,
+  padding: 14,
+  marginBottom: 14,
+  borderWidth: 0.5,
+  borderColor: "#DDE3EA",
 },
 
 });
