@@ -357,12 +357,18 @@ export default function Registrar() {
             </>
           )}
 
-          <View style={styles.sectionCard}>
-            <Text style={styles.sectionLabel}>
-              {state === "confirm"
-                ? "🧾 Revisar despesa"
-                : "🧾 Preencher manualmente"}
-            </Text>
+          <View
+  style={[
+    styles.sectionCard,
+    (menuCategoriaAberto || menuSubcategoriaAberto) &&
+      styles.sectionCardOnTop,
+  ]}
+>
+  <Text style={styles.sectionLabel}>
+    {state === "confirm"
+      ? "🧾 Revisar despesa"
+      : "🧾 Preencher manualmente"}
+  </Text>
 
             <Text style={styles.label}>Valor</Text>
             <TextInput
@@ -376,105 +382,119 @@ export default function Registrar() {
 
             <Text style={styles.label}>Categoria</Text>
 
-            <TouchableOpacity
-              style={styles.categorySelectButton}
-              onPress={() => setMenuCategoriaAberto(!menuCategoriaAberto)}
-              activeOpacity={0.85}
+            <View style={styles.categoryDropdownWrapper}>
+  <TouchableOpacity
+    style={styles.categorySelectButton}
+    onPress={() => setMenuCategoriaAberto(!menuCategoriaAberto)}
+    activeOpacity={0.85}
+  >
+    <Text
+      style={[
+        styles.categorySelectText,
+        !categoria && styles.categoryPlaceholder,
+      ]}
+    >
+      {categoria || "Selecione a categoria"}
+    </Text>
+
+    <Text style={styles.categorySelectArrow}>
+      {menuCategoriaAberto ? "▲" : "▼"}
+    </Text>
+  </TouchableOpacity>
+
+  {menuCategoriaAberto ? (
+    <View style={styles.categoryMenuFloating}>
+      <ScrollView
+        style={styles.categoryMenuScroll}
+        showsVerticalScrollIndicator={true}
+        nestedScrollEnabled
+      >
+        {MASTER_CATEGORIES.map((cat: string) => (
+          <TouchableOpacity
+            key={cat}
+            style={styles.categoryMenuItem}
+            onPress={() => selecionarCategoriaManual(cat)}
+            activeOpacity={0.8}
+          >
+            <Text
+              style={[
+                styles.categoryMenuItemText,
+                categoria === cat &&
+                  styles.categoryMenuItemTextActive,
+              ]}
             >
-              <Text
-                style={[
-                  styles.categorySelectText,
-                  !categoria && styles.categoryPlaceholder,
-                ]}
-              >
-                {categoria || "Selecione a categoria"}
-              </Text>
+              {cat}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
 
-              <Text style={styles.categorySelectArrow}>
-                {menuCategoriaAberto ? "▲" : "▼"}
-              </Text>
-            </TouchableOpacity>
-
-            {menuCategoriaAberto ? (
-              <View style={styles.categoryMenu}>
-                <ScrollView
-                  style={styles.categoryMenuScroll}
-                  showsVerticalScrollIndicator={false}
-                >
-                  {MASTER_CATEGORIES.map((cat: string) => (
-                    <TouchableOpacity
-                      key={cat}
-                      style={styles.categoryMenuItem}
-                      onPress={() => selecionarCategoriaManual(cat)}
-                      activeOpacity={0.8}
-                    >
-                      <Text
-                        style={[
-                          styles.categoryMenuItemText,
-                          categoria === cat &&
-                            styles.categoryMenuItemTextActive,
-                        ]}
-                      >
-                        {cat}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
-            ) : null}
+      <Text style={styles.categoryMenuHint}>
+        Role para ver mais categorias
+      </Text>
+    </View>
+  ) : null}
+</View>
 
             {categoria && subcategoriasDisponiveis.length > 0 ? (
               <>
                 <Text style={styles.label}>Subcategoria</Text>
 
-                <TouchableOpacity
-                  style={styles.categorySelectButton}
-                  onPress={() =>
-                    setMenuSubcategoriaAberto(!menuSubcategoriaAberto)
-                  }
-                  activeOpacity={0.85}
-                >
-                  <Text
-                    style={[
-                      styles.categorySelectText,
-                      !subcategoria && styles.categoryPlaceholder,
-                    ]}
-                  >
-                    {subcategoria || "Selecione a subcategoria"}
-                  </Text>
+                <View style={styles.categoryDropdownWrapper}>
+  <TouchableOpacity
+    style={styles.categorySelectButton}
+    onPress={() =>
+      setMenuSubcategoriaAberto(!menuSubcategoriaAberto)
+    }
+    activeOpacity={0.85}
+  >
+    <Text
+      style={[
+        styles.categorySelectText,
+        !subcategoria && styles.categoryPlaceholder,
+      ]}
+    >
+      {subcategoria || "Selecione a subcategoria"}
+    </Text>
 
-                  <Text style={styles.categorySelectArrow}>
-                    {menuSubcategoriaAberto ? "▲" : "▼"}
-                  </Text>
-                </TouchableOpacity>
+    <Text style={styles.categorySelectArrow}>
+      {menuSubcategoriaAberto ? "▲" : "▼"}
+    </Text>
+  </TouchableOpacity>
 
-                {menuSubcategoriaAberto ? (
-                  <View style={styles.categoryMenu}>
-                    <ScrollView
-                      style={styles.categoryMenuScroll}
-                      showsVerticalScrollIndicator={false}
-                    >
-                      {subcategoriasDisponiveis.map((sub: string) => (
-                        <TouchableOpacity
-                          key={sub}
-                          style={styles.categoryMenuItem}
-                          onPress={() => selecionarSubcategoriaManual(sub)}
-                          activeOpacity={0.8}
-                        >
-                          <Text
-                            style={[
-                              styles.categoryMenuItemText,
-                              subcategoria === sub &&
-                                styles.categoryMenuItemTextActive,
-                            ]}
-                          >
-                            {sub}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </ScrollView>
-                  </View>
-                ) : null}
+  {menuSubcategoriaAberto ? (
+    <View style={styles.categoryMenuFloating}>
+      <ScrollView
+        style={styles.categoryMenuScroll}
+        showsVerticalScrollIndicator={true}
+        nestedScrollEnabled
+      >
+        {subcategoriasDisponiveis.map((sub: string) => (
+          <TouchableOpacity
+            key={sub}
+            style={styles.categoryMenuItem}
+            onPress={() => selecionarSubcategoriaManual(sub)}
+            activeOpacity={0.8}
+          >
+            <Text
+              style={[
+                styles.categoryMenuItemText,
+                subcategoria === sub &&
+                  styles.categoryMenuItemTextActive,
+              ]}
+            >
+              {sub}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      <Text style={styles.categoryMenuHint}>
+        Role para ver mais opções
+      </Text>
+    </View>
+  ) : null}
+</View>
               </>
             ) : null}
 
@@ -728,4 +748,53 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: "#DDE3EA",
   },
+
+sectionCardOnTop: {
+  zIndex: 3000,
+  elevation: 12,
+},
+
+categoryDropdownWrapper: {
+  position: "relative",
+  zIndex: 2500,
+  marginBottom: 8,
+},
+
+categoryMenuFloating: {
+  position: "absolute",
+  top: 54,
+  left: 0,
+  right: 0,
+  backgroundColor: "#FFFFFF",
+  borderWidth: 1,
+  borderColor: "#DDE3EA",
+  borderRadius: 12,
+  maxHeight: 320,
+  overflow: "hidden",
+  zIndex: 5000,
+  elevation: 16,
+  shadowColor: "#000",
+  shadowOffset: {
+    width: 0,
+    height: 4,
+  },
+  shadowOpacity: 0.12,
+  shadowRadius: 10,
+},
+
+categoryMenuScroll: {
+  maxHeight: 280,
+},
+
+categoryMenuHint: {
+  fontSize: 11,
+  color: "#777",
+  textAlign: "center",
+  paddingVertical: 7,
+  borderTopWidth: 0.5,
+  borderTopColor: "#EEF0F3",
+  backgroundColor: "#FAFAFA",
+},
+
+
 });

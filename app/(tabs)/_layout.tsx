@@ -13,12 +13,12 @@ export default function TabsLayout() {
           fontWeight: "600",
         },
         tabBarStyle: {
-          height: 76,
-          paddingTop: 6,
-          paddingBottom: 10,
+          height: 62,
+          paddingTop: 4,
+          paddingBottom: 4,
         },
         tabBarItemStyle: {
-          paddingVertical: 2,
+          paddingVertical: 0,
         },
       }}
     >
