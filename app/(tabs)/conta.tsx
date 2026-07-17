@@ -54,11 +54,19 @@ function traduzirErroAuth(message?: string) {
     return "E-mail não confirmado. Por favor, verifique seu e-mail e confirme sua conta antes de entrar.";
   }
 
-  if (texto.includes("invalid login credentials")) {
+  if (
+    texto.includes("invalid login credentials") ||
+    (texto.includes("invalid") && texto.includes("credentials")) ||
+    texto.includes("login credentials")
+  ) {
     return "E-mail ou senha incorretos. Verifique os dados e tente novamente.";
   }
 
-  if (texto.includes("user already registered")) {
+  if (
+    texto.includes("user already registered") ||
+    texto.includes("already registered") ||
+    texto.includes("already been registered")
+  ) {
     return "Este e-mail já possui uma conta. Toque em Entrar e acesse sua conta.";
   }
 
@@ -176,6 +184,22 @@ export default function Conta() {
       alert("Erro ao criar conta.\n\n" + traduzirErroAuth(error.message));
       return;
     }
+
+    const identities = data?.user?.identities;
+
+if (
+  data?.user &&
+  Array.isArray(identities) &&
+  identities.length === 0
+) {
+  setAuthMode("login");
+  setSenha("");
+  setMensagem(
+    "Este e-mail já possui uma conta. Toque em Entrar e acesse sua conta."
+  );
+  limparMensagemDepois();
+  return;
+}
 
     if (data?.user && data?.session) {
       await upsertProfile({
