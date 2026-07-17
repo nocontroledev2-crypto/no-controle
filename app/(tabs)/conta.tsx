@@ -192,12 +192,14 @@ if (
   Array.isArray(identities) &&
   identities.length === 0
 ) {
+  alert(
+    "Conta já existente.\n\n" +
+      "Este e-mail já possui uma conta. Toque em Entrar e acesse sua conta."
+  );
+
   setAuthMode("login");
   setSenha("");
-  setMensagem(
-    "Este e-mail já possui uma conta. Toque em Entrar e acesse sua conta."
-  );
-  limparMensagemDepois();
+  setMensagem("");
   return;
 }
 
