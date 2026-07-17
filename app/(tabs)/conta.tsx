@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
@@ -10,14 +9,17 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+import {
+  getCurrentUser,
+  getProfile,
+  signIn,
+  signOut,
+  signUp,
+  upsertProfile,
+} from "../services/authService";
 import { Expense, getAllExpenses } from "../storage/expenseStorage";
 
-const USER_PROFILE_KEY = "@no-controle:user-profile";
-
-type UserProfile = {
-  nome: string;
-  email: string;
-};
+type AuthMode = "signup" | "login";
 
 function formatMoney(valor: number | null | undefined) {
   const safeValue = Number(valor);
@@ -49,10 +51,15 @@ export default function Conta() {
   const { width } = useWindowDimensions();
   const isMobile = width < 480;
 
+  const [authMode, setAuthMode] = useState<AuthMode>("signup");
+  const [usuarioLogado, setUsuarioLogado] = useState<any | null>(null);
+
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+
   const [mensagem, setMensagem] = useState("");
-  const [perfilSalvo, setPerfilSalvo] = useState(false);
+  const [carregando, setCarregando] = useState(false);
 
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [totalRegistros, setTotalRegistros] = useState(0);
@@ -63,8 +70,8 @@ export default function Conta() {
   useFocusEffect(
     useCallback(() => {
       async function load() {
-        const savedProfile = await AsyncStorage.getItem(USER_PROFILE_KEY);
         const data = await getAllExpenses();
+        const user = await getCurrentUser();
 
         const normalizedData = (data || []).map((item: any) => {
           const safeValue = Number(item.valor);
@@ -78,19 +85,8 @@ export default function Conta() {
           };
         });
 
-        if (savedProfile) {
-          const parsed: UserProfile = JSON.parse(savedProfile);
-          setNome(parsed.nome || "");
-          setEmail(parsed.email || "");
-          setPerfilSalvo(true);
-        } else {
-          setPerfilSalvo(false);
-        }
-
         const categorias = new Set(
-          normalizedData
-            .map((item) => item.categoria)
-            .filter(Boolean)
+          normalizedData.map((item) => item.categoria).filter(Boolean)
         );
 
         const total = normalizedData.reduce(
@@ -99,10 +95,7 @@ export default function Conta() {
         );
 
         const ultimaDespesa = [...normalizedData].sort((a, b) => {
-          return (
-            parseDateSafe(b.data).getTime() -
-            parseDateSafe(a.data).getTime()
-          );
+          return parseDateSafe(b.data).getTime() - parseDateSafe(a.data).getTime();
         })[0];
 
         setExpenses(normalizedData);
@@ -110,13 +103,34 @@ export default function Conta() {
         setCategoriasUsadas(categorias.size);
         setTotalGasto(total);
         setUltimoLancamento(ultimaDespesa?.data || null);
+
+        if (user) {
+          setUsuarioLogado(user);
+          setEmail(user.email || "");
+
+          const { data: profile } = await getProfile(user.id);
+
+          if (profile?.nome) {
+            setNome(profile.nome);
+          } else if (user.user_metadata?.nome) {
+            setNome(user.user_metadata.nome);
+          }
+        } else {
+          setUsuarioLogado(null);
+        }
       }
 
       load();
     }, [])
   );
 
-  async function salvarPerfil() {
+  function limparMensagemDepois() {
+    setTimeout(() => {
+      setMensagem("");
+    }, 3500);
+  }
+
+  async function criarConta() {
     if (!nome.trim()) {
       alert("Informe seu nome.");
       return;
@@ -127,26 +141,100 @@ export default function Conta() {
       return;
     }
 
-    const profile: UserProfile = {
-      nome: nome.trim(),
-      email: email.trim(),
-    };
+    if (!senha.trim() || senha.length < 6) {
+      alert("Informe uma senha com pelo menos 6 caracteres.");
+      return;
+    }
 
-    await AsyncStorage.setItem(USER_PROFILE_KEY, JSON.stringify(profile));
+    setCarregando(true);
 
-    setPerfilSalvo(true);
-    setMensagem("Perfil salvo com sucesso.");
+    const { data, error } = await signUp(email.trim(), senha.trim(), nome.trim());
 
-    setTimeout(() => {
-      setMensagem("");
-    }, 2500);
+    setCarregando(false);
+
+    if (error) {
+      alert("Erro ao criar conta.\n\n" + error.message);
+      return;
+    }
+
+    if (data?.user && data?.session) {
+      await upsertProfile({
+        id: data.user.id,
+        nome: nome.trim(),
+        email: email.trim(),
+      });
+
+      setUsuarioLogado(data.user);
+      setMensagem("Conta criada e conectada com sucesso.");
+      limparMensagemDepois();
+      return;
+    }
+
+    setMensagem(
+      "Conta criada. Verifique seu e-mail para confirmar o cadastro antes de entrar."
+    );
+    limparMensagemDepois();
+    setAuthMode("login");
+  }
+
+  async function entrarConta() {
+    if (!email.trim()) {
+      alert("Informe seu e-mail.");
+      return;
+    }
+
+    if (!senha.trim()) {
+      alert("Informe sua senha.");
+      return;
+    }
+
+    setCarregando(true);
+
+    const { data, error } = await signIn(email.trim(), senha.trim());
+
+    setCarregando(false);
+
+    if (error) {
+      alert("Erro ao entrar.\n\n" + error.message);
+      return;
+    }
+
+    if (data?.user) {
+      const nomePerfil =
+        nome.trim() ||
+        data.user.user_metadata?.nome ||
+        "Usuário No Controle";
+
+      await upsertProfile({
+        id: data.user.id,
+        nome: nomePerfil,
+        email: data.user.email || email.trim(),
+      });
+
+      setUsuarioLogado(data.user);
+      setNome(nomePerfil);
+      setEmail(data.user.email || email.trim());
+      setSenha("");
+      setMensagem("Login realizado com sucesso.");
+      limparMensagemDepois();
+    }
+  }
+
+  async function sairConta() {
+    await signOut();
+
+    setUsuarioLogado(null);
+    setSenha("");
+    setMensagem("Você saiu da sua conta.");
+    limparMensagemDepois();
   }
 
   async function exportarDados() {
     const payload = {
       app: "No Controle",
       geradoEm: new Date().toISOString(),
-      perfil: {
+      usuario: {
+        logado: !!usuarioLogado,
         nome: nome.trim(),
         email: email.trim(),
       },
@@ -170,10 +258,7 @@ export default function Conta() {
         await navigator.clipboard.writeText(texto);
 
         setMensagem("Dados copiados para a área de transferência.");
-
-        setTimeout(() => {
-          setMensagem("");
-        }, 2500);
+        limparMensagemDepois();
 
         return;
       }
@@ -186,12 +271,7 @@ export default function Conta() {
   }
 
   return (
-    <View
-      style={[
-        styles.container,
-        isMobile && styles.containerMobile,
-      ]}
-    >
+    <View style={[styles.container, isMobile && styles.containerMobile]}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -203,46 +283,132 @@ export default function Conta() {
 
           <Text style={styles.heroText}>
             Este é o espaço para proteger sua jornada financeira, acompanhar seus dados
-            e preparar sua futura sincronização em nuvem.
+            e preparar sua sincronização em nuvem.
           </Text>
 
           <View style={styles.statusPill}>
             <Text style={styles.statusPillText}>
-              {perfilSalvo ? "✅ Perfil salvo neste dispositivo" : "ℹ️ Perfil ainda não salvo"}
+              {usuarioLogado ? "✅ Conta conectada" : "🔐 Entre ou crie sua conta"}
             </Text>
           </View>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>📝 Perfil do usuário</Text>
+          <Text style={styles.cardTitle}>
+            {usuarioLogado ? "✅ Conta ativa" : "🔐 Acesso obrigatório"}
+          </Text>
 
-          <Text style={styles.label}>Nome</Text>
-          <TextInput
-            style={styles.input}
-            value={nome}
-            onChangeText={setNome}
-            placeholder="Digite seu nome"
-          />
+          {usuarioLogado ? (
+            <>
+              <Text style={styles.infoText}>
+                Seus dados serão preparados para sincronização na nuvem.
+              </Text>
 
-          <Text style={styles.label}>E-mail</Text>
-          <TextInput
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            placeholder="Digite seu e-mail"
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
+              <View style={styles.accountBox}>
+                <Text style={styles.accountLabel}>Nome</Text>
+                <Text style={styles.accountValue}>
+                  {nome || "Usuário No Controle"}
+                </Text>
 
-          <TouchableOpacity style={styles.saveButton} onPress={salvarPerfil}>
-            <Text style={styles.saveButtonText}>
-              {perfilSalvo ? "💾 Atualizar perfil" : "💾 Salvar perfil"}
-            </Text>
-          </TouchableOpacity>
+                <Text style={styles.accountLabel}>E-mail</Text>
+                <Text style={styles.accountValue}>{email}</Text>
+              </View>
 
-          {mensagem ? (
-            <Text style={styles.successText}>{mensagem}</Text>
-          ) : null}
+              <TouchableOpacity style={styles.logoutButton} onPress={sairConta}>
+                <Text style={styles.logoutButtonText}>🚪 Sair da conta</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <View style={styles.authModeRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.authModeButton,
+                    authMode === "signup" && styles.authModeButtonActive,
+                  ]}
+                  onPress={() => setAuthMode("signup")}
+                >
+                  <Text
+                    style={[
+                      styles.authModeText,
+                      authMode === "signup" && styles.authModeTextActive,
+                    ]}
+                  >
+                    Criar conta
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.authModeButton,
+                    authMode === "login" && styles.authModeButtonActive,
+                  ]}
+                  onPress={() => setAuthMode("login")}
+                >
+                  <Text
+                    style={[
+                      styles.authModeText,
+                      authMode === "login" && styles.authModeTextActive,
+                    ]}
+                  >
+                    Entrar
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {authMode === "signup" ? (
+                <>
+                  <Text style={styles.label}>Nome</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={nome}
+                    onChangeText={setNome}
+                    placeholder="Digite seu nome"
+                  />
+                </>
+              ) : null}
+
+              <Text style={styles.label}>E-mail</Text>
+              <TextInput
+                style={styles.input}
+                value={email}
+                onChangeText={setEmail}
+                placeholder="Digite seu e-mail"
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+
+              <Text style={styles.label}>Senha</Text>
+              <TextInput
+                style={styles.input}
+                value={senha}
+                onChangeText={setSenha}
+                placeholder="Digite sua senha"
+                secureTextEntry
+              />
+
+              <TouchableOpacity
+                style={styles.saveButton}
+                onPress={authMode === "signup" ? criarConta : entrarConta}
+                disabled={carregando}
+              >
+                <Text style={styles.saveButtonText}>
+                  {carregando
+                    ? "Aguarde..."
+                    : authMode === "signup"
+                    ? "🚀 Criar minha conta"
+                    : "🔑 Entrar na minha conta"}
+                </Text>
+              </TouchableOpacity>
+
+              <Text style={styles.infoTextSmall}>
+                Ao criar uma conta, seus dados ficarão prontos para serem protegidos
+                e sincronizados na nuvem.
+              </Text>
+            </>
+          )}
+
+          {mensagem ? <Text style={styles.successText}>{mensagem}</Text> : null}
         </View>
 
         <View style={styles.card}>
@@ -275,34 +441,24 @@ export default function Conta() {
           </View>
 
           <Text style={styles.infoText}>
-            Nesta versão, os registros ficam salvos no armazenamento local deste
-            navegador ou dispositivo.
+            Os dados atuais deste dispositivo são da fase de testes. A base oficial
+            em nuvem começará com a conta real.
           </Text>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>🔒 Backup e sincronização</Text>
+          <Text style={styles.cardTitle}>☁️ Nuvem e sincronização</Text>
 
           <Text style={styles.infoText}>
-            Em breve, você poderá criar uma conta com login real para manter seus dados
-            protegidos na nuvem e acessar seu histórico em outros dispositivos.
+            A conta real é a base para salvar seus registros na nuvem e acessar
+            seu histórico em outros dispositivos.
           </Text>
 
           <View style={styles.futureBox}>
-            <Text style={styles.futureItem}>✅ Backup dos registros</Text>
-            <Text style={styles.futureItem}>✅ Acesso em mais de um dispositivo</Text>
+            <Text style={styles.futureItem}>✅ Conta real com e-mail e senha</Text>
+            <Text style={styles.futureItem}>✅ Base para backup dos registros</Text>
             <Text style={styles.futureItem}>✅ Histórico vinculado ao usuário</Text>
-            <Text style={styles.futureItem}>✅ Base para educação financeira personalizada</Text>
-          </View>
-
-          <View style={styles.disabledActionsRow}>
-            <View style={styles.disabledButton}>
-              <Text style={styles.disabledButtonText}>Criar conta, em breve</Text>
-            </View>
-
-            <View style={styles.disabledButton}>
-              <Text style={styles.disabledButtonText}>Entrar, em breve</Text>
-            </View>
+            <Text style={styles.futureItem}>✅ Preparação para a sincronização total</Text>
           </View>
         </View>
 
@@ -310,14 +466,12 @@ export default function Conta() {
           <Text style={styles.cardTitle}>📤 Exportar meus dados</Text>
 
           <Text style={styles.infoText}>
-            Quer guardar uma cópia dos seus registros atuais? Você pode copiar seus dados
+            Quer guardar uma cópia dos registros atuais de teste? Você pode copiar seus dados
             para salvar em local seguro.
           </Text>
 
           <TouchableOpacity style={styles.exportButton} onPress={exportarDados}>
-            <Text style={styles.exportButtonText}>
-              📋 Copiar dados atuais
-            </Text>
+            <Text style={styles.exportButtonText}>📋 Copiar dados atuais</Text>
           </TouchableOpacity>
         </View>
 
@@ -325,9 +479,8 @@ export default function Conta() {
           <Text style={styles.warningTitle}>⚠️ Importante</Text>
 
           <Text style={styles.warningText}>
-            Se você abrir o No Controle em outro navegador, janela anônima ou outro
-            dispositivo, os registros podem não aparecer porque ainda não existe
-            sincronização em nuvem nesta etapa.
+            A conta real foi criada para proteger a próxima fase do No Controle.
+            Os registros atuais de teste ainda podem estar apenas neste dispositivo.
           </Text>
         </View>
 
@@ -362,11 +515,11 @@ const styles = StyleSheet.create({
   },
 
   scrollContent: {
-  paddingBottom: 90,
-  width: "100%",
-  maxWidth: 820,
-  alignSelf: "center",
-},
+    paddingBottom: 90,
+    width: "100%",
+    maxWidth: 820,
+    alignSelf: "center",
+  },
 
   title: {
     fontSize: 22,
@@ -461,12 +614,82 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
+  logoutButton: {
+    backgroundColor: "#FFF5F5",
+    borderWidth: 0.5,
+    borderColor: "#F3C2C2",
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: "center",
+    marginTop: 10,
+  },
+
+  logoutButtonText: {
+    color: "#C0392B",
+    fontSize: 13,
+    fontWeight: "800",
+  },
+
   successText: {
     textAlign: "center",
     color: "#0A8F55",
     fontSize: 12,
     fontWeight: "600",
     marginTop: 10,
+  },
+
+  authModeRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 12,
+  },
+
+  authModeButton: {
+    flex: 1,
+    backgroundColor: "#F1F3F5",
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: "center",
+    borderWidth: 0.5,
+    borderColor: "#E5E7EB",
+  },
+
+  authModeButtonActive: {
+    backgroundColor: "#F0FAF5",
+    borderColor: "#0A8F55",
+  },
+
+  authModeText: {
+    color: "#666",
+    fontSize: 13,
+    fontWeight: "700",
+  },
+
+  authModeTextActive: {
+    color: "#0A8F55",
+  },
+
+  accountBox: {
+    backgroundColor: "#F9FAFB",
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 0.5,
+    borderColor: "#E5E7EB",
+    marginTop: 4,
+  },
+
+  accountLabel: {
+    fontSize: 12,
+    color: "#666",
+    fontWeight: "600",
+    marginBottom: 2,
+  },
+
+  accountValue: {
+    fontSize: 14,
+    color: "#333",
+    fontWeight: "800",
+    marginBottom: 10,
   },
 
   metricsGrid: {
@@ -525,12 +748,19 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
 
+  infoTextSmall: {
+    fontSize: 12,
+    color: "#777",
+    lineHeight: 17,
+    marginTop: 10,
+  },
+
   futureBox: {
     backgroundColor: "#F9FAFB",
     borderRadius: 12,
     padding: 12,
     marginTop: 4,
-    marginBottom: 12,
+    marginBottom: 4,
     borderWidth: 0.5,
     borderColor: "#E5E7EB",
   },
@@ -539,25 +769,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#333",
     marginBottom: 6,
-  },
-
-  disabledActionsRow: {
-    flexDirection: "row",
-    gap: 10,
-  },
-
-  disabledButton: {
-    flex: 1,
-    backgroundColor: "#E8EAEE",
-    borderRadius: 10,
-    paddingVertical: 11,
-    alignItems: "center",
-  },
-
-  disabledButtonText: {
-    color: "#777",
-    fontSize: 12,
-    fontWeight: "700",
   },
 
   exportButton: {
