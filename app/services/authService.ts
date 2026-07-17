@@ -1,12 +1,21 @@
 import { supabase } from "../lib/supabase";
 
+const authClient = supabase.auth as any;
+const dbClient = supabase as any;
+
 export async function signUp(
   email: string,
-  password: string
+  password: string,
+  nome: string
 ) {
-  return supabase.auth.signUp({
+  return authClient.signUp({
     email,
     password,
+    options: {
+      data: {
+        nome,
+      },
+    },
   });
 }
 
@@ -14,20 +23,50 @@ export async function signIn(
   email: string,
   password: string
 ) {
-  return supabase.auth.signInWithPassword({
+  return authClient.signInWithPassword({
     email,
     password,
   });
 }
 
 export async function signOut() {
-  return supabase.auth.signOut();
+  return authClient.signOut();
 }
 
 export async function getCurrentUser() {
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await authClient.getUser();
 
   return user;
+}
+
+export async function getCurrentSession() {
+  const {
+    data: { session },
+  } = await authClient.getSession();
+
+  return session;
+}
+
+export async function getProfile(userId: string) {
+  return dbClient
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)*    .single();
+}
+
+export async fun*tion upsertProfile(params: {
+  id:*string;
+  nome: string;
+  email: s*ring;
+}) {
+  return dbClient
+    .*rom("profiles")
+    .upsert({
+    * id: params.id,
+      nome: params*nome,
+      email: params.email,
+ *    updated_at: new Date().toISOSt*ing(),
+    });
 }
