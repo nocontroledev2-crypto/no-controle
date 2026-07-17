@@ -53,20 +53,21 @@ export async function getProfile(userId: string) {
   return dbClient
     .from("profiles")
     .select("*")
-    .eq("id", userId)*    .single();
+    .eq("id", userId)
+    .single();
 }
 
-export async fun*tion upsertProfile(params: {
-  id:*string;
+export async function upsertProfile(params: {
+  id: string;
   nome: string;
-  email: s*ring;
+  email: string;
 }) {
   return dbClient
-    .*rom("profiles")
+    .from("profiles")
     .upsert({
-    * id: params.id,
-      nome: params*nome,
+      id: params.id,
+      nome: params.nome,
       email: params.email,
- *    updated_at: new Date().toISOSt*ing(),
+      updated_at: new Date().toISOString(),
     });
 }
