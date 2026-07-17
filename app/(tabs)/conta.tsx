@@ -17,7 +17,7 @@ import {
   signUp,
   upsertProfile,
 } from "../services/authService";
-import { Expense, getAllExpenses } from "../storage/expenseStorage";
+import { getAllExpenses } from "../storage/expenseStorage";
 
 type AuthMode = "signup" | "login";
 
@@ -47,6 +47,28 @@ function formatDateBR(dateStr: string | null) {
   return d.toLocaleDateString("pt-BR");
 }
 
+function traduzirErroAuth(message?: string) {
+  const texto = (message || "").toLowerCase();
+
+  if (texto.includes("email not confirmed")) {
+    return "E-mail não confirmado. Por favor, verifique seu e-mail e confirme sua conta antes de entrar.";
+  }
+
+  if (texto.includes("invalid login credentials")) {
+    return "E-mail ou senha incorretos. Verifique os dados e tente novamente.";
+  }
+
+  if (texto.includes("user already registered")) {
+    return "Este e-mail já possui uma conta. Toque em Entrar e acesse sua conta.";
+  }
+
+  if (texto.includes("password")) {
+    return "A senha informada não atende aos requisitos. Use pelo menos 6 caracteres.";
+  }
+
+  return message || "Não foi possível concluir a operação. Tente novamente.";
+}
+
 export default function Conta() {
   const { width } = useWindowDimensions();
   const isMobile = width < 480;
@@ -60,8 +82,7 @@ export default function Conta() {
 
   const [mensagem, setMensagem] = useState("");
   const [carregando, setCarregando] = useState(false);
-
-  const [expenses, setExpenses] = useState<Expense[]>([]);
+  
   const [totalRegistros, setTotalRegistros] = useState(0);
   const [categoriasUsadas, setCategoriasUsadas] = useState(0);
   const [totalGasto, setTotalGasto] = useState(0);
@@ -97,8 +118,7 @@ export default function Conta() {
         const ultimaDespesa = [...normalizedData].sort((a, b) => {
           return parseDateSafe(b.data).getTime() - parseDateSafe(a.data).getTime();
         })[0];
-
-        setExpenses(normalizedData);
+        
         setTotalRegistros(normalizedData.length);
         setCategoriasUsadas(categorias.size);
         setTotalGasto(total);
@@ -153,7 +173,7 @@ export default function Conta() {
     setCarregando(false);
 
     if (error) {
-      alert("Erro ao criar conta.\n\n" + error.message);
+      alert("Erro ao criar conta.\n\n" + traduzirErroAuth(error.message));
       return;
     }
 
@@ -195,7 +215,7 @@ export default function Conta() {
     setCarregando(false);
 
     if (error) {
-      alert("Erro ao entrar.\n\n" + error.message);
+      alert("Erro ao entrar.\n\n" + traduzirErroAuth(error.message));
       return;
     }
 
@@ -227,47 +247,6 @@ export default function Conta() {
     setSenha("");
     setMensagem("Você saiu da sua conta.");
     limparMensagemDepois();
-  }
-
-  async function exportarDados() {
-    const payload = {
-      app: "No Controle",
-      geradoEm: new Date().toISOString(),
-      usuario: {
-        logado: !!usuarioLogado,
-        nome: nome.trim(),
-        email: email.trim(),
-      },
-      resumo: {
-        registros: totalRegistros,
-        categoriasUsadas,
-        totalGasto,
-        ultimoLancamento,
-      },
-      despesas: expenses,
-    };
-
-    const texto = JSON.stringify(payload, null, 2);
-
-    try {
-      if (
-        typeof navigator !== "undefined" &&
-        navigator.clipboard &&
-        navigator.clipboard.writeText
-      ) {
-        await navigator.clipboard.writeText(texto);
-
-        setMensagem("Dados copiados para a área de transferência.");
-        limparMensagemDepois();
-
-        return;
-      }
-
-      alert("Não foi possível copiar automaticamente neste dispositivo.");
-    } catch (error) {
-      console.error(error);
-      alert("Erro ao exportar dados.");
-    }
   }
 
   return (
@@ -441,8 +420,8 @@ export default function Conta() {
           </View>
 
           <Text style={styles.infoText}>
-            Os dados atuais deste dispositivo são da fase de testes. A base oficial
-            em nuvem começará com a conta real.
+              A sincronização completa das despesas será ativada na próxima etapa.
+              A partir dela, seus registros ficarão vinculados à sua conta.
           </Text>
         </View>
 
@@ -461,29 +440,7 @@ export default function Conta() {
             <Text style={styles.futureItem}>✅ Preparação para a sincronização total</Text>
           </View>
         </View>
-
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>📤 Exportar meus dados</Text>
-
-          <Text style={styles.infoText}>
-            Quer guardar uma cópia dos registros atuais de teste? Você pode copiar seus dados
-            para salvar em local seguro.
-          </Text>
-
-          <TouchableOpacity style={styles.exportButton} onPress={exportarDados}>
-            <Text style={styles.exportButtonText}>📋 Copiar dados atuais</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.warningCard}>
-          <Text style={styles.warningTitle}>⚠️ Importante</Text>
-
-          <Text style={styles.warningText}>
-            A conta real foi criada para proteger a próxima fase do No Controle.
-            Os registros atuais de teste ainda podem estar apenas neste dispositivo.
-          </Text>
-        </View>
-
+                
         <View style={styles.brandCard}>
           <Text style={styles.brandTitle}>💚 O que o No Controle defende</Text>
 
