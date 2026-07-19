@@ -784,24 +784,41 @@ const selectedCategoryCountText =
     ? "1 registro"
     : `${selectedCategoryItems.length} registros`;
 
-  /* ===============================
+/* ===============================
      RENDER
   =============================== */
-if (usuarioLogado === false) {
- return (
-  <ScrollView
-    style={styles.container}
-    contentContainerStyle={{
-      paddingHorizontal: isMobile ? 12 : 16,
-      paddingTop: isMobile ? 12 : 16,
-      paddingBottom: 140,
-    }}
-    showsVerticalScrollIndicator={false}
-  >
 
+  if (usuarioLogado === false) {
+    return (
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{
+          paddingHorizontal: isMobile ? 12 : 16,
+          paddingTop: isMobile ? 12 : 16,
+          paddingBottom: 140,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.title}>Histórico</Text>
+        <AuthRequiredCard />
+      </ScrollView>
+    );
+  }
+  
+  return (
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{
+        paddingHorizontal: isMobile ? 12 : 16,
+        paddingTop: isMobile ? 12 : 16,
+        paddingBottom: 140,
+      }}
+      showsVerticalScrollIndicator={false}
+    >
       <Text style={styles.title}>Histórico</Text>
 
       <View style={styles.viewModeRow}>
+
         <TouchableOpacity
           style={[
             styles.viewModeButton,
