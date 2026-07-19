@@ -1,11 +1,15 @@
 import { useRouter } from "expo-router";
 import React from "react";
 import {
+    Text as RNText,
+    TouchableOpacity as RNTouchableOpacity,
+    View as RNView,
     StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
 } from "react-native";
+
+const View = RNView as any;
+const Text = RNText as any;
+const TouchableOpacity = RNTouchableOpacity as any;
 
 export default function AuthRequiredCard() {
   const router = useRouter();
