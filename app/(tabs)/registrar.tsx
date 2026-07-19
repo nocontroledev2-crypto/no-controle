@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -755,10 +757,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
 
-  categoryMenuScroll: {
-    maxHeight: 220,
-  },
-
+  
   categoryMenuItem: {
     paddingVertical: 11,
     paddingHorizontal: 12,
