@@ -246,15 +246,23 @@ export default function Registrar() {
         ? data
         : new Date();
 
-    await saveExpense({
-      id: Date.now().toString(),
-      valor: Number(valorNumerico.toFixed(2)),
-      categoria,
-      subcategoria,
-      termoEncontrado,
-      data: dataFinal.toISOString().split("T")[0],
-      createdAt: new Date().toISOString(),
-    });
+   try {
+  await saveExpense({
+    id: Date.now().toString(),
+    valor: Number(valorNumerico.toFixed(2)),
+    categoria,
+    subcategoria,
+    termoEncontrado,
+    data: dataFinal.toISOString().split("T")[0],
+    createdAt: new Date().toISOString(),
+  });
+} catch (error) {
+  alert(
+    "Não foi possível salvar a despesa.\n\n" +
+      String(error instanceof Error ? error.message : error)
+  );
+  return;
+}
 
     const hoje = new Date();
 

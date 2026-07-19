@@ -1,6 +1,5 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const STORAGE_KEY = "@no-controle:expenses";
+import { supabase } from "../lib/supabase";
+import { getCurrentUser } from "../services/authService";
 
 export type Expense = {
   id: string;
@@ -12,9 +11,8 @@ export type Expense = {
   createdAt: string;
 };
 
-/**
- * Normaliza uma despesa garantindo que o valor seja sempre numérico e válido
- */
+const dbClient = supabase as any;
+
 function normalizeExpense(expense: Expense): Expense {
   const safeValue = Number(expense.valor);
 
@@ -25,77 +23,133 @@ function normalizeExpense(expense: Expense): Expense {
   return {
     ...expense,
     valor: Number(safeValue.toFixed(2)),
+    subcategoria: expense.subcategoria ?? "",
+    termoEncontrado: expense.termoEncontrado ?? "",
   };
 }
 
-/**
- * Busca todas as despesas salvas
- */
+function mapFromSupabase(row: any): Expense {
+  return {
+    id: row.id,
+    valor: Number(row.valor || 0),
+    categoria: row.categoria || "",
+    subcategoria: row.subcategoria || "",
+    termoEncontrado: row.termo_encontrado || "",
+    data: row.data,
+    createdAt: row.created_at,
+  };
+}
+
+async function requireUser() {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    throw new Error("Entre na sua conta para salvar e acessar seus registros.");
+  }
+
+  return user;
+}
+
 export async function getAllExpenses(): Promise<Expense[]> {
   try {
-    const json = await AsyncStorage.getItem(STORAGE_KEY);
-    const expenses = json ? JSON.parse(json) : [];
+    const user = await getCurrentUser();
 
-    if (!Array.isArray(expenses)) {
+    if (!user) {
       return [];
     }
 
-    return expenses.map((expense: any) => {
-      const safeValue = Number(expense.valor);
+    const { data, error } = await dbClient
+      .from("expenses")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
 
-      return {
-  ...expense,
-  valor: Number.isFinite(safeValue) ? safeValue : 0,
-  subcategoria: expense.subcategoria ?? "",
-  termoEncontrado: expense.termoEncontrado ?? "",
-};
-    });
-  } catch {
+    if (error) {
+      console.error(error);
+      return [];
+    }
+
+    if (!Array.isArray(data)) {
+      return [];
+    }
+
+    return data.map(mapFromSupabase);
+  } catch (error) {
+    console.error(error);
     return [];
   }
 }
 
-/**
- * Salva uma nova despesa
- */
 export async function saveExpense(expense: Expense): Promise<void> {
+  const user = await requireUser();
   const normalizedExpense = normalizeExpense(expense);
 
-  const expenses = await getAllExpenses();
-  expenses.push(normalizedExpense);
+  const { error } = await dbClient
+    .from("expenses")
+    .insert({
+      user_id: user.id,
+      valor: normalizedExpense.valor,
+      categoria: normalizedExpense.categoria,
+      subcategoria: normalizedExpense.subcategoria ?? "",
+      termo_encontrado: normalizedExpense.termoEncontrado ?? "",
+      data: normalizedExpense.data,
+      created_at: normalizedExpense.createdAt,
+      updated_at: new Date().toISOString(),
+    });
 
-  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
+  if (error) {
+    console.error(error);
+    throw new Error("Não foi possível salvar a despesa na nuvem.");
+  }
 }
 
-/**
- * Atualiza uma despesa existente pelo ID
- */
 export async function updateExpense(updatedExpense: Expense): Promise<void> {
+  await requireUser();
+
   const normalizedExpense = normalizeExpense(updatedExpense);
 
-  const expenses = await getAllExpenses();
+  const { error } = await dbClient
+    .from("expenses")
+    .update({
+      valor: normalizedExpense.valor,
+      categoria: normalizedExpense.categoria,
+      subcategoria: normalizedExpense.subcategoria ?? "",
+      termo_encontrado: normalizedExpense.termoEncontrado ?? "",
+      data: normalizedExpense.data,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", normalizedExpense.id);
 
-  const updatedExpenses = expenses.map((expense) =>
-    expense.id === normalizedExpense.id ? normalizedExpense : expense
-  );
-
-  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedExpenses));
+  if (error) {
+    console.error(error);
+    throw new Error("Não foi possível atualizar a despesa.");
+  }
 }
 
-/**
- * Exclui uma despesa pelo ID
- */
 export async function deleteExpense(id: string): Promise<void> {
-  const expenses = await getAllExpenses();
+  await requireUser();
 
-  const updatedExpenses = expenses.filter((expense) => expense.id !== id);
+  const { error } = await dbClient
+    .from("expenses")
+    .delete()
+    .eq("id", id);
 
-  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedExpenses));
+  if (error) {
+    console.error(error);
+    throw new Error("Não foi possível excluir a despesa.");
+  }
 }
 
-/**
- * Limpa todas as despesas (apenas para debug/desenvolvimento)
- */
 export async function clearExpenses(): Promise<void> {
-  await AsyncStorage.removeItem(STORAGE_KEY);
+  const user = await requireUser();
+
+  const { error } = await dbClient
+    .from("expenses")
+    .delete()
+    .eq("user_id", user.id);
+
+  if (error) {
+    console.error(error);
+    throw new Error("Não foi possível limpar as despesas.");
+  }
 }
