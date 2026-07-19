@@ -96,61 +96,74 @@ export default function Conta() {
   const [totalGasto, setTotalGasto] = useState(0);
   const [ultimoLancamento, setUltimoLancamento] = useState<string | null>(null);
 
-  useFocusEffect(
-    useCallback(() => {
-      async function load() {
-        const data = await getAllExpenses();
-        const user = await getCurrentUser();
+  async function carregarResumoDados() {
+  const data = await getAllExpenses();
 
-        const normalizedData = (data || []).map((item: any) => {
-          const safeValue = Number(item.valor);
+  const normalizedData = (data || []).map((item: any) => {
+    const safeValue = Number(item.valor);
 
-          return {
-            ...item,
-            valor: Number.isFinite(safeValue) ? safeValue : 0,
-            categoria: item.categoria || "",
-            subcategoria: item.subcategoria || "",
-            termoEncontrado: item.termoEncontrado || "",
-          };
-        });
+    return {
+      ...item,
+      valor: Number.isFinite(safeValue) ? safeValue : 0,
+      categoria: item.categoria || "",
+      subcategoria: item.subcategoria || "",
+      termoEncontrado: item.termoEncontrado || "",
+    };
+  });
 
-        const categorias = new Set(
-          normalizedData.map((item) => item.categoria).filter(Boolean)
-        );
-
-        const total = normalizedData.reduce(
-          (sum, item) => sum + Number(item.valor || 0),
-          0
-        );
-
-        const ultimaDespesa = [...normalizedData].sort((a, b) => {
-          return parseDateSafe(b.data).getTime() - parseDateSafe(a.data).getTime();
-        })[0];
-        
-        setTotalRegistros(normalizedData.length);
-        setCategoriasUsadas(categorias.size);
-        setTotalGasto(total);
-        setUltimoLancamento(ultimaDespesa?.data || null);
-
-        if (user) {
-          setUsuarioLogado(user);
-          setEmail(user.email || "");
-
-          const { data: profile } = await getProfile(user.id);
-
-          if (profile?.nome) {
-            setNome(profile.nome);
-          } else if (user.user_metadata?.nome) {
-            setNome(user.user_metadata.nome);
-          }
-        } else {
-          setUsuarioLogado(null);
-        }
-      }
-
-      load();
-    }, [])
+  const categorias = new Set(
+    normalizedData.map((item) => item.categoria).filter(Boolean)
   );
+
+  const total = normalizedData.reduce(
+    (sum, item) => sum + Number(item.valor || 0),
+    0
+  );
+
+  const ultimaDespesa = [...normalizedData].sort((a, b) => {
+    return parseDateSafe(b.data).getTime() - parseDateSafe(a.data).getTime();
+  })[0];
+
+  setTotalRegistros(normalizedData.length);
+  setCategoriasUsadas(categorias.size);
+  setTotalGasto(total);
+  setUltimoLancamento(ultimaDespesa?.data || null);
+}
+
+function zerarResumoDados() {
+  setTotalRegistros(0);
+  setCategoriasUsadas(0);
+  setTotalGasto(0);
+  setUltimoLancamento(null);
+}
+
+  useFocusEffect(
+  useCallback(() => {
+    async function load() {
+      const user = await getCurrentUser();
+
+      if (user) {
+        setUsuarioLogado(user);
+        setEmail(user.email || "");
+
+        const { data: profile } = await getProfile(user.id);
+
+        if (profile?.nome) {
+          setNome(profile.nome);
+        } else if (user.user_metadata?.nome) {
+          setNome(user.user_metadata.nome);
+        }
+
+        await carregarResumoDados();
+      } else {
+        setUsuarioLogado(null);
+        zerarResumoDados();
+      }
+    }
+
+    load();
+  }, [])
+);
 
   function limparMensagemDepois() {
     setTimeout(() => {
@@ -258,22 +271,28 @@ if (
       });
 
       setUsuarioLogado(data.user);
-      setNome(nomePerfil);
-      setEmail(data.user.email || email.trim());
-      setSenha("");
-      setMensagem("Login realizado com sucesso.");
-      limparMensagemDepois();
+setNome(nomePerfil);
+setEmail(data.user.email || email.trim());
+setSenha("");
+
+await carregarResumoDados();
+
+setMensagem("Login realizado com sucesso.");
+limparMensagemDepois();
+
     }
   }
 
   async function sairConta() {
-    await signOut();
+  await signOut();
 
-    setUsuarioLogado(null);
-    setSenha("");
-    setMensagem("Você saiu da sua conta.");
-    limparMensagemDepois();
-  }
+  setUsuarioLogado(null);
+  setSenha("");
+  zerarResumoDados();
+
+  setMensagem("Você saiu da sua conta.");
+  limparMensagemDepois();
+}
 
   return (
     <View style={[styles.container, isMobile && styles.containerMobile]}>
@@ -417,7 +436,7 @@ if (
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>📦 Dados neste dispositivo</Text>
+          <Text style={styles.cardTitle}>☁️ Dados da sua conta</Text>
 
           <View style={styles.metricsGrid}>
             <View style={styles.metricBox}>
@@ -446,9 +465,10 @@ if (
           </View>
 
           <Text style={styles.infoText}>
-              A sincronização completa das despesas será ativada na próxima etapa.
-              A partir dela, seus registros ficarão vinculados à sua conta.
-          </Text>
+  {usuarioLogado
+    ? "Estes são os registros sincronizados na sua conta No Controle."
+    : "Entre ou crie sua conta para visualizar seus registros sincronizados."}
+</Text>
         </View>
 
         <View style={styles.card}>
