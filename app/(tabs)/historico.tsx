@@ -1,5 +1,7 @@
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import AuthRequiredCard from "../components/AuthRequiredCard";
+import { getCurrentUser } from "../services/authService";
 
 import {
   Modal,
@@ -69,7 +71,8 @@ export default function Historico() {
 );
 
   const [showReportModal, setShowReportModal] = useState(false);
-  const now = new Date();
+const [usuarioLogado, setUsuarioLogado] = useState<boolean | null>(null);
+const now = new Date();
 
   /* ===============================
      HELPERS
@@ -191,7 +194,17 @@ export default function Historico() {
   =============================== */
 
   async function loadExpenses() {
-    const data = await getAllExpenses();
+  const user = await getCurrentUser();
+
+  if (!user) {
+    setUsuarioLogado(false);
+    setExpenses([]);
+    return;
+  }
+
+  setUsuarioLogado(true);
+
+  const data = await getAllExpenses();
 
     const normalized = (data || []).map((item: any) => {
       const safeValue = Number(item.valor);
@@ -773,7 +786,7 @@ const selectedCategoryCountText =
   /* ===============================
      RENDER
   =============================== */
-
+if (usuarioLogado === false) {
  return (
   <ScrollView
     style={styles.container}

@@ -1,5 +1,5 @@
-import { useRouter } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   ScrollView,
@@ -9,9 +9,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import AuthRequiredCard from "../components/AuthRequiredCard";
 import { MASTER_CATEGORIES } from "../constants/categories";
 import { getSubcategoriesByMaster } from "../constants/subcategories";
 import { parseSpeech } from "../helpers/speechParser";
+import { getCurrentUser } from "../services/authService";
 import { saveExpense } from "../storage/expenseStorage";
 
 type RegistrarState = "idle" | "listening" | "processing" | "confirm";
@@ -29,6 +31,18 @@ export default function Registrar() {
   const [termoEncontrado, setTermoEncontrado] = useState("");
   const [data, setData] = useState(new Date());
   const [dataTexto, setDataTexto] = useState(formatarData(new Date()));
+  const [usuarioLogado, setUsuarioLogado] = useState<boolean | null>(null);
+
+useFocusEffect(
+  useCallback(() => {
+    async function checkAuth() {
+      const user = await getCurrentUser();
+      setUsuarioLogado(!!user);
+    }
+
+    checkAuth();
+  }, [])
+);
 
   const recognitionRef = useRef<any>(null);
   const valorInputRef = useRef<TextInput>(null);
@@ -284,6 +298,20 @@ export default function Registrar() {
     setState("idle");
     setTimeout(() => valorInputRef.current?.focus(), 100);
   }
+
+ 
+if (usuarioLogado === false) {
+  return (
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+    >
+      <Text style={styles.title}>Registrar despesa</Text>
+      <AuthRequiredCard />
+    </ScrollView>
+  );
+}
 
   return (
     <ScrollView
