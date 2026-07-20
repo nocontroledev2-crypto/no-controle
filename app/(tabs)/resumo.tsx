@@ -9,6 +9,8 @@ import {
   useWindowDimensions,
 } from "react-native";
 
+import AuthRequiredCard from "../components/AuthRequiredCard";
+import { getCurrentUser } from "../services/authService";
 import { getAllExpenses } from "../storage/expenseStorage";
 
 function parseDateSafe(dateStr: string) {
@@ -59,6 +61,7 @@ export default function Resumo() {
   const router = useRouter();
   const [period, setPeriod] = useState<Period>("month");
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [usuarioLogado, setUsuarioLogado] = useState<boolean | null>(null);
   const [menuAberto, setMenuAberto] = useState(false);
 
 
@@ -82,7 +85,17 @@ export default function Resumo() {
    useFocusEffect(
   useCallback(() => {
     async function load() {
-      const data = await getAllExpenses();
+  const user = await getCurrentUser();
+
+  if (!user) {
+    setUsuarioLogado(false);
+    setExpenses([]);
+    return;
+  }
+
+  setUsuarioLogado(true);
+
+  const data = await getAllExpenses();
 
 const normalizedData = (data || []).map((item: any) => {
   const safeValue = Number(item.valor);
@@ -356,6 +369,14 @@ function cancelarPeriodoPersonalizado() {
 }
 
   /* ============================ */
+if (usuarioLogado === false) {
+  return (
+    <View style={[styles.container, isMobile && styles.containerMobile]}>
+      <Text style={styles.title}>NO CONTROLE</Text>
+      <AuthRequiredCard />
+    </View>
+  );
+}
 
   return (
   <View style={[styles.container, isMobile && styles.containerMobile]}>

@@ -10,6 +10,8 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+import AuthRequiredCard from "../components/AuthRequiredCard";
+import { getCurrentUser } from "../services/authService";
 import { Expense, getAllExpenses } from "../storage/expenseStorage";
 
 const SIMULATOR_CONFIG_KEY = "@no-controle:simulator-config";
@@ -76,8 +78,18 @@ export default function Simulador() {
   useFocusEffect(
     useCallback(() => {
       async function load() {
-        const data = await getAllExpenses();
-        const savedConfig = await AsyncStorage.getItem(SIMULATOR_CONFIG_KEY);
+  const user = await getCurrentUser();
+
+  if (!user) {
+    setUsuarioLogado(false);
+    setExpenses([]);
+    return;
+  }
+
+  setUsuarioLogado(true);
+
+  const data = await getAllExpenses();
+  const savedConfig = await AsyncStorage.getItem(SIMULATOR_CONFIG_KEY);
 
         const normalizedData = (data || []).map((item: any) => {
           const safeValue = Number(item.valor);
@@ -249,7 +261,19 @@ export default function Simulador() {
       setMensagem("");
     }, 2500);
   }
-
+if (usuarioLogado === false) {
+  return (
+    <View style={[styles.container, isMobile && styles.containerMobile]}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.title}>Simulador</Text>
+        <AuthRequiredCard />
+      </ScrollView>
+    </View>
+  );
+}
   return (
     <View style={[styles.container, isMobile && styles.containerMobile]}>
       <ScrollView
