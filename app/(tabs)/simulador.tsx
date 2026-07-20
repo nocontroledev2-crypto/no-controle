@@ -93,7 +93,8 @@ export default function Simulador() {
 
         const normalizedData = (data || []).map((item: any) => {
           const safeValue = Number(item.valor);
-
+        console.log("SIMULADOR RENDERIZOU");
+        
           return {
             ...item,
             valor: Number.isFinite(safeValue) ? safeValue : 0,
