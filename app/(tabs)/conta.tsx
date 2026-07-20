@@ -237,51 +237,57 @@ if (
   }
 
   async function entrarConta() {
-    if (!email.trim()) {
-      alert("Informe seu e-mail.");
-      return;
-    }
+  if (!email.trim()) {
+    alert("Informe seu e-mail.");
+    return;
+  }
 
-    if (!senha.trim()) {
-      alert("Informe sua senha.");
-      return;
-    }
+  if (!senha.trim()) {
+    alert("Informe sua senha.");
+    return;
+  }
 
-    setCarregando(true);
+  setCarregando(true);
 
-    const { data, error } = await signIn(email.trim(), senha.trim());
+  const { data, error } = await signIn(email.trim(), senha.trim());
 
-    setCarregando(false);
+  setCarregando(false);
 
-    if (error) {
-      alert("Erro ao entrar.\n\n" + traduzirErroAuth(error.message));
-      return;
-    }
+  if (error) {
+    alert("Erro ao entrar.\n\n" + traduzirErroAuth(error.message));
+    return;
+  }
 
-    if (data?.user) {
-      const nomePerfil =
-        nome.trim() ||
-        data.user.user_metadata?.nome ||
-        "Usuário No Controle";
+  if (data?.user) {
+    const nomePerfil =
+      nome.trim() ||
+      data.user.user_metadata?.nome ||
+      "Usuário No Controle";
 
+    // Atualiza a tela imediatamente após login
+    setUsuarioLogado(data.user);
+    setNome(nomePerfil);
+    setEmail(data.user.email || email.trim());
+    setSenha("");
+
+    setMensagem("Login realizado com sucesso.");
+    limparMensagemDepois();
+
+    // Carrega os dados da conta sem travar a mudança visual da tela
+    await carregarResumoDados();
+
+    // Atualiza/cria perfil em segundo momento, sem impedir a tela de mudar
+    try {
       await upsertProfile({
         id: data.user.id,
         nome: nomePerfil,
         email: data.user.email || email.trim(),
       });
-
-      setUsuarioLogado(data.user);
-setNome(nomePerfil);
-setEmail(data.user.email || email.trim());
-setSenha("");
-
-await carregarResumoDados();
-
-setMensagem("Login realizado com sucesso.");
-limparMensagemDepois();
-
+    } catch (profileError) {
+      console.error("Erro ao atualizar perfil após login:", profileError);
     }
   }
+}
 
   async function sairConta() {
   await signOut();
