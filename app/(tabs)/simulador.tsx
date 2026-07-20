@@ -93,14 +93,13 @@ export default function Simulador() {
   const savedConfig = await AsyncStorage.getItem(SIMULATOR_CONFIG_KEY);
 
         const normalizedData = (data || []).map((item: any) => {
-          const safeValue = Number(item.valor);
-        console.log("SIMULADOR RENDERIZOU");
-        
-          return {
-            ...item,
-            valor: Number.isFinite(safeValue) ? safeValue : 0,
-          };
-        });
+  const safeValue = Number(item.valor);
+
+  return {
+    ...item,
+    valor: Number.isFinite(safeValue) ? safeValue : 0,
+  };
+});
 
         setExpenses(normalizedData);
 
