@@ -63,14 +63,31 @@ export async function upsertProfile(profile: {
   email?: string;
   renda_mensal?: string;
   meta_economia?: string;
-}) 
-{
+}) {
+  const payload: any = {
+    id: profile.id,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (profile.nome !== undefined) {
+    payload.nome = profile.nome;
+  }
+
+  if (profile.email !== undefined) {
+    payload.email = profile.email;
+  }
+
+  if (profile.renda_mensal !== undefined) {
+    payload.renda_mensal = profile.renda_mensal;
+  }
+
+  if (profile.meta_economia !== undefined) {
+    payload.meta_economia = profile.meta_economia;
+  }
+
   return dbClient
     .from("profiles")
-    .upsert({
-      id: params.id,
-      nome: params.nome,
-      email: params.email,
-      updated_at: new Date().toISOString(),
+    .upsert(payload, {
+      onConflict: "id",
     });
 }
