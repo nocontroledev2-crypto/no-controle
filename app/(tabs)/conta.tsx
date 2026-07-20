@@ -598,7 +598,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 12,
     marginBottom: 12,
-    fontSize: 14,
+    fontSize: 16,
     color: "#333",
   },
 
