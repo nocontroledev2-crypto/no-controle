@@ -431,7 +431,7 @@ export default function Simulador() {
           >
             <Text style={styles.cardTitle}>
               {limiteSeguro >= 0
-                ? "💰 Quanto ainda posso gastar?"
+                ? "💰 Margem segura do mês"
                 : "🚨 Limite seguro estourado"}
             </Text>
 
@@ -446,7 +446,7 @@ export default function Simulador() {
 
             <Text style={styles.subText}>
               {limiteSeguro >= 0
-                ? "Esse é o limite aproximado para continuar dentro da sua renda e ainda respeitar sua meta."
+                ? "Esse valor mostra a margem aproximada para manter seus gastos dentro da renda e ainda respeitar sua meta."
                 : "Você já ultrapassou o limite seguro considerando sua renda e meta informadas."}
             </Text>
 
