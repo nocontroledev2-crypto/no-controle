@@ -67,6 +67,7 @@ export default function Simulador() {
   const isMobile = width < 480;
 
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [usuarioLogado, setUsuarioLogado] = useState<boolean | null>(null);
   const [rendaMensal, setRendaMensal] = useState("");
   const [metaEconomia, setMetaEconomia] = useState("");
   const [rendaMensalSalva, setRendaMensalSalva] = useState("");
