@@ -87,6 +87,9 @@ export default function Conta() {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [editandoNome, setEditandoNome] = useState(false);
+  const [nomeEditado, setNomeEditado] = useState("");
+  const [salvandoNome, setSalvandoNome] = useState(false);
 
   const [mensagem, setMensagem] = useState("");
   const [carregando, setCarregando] = useState(false);
@@ -300,6 +303,53 @@ if (
   limparMensagemDepois();
 }
 
+function iniciarEdicaoNome() {
+  setNomeEditado(nome || "");
+  setEditandoNome(true);
+}
+
+function cancelarEdicaoNome() {
+  setNomeEditado("");
+  setEditandoNome(false);
+}
+
+async function salvarNomeConta() {
+  const novoNome = nomeEditado.trim();
+
+  if (!novoNome) {
+    alert("Informe um nome válido.");
+    return;
+  }
+
+  const user = usuarioLogado || (await getCurrentUser());
+
+  if (!user) {
+    alert("Entre na sua conta para atualizar o nome.");
+    return;
+  }
+
+  setSalvandoNome(true);
+
+  try {
+    await upsertProfile({
+      id: user.id,
+      nome: novoNome,
+      email: email || user.email || "",
+    });
+
+    setNome(novoNome);
+    setNomeEditado("");
+    setEditandoNome(false);
+
+    setMensagem("Nome atualizado com sucesso.");
+    limparMensagemDepois();
+  } catch (error) {
+    console.error(error);
+    alert("Não foi possível atualizar seu nome. Tente novamente.");
+  } finally {
+    setSalvandoNome(false);
+  }
+}
   return (
     <View style={[styles.container, isMobile && styles.containerMobile]}>
       <ScrollView
@@ -336,12 +386,54 @@ if (
 
               <View style={styles.accountBox}>
                 <Text style={styles.accountLabel}>Nome</Text>
-                <Text style={styles.accountValue}>
-                  {nome || "Usuário No Controle"}
-                </Text>
 
-                <Text style={styles.accountLabel}>E-mail</Text>
-                <Text style={styles.accountValue}>{email}</Text>
+{editandoNome ? (
+  <>
+    <TextInput
+      style={styles.nameEditInput}
+      value={nomeEditado}
+      onChangeText={setNomeEditado}
+      placeholder="Digite seu nome"
+      placeholderTextColor="#9CA3AF"
+    />
+
+    <View style={styles.accountActionsRow}>
+      <TouchableOpacity
+        style={styles.smallSaveButton}
+        onPress={salvarNomeConta}
+        disabled={salvandoNome}
+      >
+        <Text style={styles.smallSaveButtonText}>
+          {salvandoNome ? "Salvando..." : "Salvar nome"}
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.smallCancelButton}
+        onPress={cancelarEdicaoNome}
+        disabled={salvandoNome}
+      >
+        <Text style={styles.smallCancelButtonText}>Cancelar</Text>
+      </TouchableOpacity>
+    </View>
+  </>
+) : (
+  <>
+    <Text style={styles.accountValue}>
+      {nome || "Usuário No Controle"}
+    </Text>
+
+    <TouchableOpacity
+      style={styles.editNameButton}
+      onPress={iniciarEdicaoNome}
+    >
+      <Text style={styles.editNameButtonText}>✏️ Editar nome</Text>
+    </TouchableOpacity>
+  </>
+)}
+
+<Text style={styles.accountLabel}>E-mail</Text>
+<Text style={styles.accountValue}>{email}</Text>
               </View>
 
               <TouchableOpacity style={styles.logoutButton} onPress={sairConta}>
@@ -839,4 +931,68 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     marginBottom: 6,
   },
+
+  nameEditInput: {
+  backgroundColor: "#FFFFFF",
+  borderWidth: 1,
+  borderColor: "#DDE3EA",
+  borderRadius: 10,
+  paddingVertical: 10,
+  paddingHorizontal: 12,
+  marginBottom: 10,
+  fontSize: 16,
+  color: "#333",
+},
+
+accountActionsRow: {
+  flexDirection: "row",
+  gap: 8,
+  marginBottom: 12,
+},
+
+smallSaveButton: {
+  backgroundColor: "#0A8F55",
+  borderRadius: 10,
+  paddingVertical: 9,
+  paddingHorizontal: 12,
+},
+
+smallSaveButtonText: {
+  color: "#FFFFFF",
+  fontSize: 12,
+  fontWeight: "800",
+},
+
+smallCancelButton: {
+  backgroundColor: "#FFFFFF",
+  borderWidth: 0.5,
+  borderColor: "#DDE3EA",
+  borderRadius: 10,
+  paddingVertical: 9,
+  paddingHorizontal: 12,
+},
+
+smallCancelButtonText: {
+  color: "#555",
+  fontSize: 12,
+  fontWeight: "700",
+},
+
+editNameButton: {
+  alignSelf: "flex-start",
+  backgroundColor: "#F0FAF5",
+  borderWidth: 0.5,
+  borderColor: "#BFE7D2",
+  borderRadius: 999,
+  paddingVertical: 6,
+  paddingHorizontal: 10,
+  marginTop: -4,
+  marginBottom: 12,
+},
+
+editNameButtonText: {
+  color: "#0A8F55",
+  fontSize: 12,
+  fontWeight: "800",
+},
 });

@@ -84,7 +84,7 @@ export async function upsertProfile(profile: {
   if (profile.meta_economia !== undefined) {
     payload.meta_economia = profile.meta_economia;
   }
-
+ 
   return dbClient
     .from("profiles")
     .upsert(payload, {
