@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
@@ -10,20 +9,13 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+
 import AuthRequiredCard from "../components/AuthRequiredCard";
-import {
-  getCurrentUser,
-  getProfile,
-  upsertProfile,
-} from "../services/authService";
+import { supabase } from "../lib/supabase";
+import { getCurrentUser } from "../services/authService";
 import { Expense, getAllExpenses } from "../storage/expenseStorage";
 
-const SIMULATOR_CONFIG_KEY = "@no-controle:simulator-config";
-
-type SimulatorConfig = {
-  rendaMensal: string;
-  metaEconomia: string;
-};
+const dbClient = supabase as any;
 
 function parseDateSafe(dateStr: string) {
   const [ano, mes, dia] = dateStr.split("-");
@@ -72,56 +64,65 @@ export default function Simulador() {
 
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [usuarioLogado, setUsuarioLogado] = useState<boolean | null>(null);
+
   const [rendaMensal, setRendaMensal] = useState("");
   const [metaEconomia, setMetaEconomia] = useState("");
   const [rendaMensalSalva, setRendaMensalSalva] = useState("");
   const [metaEconomiaSalva, setMetaEconomiaSalva] = useState("");
+
   const [mensagem, setMensagem] = useState("");
+  const [salvando, setSalvando] = useState(false);
 
   const now = new Date();
 
   useFocusEffect(
     useCallback(() => {
       async function load() {
-  const user = await getCurrentUser();
+        const user = await getCurrentUser();
 
-  if (!user) {
-    setUsuarioLogado(false);
-    setExpenses([]);
-    return;
-  }
+        if (!user) {
+          setUsuarioLogado(false);
+          setExpenses([]);
+          setRendaMensal("");
+          setMetaEconomia("");
+          setRendaMensalSalva("");
+          setMetaEconomiaSalva("");
+          return;
+        }
 
-  setUsuarioLogado(true);
+        setUsuarioLogado(true);
 
-  const { data: profile } = await getProfile(user.id);
+        const data = await getAllExpenses();
 
-if (profile) {
-  const rendaSalva = profile.renda_mensal || "";
-  const metaSalva = profile.meta_economia || "";
+        const normalizedData = (data || []).map((item: any) => {
+          const safeValue = Number(item.valor);
 
-  setRendaMensal(rendaSalva);
-  setMetaEconomia(metaSalva);
-
-  setRendaMensalSalva(rendaSalva);
-  setMetaEconomiaSalva(metaSalva);
-}
-
-});
+          return {
+            ...item,
+            valor: Number.isFinite(safeValue) ? safeValue : 0,
+          };
+        });
 
         setExpenses(normalizedData);
 
-        if (savedConfig) {
-         const parsed: SimulatorConfig = JSON.parse(savedConfig);
+        const { data: profile, error } = await dbClient
+          .from("profiles")
+          .select("renda_mensal, meta_economia")
+          .eq("id", user.id)
+          .single();
 
-         const rendaSalva = parsed.rendaMensal || "";
-         const metaSalva = parsed.metaEconomia || "";
+        if (error) {
+          console.error(error);
+          return;
+        }
 
-         setRendaMensal(rendaSalva);
-         setMetaEconomia(metaSalva);
-         setRendaMensalSalva(rendaSalva);
-         setMetaEconomiaSalva(metaSalva);
-          }
+        const rendaSalva = profile?.renda_mensal || "";
+        const metaSalva = profile?.meta_economia || "";
 
+        setRendaMensal(rendaSalva);
+        setMetaEconomia(metaSalva);
+        setRendaMensalSalva(rendaSalva);
+        setMetaEconomiaSalva(metaSalva);
       }
 
       load();
@@ -150,21 +151,24 @@ if (profile) {
   const metaNumerica = parseValorMonetario(metaEconomia);
 
   const rendaValida = Number.isFinite(rendaNumerica) && rendaNumerica > 0;
+
   const metaValida =
-  metaEconomia.trim() === ""
-    ? true
-    : Number.isFinite(metaNumerica) && metaNumerica >= 0;
+    metaEconomia.trim() === ""
+      ? true
+      : Number.isFinite(metaNumerica) && metaNumerica >= 0;
+
   const simulacaoAlterada =
     rendaMensal.trim() !== rendaMensalSalva.trim() ||
     metaEconomia.trim() !== metaEconomiaSalva.trim();
 
   const receitaConsiderada = rendaValida ? rendaNumerica : 0;
+
   const metaConsiderada =
-  metaEconomia.trim() === ""
-    ? 0
-    : metaValida
-    ? metaNumerica
-    : 0;
+    metaEconomia.trim() === ""
+      ? 0
+      : metaValida
+      ? metaNumerica
+      : 0;
 
   const limiteSeguro = receitaConsiderada - metaConsiderada - totalMesAtual;
 
@@ -216,7 +220,9 @@ if (profile) {
   const registrosTotais = expenses.length;
 
   const historicoSuficiente =
-    mesesComHistorico >= 3 && registrosTotais >= 12 && categoriasUtilizadas >= 3;
+    mesesComHistorico >= 3 &&
+    registrosTotais >= 12 &&
+    categoriasUtilizadas >= 3;
 
   function getStatusSimulador() {
     if (!rendaValida) {
@@ -231,18 +237,19 @@ if (profile) {
     if (limiteSeguro >= 0) {
       return {
         titulo: "Você está no controle",
-        detalhe: `Depois dos gastos já registrados até o momento e da sua meta, ainda existe uma margem segura para este mês.`,
+        detalhe:
+          "Depois dos gastos já registrados até o momento e da sua meta, ainda existe uma margem segura para este mês.",
         tipo: "positivo",
       };
     }
 
     return {
-  titulo: "Sua renda já não cobre os gastos registrados",
-  detalhe: `Com os gastos já registrados até o momento e sua meta informada, faltam ${formatMoney(
-    Math.abs(limiteSeguro)
-  )} para voltar ao limite seguro deste mês.`,
-  tipo: "risco",
-};
+      titulo: "Sua renda já não cobre os gastos registrados",
+      detalhe: `Com os gastos já registrados até o momento e sua meta informada, faltam ${formatMoney(
+        Math.abs(limiteSeguro)
+      )} para voltar ao limite seguro deste mês.`,
+      tipo: "risco",
+    };
   }
 
   const status = getStatusSimulador();
@@ -253,43 +260,76 @@ if (profile) {
       return;
     }
 
-    
-
-    const config: SimulatorConfig = {
-      rendaMensal: rendaMensal.trim(),
-      metaEconomia: metaEconomia.trim(),
-    };
+    if (!metaValida) {
+      alert("Informe uma meta de economia válida.");
+      return;
+    }
 
     const user = await getCurrentUser();
 
-if (user) {
-  await upsertProfile({
-    id: user.id,
-    renda_mensal: config.rendaMensal,
-    meta_economia: config.metaEconomia,
-  });
-}
-    setRendaMensalSalva(config.rendaMensal);
-    setMetaEconomiaSalva(config.metaEconomia);
+    if (!user) {
+      alert("Entre na sua conta para salvar a simulação.");
+      setUsuarioLogado(false);
+      return;
+    }
+
+    const rendaFinal = rendaMensal.trim();
+    const metaFinal = metaEconomia.trim();
+
+    setSalvando(true);
+
+    const { error } = await dbClient
+      .from("profiles")
+      .update({
+        renda_mensal: rendaFinal,
+        meta_economia: metaFinal,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", user.id);
+
+    setSalvando(false);
+
+    if (error) {
+      console.error(error);
+      alert("Não foi possível salvar a simulação na nuvem.");
+      return;
+    }
+
+    setRendaMensalSalva(rendaFinal);
+    setMetaEconomiaSalva(metaFinal);
     setMensagem("Simulação salva com sucesso.");
 
     setTimeout(() => {
       setMensagem("");
     }, 2500);
   }
-if (usuarioLogado === false) {
-  return (
-    <View style={[styles.container, isMobile && styles.containerMobile]}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+
+  if (usuarioLogado === null) {
+    return (
+      <View style={[styles.container, isMobile && styles.containerMobile]}>
         <Text style={styles.title}>Simulador</Text>
-        <AuthRequiredCard />
-      </ScrollView>
-    </View>
-  );
-}
+
+        <View style={styles.card}>
+          <Text style={styles.subText}>Carregando simulador...</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (usuarioLogado === false) {
+    return (
+      <View style={[styles.container, isMobile && styles.containerMobile]}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.title}>Simulador</Text>
+          <AuthRequiredCard />
+        </ScrollView>
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.container, isMobile && styles.containerMobile]}>
       <ScrollView
@@ -320,17 +360,21 @@ if (usuarioLogado === false) {
           />
 
           <TouchableOpacity
-           style={[
-           styles.saveButton,
-           !simulacaoAlterada && styles.saveButtonDisabled,
-           ]}
-           onPress={simulacaoAlterada ? salvarConfiguracao : undefined}
-           disabled={!simulacaoAlterada}
-           >
-           <Text style={styles.saveButtonText}>
-           {simulacaoAlterada ? "💾 Salvar simulação" : "✅ Simulação salva"}
-           </Text>
-           </TouchableOpacity>
+            style={[
+              styles.saveButton,
+              (!simulacaoAlterada || salvando) && styles.saveButtonDisabled,
+            ]}
+            onPress={simulacaoAlterada && !salvando ? salvarConfiguracao : undefined}
+            disabled={!simulacaoAlterada || salvando}
+          >
+            <Text style={styles.saveButtonText}>
+              {salvando
+                ? "Salvando..."
+                : simulacaoAlterada
+                ? "💾 Salvar simulação"
+                : "✅ Simulação salva"}
+            </Text>
+          </TouchableOpacity>
 
           {mensagem ? <Text style={styles.successText}>{mensagem}</Text> : null}
         </View>
@@ -354,29 +398,29 @@ if (usuarioLogado === false) {
           <Text style={styles.resultDetail}>{status.detalhe}</Text>
         </View>
 
-       <View style={styles.card}>
-  <Text style={styles.cardTitle}>📊 Raio-X do mês</Text>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>📊 Raio-X do mês</Text>
 
-  <View style={styles.metricLine}>
-    <Text style={styles.metricLabel}>Renda mensal</Text>
-    <View style={styles.metricDots} />
-    <Text style={styles.metricValue}>
-      {rendaValida ? formatMoney(receitaConsiderada) : "Não informada"}
-    </Text>
-  </View>
+          <View style={styles.metricLine}>
+            <Text style={styles.metricLabel}>Renda mensal</Text>
+            <View style={styles.metricDots} />
+            <Text style={styles.metricValue}>
+              {rendaValida ? formatMoney(receitaConsiderada) : "Não informada"}
+            </Text>
+          </View>
 
-  <View style={styles.metricLine}>
-    <Text style={styles.metricLabel}>Gasto até hoje</Text>
-    <View style={styles.metricDots} />
-    <Text style={styles.metricValue}>{formatMoney(totalMesAtual)}</Text>
-  </View>
+          <View style={styles.metricLine}>
+            <Text style={styles.metricLabel}>Gasto até hoje</Text>
+            <View style={styles.metricDots} />
+            <Text style={styles.metricValue}>{formatMoney(totalMesAtual)}</Text>
+          </View>
 
-  <View style={styles.metricLine}>
-    <Text style={styles.metricLabel}>Meta de economia</Text>
-    <View style={styles.metricDots} />
-    <Text style={styles.metricValue}>{formatMoney(metaConsiderada)}</Text>
-  </View>
-</View>
+          <View style={styles.metricLine}>
+            <Text style={styles.metricLabel}>Meta de economia</Text>
+            <View style={styles.metricDots} />
+            <Text style={styles.metricValue}>{formatMoney(metaConsiderada)}</Text>
+          </View>
+        </View>
 
         {rendaValida ? (
           <View
@@ -386,10 +430,10 @@ if (usuarioLogado === false) {
             ]}
           >
             <Text style={styles.cardTitle}>
-             {limiteSeguro >= 0
-             ? "💰 Quanto ainda posso gastar?"
-             : "🚨 Limite seguro estourado"}
-             </Text>
+              {limiteSeguro >= 0
+                ? "💰 Quanto ainda posso gastar?"
+                : "🚨 Limite seguro estourado"}
+            </Text>
 
             <Text
               style={[
@@ -400,73 +444,75 @@ if (usuarioLogado === false) {
               {formatMoney(limiteSeguro)}
             </Text>
 
-           <Text style={styles.subText}>
-  {limiteSeguro >= 0
-    ? "Esse é o limite aproximado para continuar dentro da sua renda e ainda respeitar sua meta."
-    : "Você já ultrapassou o limite seguro considerando sua renda e meta informadas."}
-</Text>
+            <Text style={styles.subText}>
+              {limiteSeguro >= 0
+                ? "Esse é o limite aproximado para continuar dentro da sua renda e ainda respeitar sua meta."
+                : "Você já ultrapassou o limite seguro considerando sua renda e meta informadas."}
+            </Text>
 
-{limiteSeguro >= 0 ? (
-  <Text style={styles.reserveHint}>
-    💡 Você já tem sua reserva de emergência? Se ainda não tem, esse pode ser um bom momento para começar a construir uma.
-  </Text>
-) : (
-  <Text style={styles.debtWarningHint}>
-    💡 Evite cobrir esse valor com cheque especial ou limite do cartão. Os juros podem crescer rápido. Se precisar, procure negociar antes que a dívida aumente.
-  </Text>
-)}
-
+            {limiteSeguro >= 0 ? (
+              <Text style={styles.reserveHint}>
+                💡 Você já tem sua reserva de emergência? Se ainda não tem, esse
+                pode ser um bom momento para começar a construir uma.
+              </Text>
+            ) : (
+              <Text style={styles.debtWarningHint}>
+                💡 Evite cobrir esse valor com cheque especial ou limite do
+                cartão. Os juros podem crescer rápido. Se precisar, procure
+                negociar antes que a dívida aumente.
+              </Text>
+            )}
           </View>
         ) : null}
 
         <View style={styles.card}>
-  <Text style={styles.cardTitle}>🎯 Ponto de atenção do mês</Text>
+          <Text style={styles.cardTitle}>🎯 Ponto de atenção do mês</Text>
 
-  {currentMonthExpenses.length === 0 ? (
-    <Text style={styles.subText}>
-      Registre algumas despesas para o simulador apontar onde seu dinheiro está indo.
-    </Text>
-  ) : categoriaMaisPesada ? (
-    <>
-      <Text style={styles.subText}>
-        Até agora, a categoria que mais pesou nos seus gastos foi:
-      </Text>
+          {currentMonthExpenses.length === 0 ? (
+            <Text style={styles.subText}>
+              Registre algumas despesas para o simulador apontar onde seu dinheiro está indo.
+            </Text>
+          ) : categoriaMaisPesada ? (
+            <>
+              <Text style={styles.subText}>
+                Até agora, a categoria que mais pesou nos seus gastos foi:
+              </Text>
 
-      <Text style={styles.bigCategoryText}>{categoriaMaisPesada[0]}</Text>
+              <Text style={styles.bigCategoryText}>{categoriaMaisPesada[0]}</Text>
 
-      <Text style={styles.subText}>
-        Total gasto:{" "}
-        <Text style={styles.boldText}>
-          {formatMoney(categoriaMaisPesada[1])}
-        </Text>
-      </Text>
+              <Text style={styles.subText}>
+                Total gasto:{" "}
+                <Text style={styles.boldText}>
+                  {formatMoney(categoriaMaisPesada[1])}
+                </Text>
+              </Text>
 
-      <Text style={styles.subText}>
-        Representa{" "}
-        <Text style={styles.boldText}>
-          {percentualCategoriaMaisPesada.toFixed(0)}%
-        </Text>{" "}
-        dos gastos registrados neste mês.
-      </Text>
+              <Text style={styles.subText}>
+                Representa{" "}
+                <Text style={styles.boldText}>
+                  {percentualCategoriaMaisPesada.toFixed(0)}%
+                </Text>{" "}
+                dos gastos registrados neste mês.
+              </Text>
 
-      <Text style={styles.subText}>
-        Para os próximos gastos, tente reduzir essa categoria em 20%.
-      </Text>
+              <Text style={styles.subText}>
+                Para os próximos gastos, tente reduzir essa categoria em 20%.
+              </Text>
 
-      <Text style={styles.subText}>
-        Isso poderia preservar cerca de{" "}
-        <Text style={styles.boldText}>
-          {formatMoney(economiaSimuladaCategoria)}
-        </Text>{" "}
-        no seu orçamento.
-      </Text>
-    </>
-      ) : (
-       <Text style={styles.subText}>
-      Ainda não há categoria suficiente para gerar sugestão.
-      </Text>
-      )}
-       </View>
+              <Text style={styles.subText}>
+                Isso poderia preservar cerca de{" "}
+                <Text style={styles.boldText}>
+                  {formatMoney(economiaSimuladaCategoria)}
+                </Text>{" "}
+                no seu orçamento.
+              </Text>
+            </>
+          ) : (
+            <Text style={styles.subText}>
+              Ainda não há categoria suficiente para gerar sugestão.
+            </Text>
+          )}
+        </View>
 
         {!historicoSuficiente ? (
           <View style={styles.noteCard}>
@@ -498,8 +544,9 @@ if (usuarioLogado === false) {
         <View style={styles.noteCard}>
           <Text style={styles.noteTitle}>📌 Versão MVP</Text>
           <Text style={styles.noteText}>
-            Esta versão foca em clareza: mostrar sua situação, quanto ainda pode gastar e onde agir primeiro.
-            Futuramente, o No Controle poderá simular cenários, metas por categoria e estratégias avançadas.
+            Esta versão foca em clareza: mostrar sua situação, quanto ainda pode gastar
+            e onde agir primeiro. Futuramente, o No Controle poderá simular cenários,
+            metas por categoria e estratégias avançadas.
           </Text>
         </View>
       </ScrollView>
@@ -563,7 +610,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 12,
     marginBottom: 12,
-    fontSize: 14,
+    fontSize: 16,
     color: "#333",
   },
 
@@ -574,6 +621,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     alignItems: "center",
     marginTop: 2,
+  },
+
+  saveButtonDisabled: {
+    backgroundColor: "#A7CDBB",
   },
 
   saveButtonText: {
@@ -634,31 +685,6 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 
-  resultLine: {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-  gap: 10,
-  marginTop: 8,
-  width: "100%",
-  maxWidth: 520,
-  alignSelf: "flex-start",
-},
-
-  resultLabel: {
-    fontSize: 13,
-    color: "#666",
-    flex: 1,
-  },
-
-  resultValue: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#333",
-    textAlign: "right",
-    minWidth: 120,
-  },
-
   safeCard: {
     borderColor: "#BFE7D2",
     backgroundColor: "#F3FBF7",
@@ -714,53 +740,48 @@ const styles = StyleSheet.create({
   },
 
   reserveHint: {
-  fontSize: 12,
-  color: "#4D6659",
-  lineHeight: 17,
-  marginTop: 6,
-},
+    fontSize: 12,
+    color: "#4D6659",
+    lineHeight: 17,
+    marginTop: 6,
+  },
 
-metricLine: {
-  flexDirection: "row",
-  alignItems: "center",
-  marginTop: 8,
-  width: "100%",
-  maxWidth: 330,
-},
+  debtWarningHint: {
+    fontSize: 12,
+    color: "#8A4B00",
+    lineHeight: 17,
+    marginTop: 6,
+  },
 
-metricLabel: {
-  fontSize: 13,
-  color: "#666",
-  width: 115,
-},
+  metricLine: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+    width: "100%",
+    maxWidth: 330,
+  },
 
-metricDots: {
-  flex: 1,
-  maxWidth: 70,
-  borderBottomWidth: 1,
-  borderBottomColor: "#D9E2DD",
-  borderStyle: "dotted",
-  marginHorizontal: 8,
-  marginTop: 6,
-},
+  metricLabel: {
+    fontSize: 13,
+    color: "#666",
+    width: 115,
+  },
 
-metricValue: {
-  fontSize: 13,
-  fontWeight: "800",
-  color: "#333",
-  minWidth: 105,
-  textAlign: "right",
-},
+  metricDots: {
+    flex: 1,
+    maxWidth: 70,
+    borderBottomWidth: 1,
+    borderBottomColor: "#D9E2DD",
+    borderStyle: "dotted",
+    marginHorizontal: 8,
+    marginTop: 6,
+  },
 
-debtWarningHint: {
-  fontSize: 12,
-  color: "#8A4B00",
-  lineHeight: 17,
-  marginTop: 6,
-},
-
- saveButtonDisabled: {
-  backgroundColor: "#A7CDBB",
- },
-
+  metricValue: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: "#333",
+    minWidth: 105,
+    textAlign: "right",
+  },
 });
