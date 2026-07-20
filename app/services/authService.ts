@@ -57,11 +57,14 @@ export async function getProfile(userId: string) {
     .single();
 }
 
-export async function upsertProfile(params: {
+export async function upsertProfile(profile: {
   id: string;
-  nome: string;
-  email: string;
-}) {
+  nome?: string;
+  email?: string;
+  renda_mensal?: string;
+  meta_economia?: string;
+}) 
+{
   return dbClient
     .from("profiles")
     .upsert({

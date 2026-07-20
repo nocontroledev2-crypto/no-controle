@@ -11,7 +11,11 @@ import {
   useWindowDimensions,
 } from "react-native";
 import AuthRequiredCard from "../components/AuthRequiredCard";
-import { getCurrentUser } from "../services/authService";
+import {
+  getCurrentUser,
+  getProfile,
+  upsertProfile,
+} from "../services/authService";
 import { Expense, getAllExpenses } from "../storage/expenseStorage";
 
 const SIMULATOR_CONFIG_KEY = "@no-controle:simulator-config";
@@ -89,16 +93,19 @@ export default function Simulador() {
 
   setUsuarioLogado(true);
 
-  const data = await getAllExpenses();
-  const savedConfig = await AsyncStorage.getItem(SIMULATOR_CONFIG_KEY);
+  const { data: profile } = await getProfile(user.id);
 
-        const normalizedData = (data || []).map((item: any) => {
-  const safeValue = Number(item.valor);
+if (profile) {
+  const rendaSalva = profile.renda_mensal || "";
+  const metaSalva = profile.meta_economia || "";
 
-  return {
-    ...item,
-    valor: Number.isFinite(safeValue) ? safeValue : 0,
-  };
+  setRendaMensal(rendaSalva);
+  setMetaEconomia(metaSalva);
+
+  setRendaMensalSalva(rendaSalva);
+  setMetaEconomiaSalva(metaSalva);
+}
+
 });
 
         setExpenses(normalizedData);
@@ -253,7 +260,15 @@ export default function Simulador() {
       metaEconomia: metaEconomia.trim(),
     };
 
-    await AsyncStorage.setItem(SIMULATOR_CONFIG_KEY, JSON.stringify(config));
+    const user = await getCurrentUser();
+
+if (user) {
+  await upsertProfile({
+    id: user.id,
+    renda_mensal: config.rendaMensal,
+    meta_economia: config.metaEconomia,
+  });
+}
     setRendaMensalSalva(config.rendaMensal);
     setMetaEconomiaSalva(config.metaEconomia);
     setMensagem("Simulação salva com sucesso.");
