@@ -164,13 +164,19 @@ export default function Simulador() {
   const receitaConsiderada = rendaValida ? rendaNumerica : 0;
 
   const metaConsiderada =
-    metaEconomia.trim() === ""
-      ? 0
-      : metaValida
-      ? metaNumerica
-      : 0;
+  metaEconomia.trim() === ""
+    ? 0
+    : metaValida
+    ? metaNumerica
+    : 0;
 
-  const limiteSeguro = receitaConsiderada - metaConsiderada - totalMesAtual;
+const temMetaEconomia =
+  metaEconomia.trim() !== "" &&
+  metaValida &&
+  Number.isFinite(metaNumerica) &&
+  metaNumerica > 0;
+
+const limiteSeguro = receitaConsiderada - metaConsiderada - totalMesAtual;
 
   const porCategoria = useMemo(() => {
     const map: Record<string, number> = {};
@@ -431,8 +437,10 @@ export default function Simulador() {
           >
             <Text style={styles.cardTitle}>
               {limiteSeguro >= 0
-                ? "💰 Margem segura do mês"
-                : "🚨 Limite seguro estourado"}
+              ? temMetaEconomia
+              ? "💚 Margem segura do mês"
+              : "🧭 Margem estimada do mês"
+              : "🚨 Limite seguro estourado"}
             </Text>
 
             <Text
@@ -445,23 +453,26 @@ export default function Simulador() {
             </Text>
 
             <Text style={styles.subText}>
-              {limiteSeguro >= 0
-                ? "Esse valor mostra a margem aproximada para manter seus gastos dentro da renda e ainda respeitar sua meta."
-                : "Você já ultrapassou o limite seguro considerando sua renda e meta informadas."}
-            </Text>
+  {limiteSeguro >= 0
+    ? temMetaEconomia
+      ? "Esse valor mostra a margem aproximada para manter seus gastos dentro da renda e ainda respeitar sua meta."
+      : "Esse valor mostra quanto ainda resta dentro da sua renda. Defina uma meta de economia para transformar essa margem em planejamento e proteção."
+    : "Você já ultrapassou o limite seguro considerando sua renda e meta informadas."}
+</Text>
 
             {limiteSeguro >= 0 ? (
-              <Text style={styles.reserveHint}>
-                💡 Você já tem sua reserva de emergência? Se ainda não tem, esse
-                pode ser um bom momento para começar a construir uma.
-              </Text>
-            ) : (
-              <Text style={styles.debtWarningHint}>
-                💡 Evite cobrir esse valor com cheque especial ou limite do
-                cartão. Os juros podem crescer rápido. Se precisar, procure
-                negociar antes que a dívida aumente.
-              </Text>
-            )}
+  <Text style={styles.reserveHint}>
+    {temMetaEconomia
+      ? "💡 Você já tem sua reserva de emergência? Se ainda não tem, esse pode ser um bom momento para começar a construir uma."
+      : "💡 Comece com uma meta pequena. Separar uma parte da renda antes de gastar ajuda a criar reserva e evitar aperto no fim do mês."}
+  </Text>
+) : (
+  <Text style={styles.debtWarningHint}>
+    💡 Evite cobrir esse valor com cheque especial ou limite do
+    cartão. Os juros podem crescer rápido. Se precisar, procure
+    negociar antes que a dívida aumente.
+  </Text>
+)}
           </View>
         ) : null}
 
