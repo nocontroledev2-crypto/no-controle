@@ -93,6 +93,7 @@ export default function Conta() {
 
   const [mensagem, setMensagem] = useState("");
   const [carregando, setCarregando] = useState(false);
+  const [ocultarValores, setOcultarValores] = useState(false);
   
   const [totalRegistros, setTotalRegistros] = useState(0);
   const [categoriasUsadas, setCategoriasUsadas] = useState(0);
@@ -173,6 +174,12 @@ function zerarResumoDados() {
       setMensagem("");
     }, 3500);
   }
+
+  function formatarValorVisivel(valor: number) {
+  return ocultarValores
+    ? "R$ ••••••"
+    : formatMoney(valor);
+}
 
   async function criarConta() {
     if (!nome.trim()) {
@@ -356,7 +363,17 @@ async function salvarNomeConta() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Minha Conta</Text>
+        <View style={styles.headerRow}>
+  <Text style={styles.title}>Minha Conta</Text>
+
+  <TouchableOpacity
+    onPress={() => setOcultarValores(!ocultarValores)}
+  >
+    <Text style={styles.eyeButton}>
+      {ocultarValores ? "🙈" : "👁️"}
+    </Text>
+  </TouchableOpacity>
+</View>
 
         <View style={styles.heroCard}>
           <Text style={styles.heroTitle}>👤 Sua jornada no No Controle</Text>
@@ -554,7 +571,9 @@ async function salvarNomeConta() {
 
           <View style={styles.infoLine}>
             <Text style={styles.infoLabel}>Total registrado</Text>
-            <Text style={styles.infoValue}>{formatMoney(totalGasto)}</Text>
+            <Text style={styles.infoValue}>
+  {formatarValorVisivel(totalGasto)}
+</Text>
           </View>
 
           <View style={styles.infoLine}>
@@ -995,4 +1014,15 @@ editNameButtonText: {
   fontSize: 12,
   fontWeight: "800",
 },
+headerRow: {
+  flexDirection: "row",
+  justifyContent: "center",
+  alignItems: "center",
+  gap: 10,
+},
+
+eyeButton: {
+  fontSize: 20,
+},
+
 });
