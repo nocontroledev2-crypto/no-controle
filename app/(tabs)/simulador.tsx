@@ -58,6 +58,12 @@ function formatMoney(valor: number | null | undefined) {
   });
 }
 
+function formatarValorVisivel(valor: number) {
+  return ocultarValores
+    ? "R$ ••••••"
+    : formatMoney(valor);
+}
+
 export default function Simulador() {
   const { width } = useWindowDimensions();
   const isMobile = width < 480;
@@ -71,6 +77,7 @@ export default function Simulador() {
   const [metaEconomiaSalva, setMetaEconomiaSalva] = useState("");
 
   const [mensagem, setMensagem] = useState("");
+  const [ocultarValores, setOcultarValores] = useState(false);
   const [salvando, setSalvando] = useState(false);
 
   const now = new Date();
@@ -318,7 +325,17 @@ const limiteSeguro = receitaConsiderada - metaConsiderada - totalMesAtual;
   if (usuarioLogado === null) {
     return (
       <View style={[styles.container, isMobile && styles.containerMobile]}>
-        <Text style={styles.title}>Simulador</Text>
+        <View style={styles.headerRow}>
+  <Text style={styles.title}>Simulador</Text>
+
+  <TouchableOpacity
+    onPress={() => setOcultarValores(!ocultarValores)}
+  >
+    <Text style={styles.eyeButton}>
+      {ocultarValores ? "🙈" : "👁️"}
+    </Text>
+  </TouchableOpacity>
+</View>
 
         <View style={styles.card}>
           <Text style={styles.subText}>Carregando simulador...</Text>
@@ -334,7 +351,17 @@ const limiteSeguro = receitaConsiderada - metaConsiderada - totalMesAtual;
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.title}>Simulador</Text>
+          <View style={styles.headerRow}>
+  <Text style={styles.title}>Simulador</Text>
+
+  <TouchableOpacity
+    onPress={() => setOcultarValores(!ocultarValores)}
+  >
+    <Text style={styles.eyeButton}>
+      {ocultarValores ? "🙈" : "👁️"}
+    </Text>
+  </TouchableOpacity>
+</View>
           <AuthRequiredCard />
         </ScrollView>
       </View>
@@ -347,15 +374,29 @@ const limiteSeguro = receitaConsiderada - metaConsiderada - totalMesAtual;
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Simulador</Text>
+        <View style={styles.headerRow}>
+  <Text style={styles.title}>Simulador</Text>
+
+  <TouchableOpacity
+    onPress={() => setOcultarValores(!ocultarValores)}
+  >
+    <Text style={styles.eyeButton}>
+      {ocultarValores ? "🙈" : "👁️"}
+    </Text>
+  </TouchableOpacity>
+</View>
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>🧠 Consultor Financeiro Pessoal</Text>
 
           <Text style={styles.label}>Renda mensal</Text>
           <TextInput
-            style={styles.input}
-            value={rendaMensal}
+  style={styles.input}
+  value={
+    ocultarValores
+      ? "••••••"
+      : rendaMensal
+  }
             onChangeText={setRendaMensal}
             placeholder="Ex: 5.000,00"
             keyboardType="decimal-pad"
@@ -364,7 +405,11 @@ const limiteSeguro = receitaConsiderada - metaConsiderada - totalMesAtual;
           <Text style={styles.label}>Meta de economia</Text>
           <TextInput
             style={styles.input}
-            value={metaEconomia}
+            value={
+  ocultarValores
+    ? "••••••"
+    : metaEconomia
+}
             onChangeText={setMetaEconomia}
             placeholder="Ex: 500,00"
             keyboardType="decimal-pad"
@@ -416,20 +461,20 @@ const limiteSeguro = receitaConsiderada - metaConsiderada - totalMesAtual;
             <Text style={styles.metricLabel}>Renda mensal</Text>
             <View style={styles.metricDots} />
             <Text style={styles.metricValue}>
-              {rendaValida ? formatMoney(receitaConsiderada) : "Não informada"}
+              {rendaValida ? formatarValorVisivel(receitaConsiderada) : "Não informada"}
             </Text>
           </View>
 
           <View style={styles.metricLine}>
             <Text style={styles.metricLabel}>Gasto até hoje</Text>
             <View style={styles.metricDots} />
-            <Text style={styles.metricValue}>{formatMoney(totalMesAtual)}</Text>
+            <Text style={styles.metricValue}>{formatarValorVisivel(totalMesAtual)}</Text>
           </View>
 
           <View style={styles.metricLine}>
             <Text style={styles.metricLabel}>Meta de economia</Text>
             <View style={styles.metricDots} />
-            <Text style={styles.metricValue}>{formatMoney(metaConsiderada)}</Text>
+            <Text style={styles.metricValue}>{formatarValorVisivel(metaConsiderada)}</Text>
           </View>
         </View>
 
@@ -454,7 +499,7 @@ const limiteSeguro = receitaConsiderada - metaConsiderada - totalMesAtual;
                 limiteSeguro >= 0 ? styles.positiveText : styles.negativeText,
               ]}
             >
-              {formatMoney(limiteSeguro)}
+              {formatarValorVisivel(limiteSeguro)}
             </Text>
 
             <Text style={styles.subText}>
@@ -800,4 +845,16 @@ const styles = StyleSheet.create({
     minWidth: 105,
     textAlign: "right",
   },
+ headerRow: {
+  flexDirection: "row",
+  justifyContent: "center",
+  alignItems: "center",
+  gap: 10,
+},
+
+eyeButton: {
+  fontSize: 20,
+},
+
+
 });
