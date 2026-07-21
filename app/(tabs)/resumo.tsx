@@ -63,6 +63,7 @@ export default function Resumo() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [usuarioLogado, setUsuarioLogado] = useState<boolean | null>(null);
   const [menuAberto, setMenuAberto] = useState(false);
+  const [ocultarValores, setOcultarValores] = useState(false);
 
 
 
@@ -124,6 +125,12 @@ setExpenses(normalizedData);
     style: "currency",
     currency: "BRL",
   });
+}
+
+function formatarValorVisivel(valor: number) {
+  return ocultarValores
+    ? "R$ ••••••"
+    : formatMoney(valor);
 }
 
   /* ===========================
@@ -372,7 +379,17 @@ function cancelarPeriodoPersonalizado() {
 if (usuarioLogado === false) {
   return (
     <View style={[styles.container, isMobile && styles.containerMobile]}>
-      <Text style={styles.title}>NO CONTROLE</Text>
+      <View style={styles.headerRow}>
+  <Text style={styles.title}>NO CONTROLE</Text>
+
+  <TouchableOpacity
+    onPress={() => setOcultarValores(!ocultarValores)}
+  >
+    <Text style={styles.eyeButton}>
+      {ocultarValores ? "🙈" : "👁️"}
+    </Text>
+  </TouchableOpacity>
+</View>
       <AuthRequiredCard />
     </View>
   );
@@ -381,7 +398,17 @@ if (usuarioLogado === false) {
   return (
   <View style={[styles.container, isMobile && styles.containerMobile]}>
 
-      <Text style={styles.title}>NO CONTROLE</Text>
+      <View style={styles.headerRow}>
+  <Text style={styles.title}>NO CONTROLE</Text>
+
+  <TouchableOpacity
+    onPress={() => setOcultarValores(!ocultarValores)}
+  >
+    <Text style={styles.eyeButton}>
+      {ocultarValores ? "🙈" : "👁️"}
+    </Text>
+  </TouchableOpacity>
+</View>
 
       {/* ✅ SELECTOR */}
       <TouchableOpacity
@@ -540,7 +567,7 @@ if (usuarioLogado === false) {
       
       <Card
   title="💰Total gasto"
-  value={formatMoney(total)}
+  value={formatarValorVisivel(media)}
   style={styles.cardInRow}
   onPress={() =>
     router.push({
@@ -958,6 +985,15 @@ learningItem: {
   color: "#333",
   marginBottom: 6,
 },
+headerRow: {
+  flexDirection: "row",
+  justifyContent: "center",
+  alignItems: "center",
+  gap: 10,
+},
 
+eyeButton: {
+  fontSize: 20,
+},
 
 });
