@@ -73,6 +73,12 @@ export default function Historico() {
 
   const [showReportModal, setShowReportModal] = useState(false);
 const [usuarioLogado, setUsuarioLogado] = useState<boolean | null>(null);
+const [ocultarValores, setOcultarValores] = useState(false);
+function formatarValorVisivel(valor: number) {
+  return ocultarValores
+    ? "R$ ••••••"
+    : formatMoney(valor);
+}
 const now = new Date();
 
   /* ===============================
@@ -799,7 +805,17 @@ const selectedCategoryCountText =
         }}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Histórico</Text>
+        <View style={styles.headerRow}>
+  <Text style={styles.title}>Histórico</Text>
+
+  <TouchableOpacity
+    onPress={() => setOcultarValores(!ocultarValores)}
+  >
+    <Text style={styles.eyeButton}>
+      {ocultarValores ? "🙈" : "👁️"}
+    </Text>
+  </TouchableOpacity>
+</View>
         <AuthRequiredCard />
       </ScrollView>
     );
@@ -815,7 +831,17 @@ const selectedCategoryCountText =
       }}
       showsVerticalScrollIndicator={false}
     >
-      <Text style={styles.title}>Histórico</Text>
+      <View style={styles.headerRow}>
+  <Text style={styles.title}>Histórico</Text>
+
+  <TouchableOpacity
+    onPress={() => setOcultarValores(!ocultarValores)}
+  >
+    <Text style={styles.eyeButton}>
+      {ocultarValores ? "🙈" : "👁️"}
+    </Text>
+  </TouchableOpacity>
+</View>
 
       <View style={styles.viewModeRow}>
 
@@ -1093,7 +1119,7 @@ const selectedCategoryCountText =
 
   <View style={styles.summaryInlineRow}>
     <Text style={styles.summaryValue}>
-      {formatMoney(totalPeriodo)}
+      {formatarValorVisivel(totalPeriodo)}
     </Text>
 
     <Text style={styles.summaryInlineMeta}>
@@ -2110,6 +2136,18 @@ reportButtonsRow: {
   flexDirection: "row",
   flexWrap: "wrap",
   gap: 6,
+},
+
+headerRow: {
+  flexDirection: "row",
+  justifyContent: "center",
+  alignItems: "center",
+  gap: 10,
+  marginBottom: 10,
+},
+
+eyeButton: {
+  fontSize: 20,
 },
 
 });
