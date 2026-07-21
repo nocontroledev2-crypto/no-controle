@@ -17,6 +17,13 @@ export default function Home() {
   const [registrosHoje, setRegistrosHoje] = useState(0);
   const [comparacaoTexto, setComparacaoTexto] = useState("");
   const [categoriaInsight, setCategoriaInsight] = useState("");
+  const [ocultarValores, setOcultarValores] = useState(false);
+
+  function formatarValorVisivel(valor: number) {
+  return ocultarValores
+    ? "R$ ••••••"
+    : formatMoney(valor);
+}
 
   /* ✅ DATA SEGURA */
   function parseDateSafe(dateStr: string) {
@@ -147,8 +154,19 @@ export default function Home() {
     showsVerticalScrollIndicator={false}
   >
 
-      <Text style={styles.title}>No Controle</Text>
-      <Text style={styles.subtitle}>Hoje</Text>
+      <View style={styles.headerRow}>
+  <Text style={styles.title}>No Controle</Text>
+
+  <TouchableOpacity
+    onPress={() => setOcultarValores(!ocultarValores)}
+  >
+    <Text style={styles.eyeButton}>
+      {ocultarValores ? "🙈" : "👁️"}
+    </Text>
+  </TouchableOpacity>
+</View>
+
+<Text style={styles.subtitle}>Hoje</Text>
 
       <View style={styles.insightBox}>
         <Text style={styles.insightText}>
@@ -163,7 +181,7 @@ export default function Home() {
         <Text style={styles.metricLabel}>Total do dia</Text>
 
         <Text style={styles.metricValue}>
-          {formatMoney(totalHoje)}
+          {formatarValorVisivel(totalHoje)}
         </Text>
 
         {comparacaoTexto !== "" && (
@@ -178,7 +196,7 @@ export default function Home() {
         <Text style={styles.metricLabel}>Total do mês</Text>
 
         <Text style={styles.metricValue}>
-          {formatMoney(totalMes)}
+          {formatarValorVisivel(totalMes)}
         </Text>
 
         {categoriaInsight !== "" && (
@@ -299,4 +317,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
+headerRow: {
+  flexDirection: "row",
+  justifyContent: "center",
+  alignItems: "center",
+  gap: 10,
+},
+
+eyeButton: {
+  fontSize: 20,
+},
+
 });
