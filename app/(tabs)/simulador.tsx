@@ -117,7 +117,7 @@ export default function Simulador() {
         }
 
         const rendaSalva = profile?.renda_mensal || "";
-        const metaSalva = profile?.meta_economia || "";
+        const metaSalva = profile?.meta_economia || "0";
 
         setRendaMensal(rendaSalva);
         setMetaEconomia(metaSalva);
@@ -241,21 +241,26 @@ const limiteSeguro = receitaConsiderada - metaConsiderada - totalMesAtual;
     }
 
     if (limiteSeguro >= 0) {
-      return {
-        titulo: "Você está no controle",
-        detalhe:
-          "Depois dos gastos já registrados até o momento e da sua meta, ainda existe uma margem segura para este mês.",
-        tipo: "positivo",
-      };
-    }
+  return {
+    titulo: "Você está no controle",
+    detalhe: temMetaEconomia
+      ? "Depois dos gastos já registrados até o momento e da sua meta, ainda existe uma margem segura para este mês."
+      : "Depois dos gastos já registrados até o momento, ainda existe uma margem dentro da sua renda. Definir uma meta de economia pode deixar seu planejamento mais forte.",
+    tipo: "positivo",
+  };
+}
 
     return {
-      titulo: "Sua renda já não cobre os gastos registrados",
-      detalhe: `Com os gastos já registrados até o momento e sua meta informada, faltam ${formatMoney(
+  titulo: "Sua renda já não cobre os gastos registrados",
+  detalhe: temMetaEconomia
+    ? `Com os gastos já registrados até o momento e sua meta informada, faltam ${formatMoney(
         Math.abs(limiteSeguro)
-      )} para voltar ao limite seguro deste mês.`,
-      tipo: "risco",
-    };
+      )} para voltar ao limite seguro deste mês.`
+    : `Com os gastos já registrados até o momento, faltam ${formatMoney(
+        Math.abs(limiteSeguro)
+      )} para voltar ao limite seguro dentro da sua renda.`,
+  tipo: "risco",
+};
   }
 
   const status = getStatusSimulador();
@@ -280,7 +285,7 @@ const limiteSeguro = receitaConsiderada - metaConsiderada - totalMesAtual;
     }
 
     const rendaFinal = rendaMensal.trim();
-    const metaFinal = metaEconomia.trim();
+    const metaFinal = metaEconomia.trim() || "0";
 
     setSalvando(true);
 
