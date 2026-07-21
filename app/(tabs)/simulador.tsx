@@ -401,7 +401,7 @@ const limiteSeguro = receitaConsiderada - metaConsiderada - totalMesAtual;
           <Text style={styles.label}>Meta de economia</Text>
           <TextInput
             style={styles.input}
-            value={metaEconomia}
+           value={metaEconomia}
             onChangeText={setMetaEconomia}
             placeholder="Ex: 500,00"
             keyboardType="decimal-pad"
