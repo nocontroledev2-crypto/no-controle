@@ -392,11 +392,7 @@ const limiteSeguro = receitaConsiderada - metaConsiderada - totalMesAtual;
           <Text style={styles.label}>Renda mensal</Text>
           <TextInput
   style={styles.input}
-  value={
-    ocultarValores
-      ? "••••••"
-      : rendaMensal
-  }
+  vvalue={rendaMensal}
             onChangeText={setRendaMensal}
             placeholder="Ex: 5.000,00"
             keyboardType="decimal-pad"
@@ -405,11 +401,7 @@ const limiteSeguro = receitaConsiderada - metaConsiderada - totalMesAtual;
           <Text style={styles.label}>Meta de economia</Text>
           <TextInput
             style={styles.input}
-            value={
-  ocultarValores
-    ? "••••••"
-    : metaEconomia
-}
+            value={metaEconomia}
             onChangeText={setMetaEconomia}
             placeholder="Ex: 500,00"
             keyboardType="decimal-pad"
