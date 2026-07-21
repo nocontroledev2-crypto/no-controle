@@ -1,3 +1,4 @@
+import { usePrivacy } from "../context/privacyContext";
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
@@ -80,6 +81,10 @@ function traduzirErroAuth(message?: string) {
 export default function Conta() {
   const { width } = useWindowDimensions();
   const isMobile = width < 480;
+  const {
+  ocultarValores,
+  setOcultarValores,
+} = usePrivacy();
 
   const [authMode, setAuthMode] = useState<AuthMode>("signup");
   const [usuarioLogado, setUsuarioLogado] = useState<any | null>(null);
@@ -93,7 +98,7 @@ export default function Conta() {
 
   const [mensagem, setMensagem] = useState("");
   const [carregando, setCarregando] = useState(false);
-  const [ocultarValores, setOcultarValores] = useState(false);
+  
   
   const [totalRegistros, setTotalRegistros] = useState(0);
   const [categoriasUsadas, setCategoriasUsadas] = useState(0);

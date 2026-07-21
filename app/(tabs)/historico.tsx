@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { usePrivacy } from "../context/privacyContext";
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import AuthRequiredCard from "../components/AuthRequiredCard";
@@ -43,6 +44,13 @@ export default function Historico() {
  const { width } = useWindowDimensions();
  const isMobile = width < 480;
 
+ 
+const {
+    ocultarValores,
+    setOcultarValores,
+  } = usePrivacy();
+
+
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [period, setPeriod] = useState<Period>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("lancamentos");
@@ -73,7 +81,7 @@ export default function Historico() {
 
   const [showReportModal, setShowReportModal] = useState(false);
 const [usuarioLogado, setUsuarioLogado] = useState<boolean | null>(null);
-const [ocultarValores, setOcultarValores] = useState(false);
+
 function formatarValorVisivel(valor: number) {
   return ocultarValores
     ? "R$ ••••••"

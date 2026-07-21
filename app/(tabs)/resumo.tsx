@@ -1,3 +1,4 @@
+import { usePrivacy } from "../context/privacyContext";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
@@ -59,11 +60,17 @@ type Expense = {
 
 export default function Resumo() {
   const router = useRouter();
+  const {
+    ocultarValores,
+    setOcultarValores,
+  } = usePrivacy();
+
+
   const [period, setPeriod] = useState<Period>("month");
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [usuarioLogado, setUsuarioLogado] = useState<boolean | null>(null);
   const [menuAberto, setMenuAberto] = useState(false);
-  const [ocultarValores, setOcultarValores] = useState(false);
+  
 
 
 

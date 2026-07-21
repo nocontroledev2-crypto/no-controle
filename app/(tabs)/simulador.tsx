@@ -1,3 +1,4 @@
+import { usePrivacy } from "../context/privacyContext";
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
@@ -61,6 +62,10 @@ function formatMoney(valor: number | null | undefined) {
 export default function Simulador() {
   const { width } = useWindowDimensions();
   const isMobile = width < 480;
+  const {
+  ocultarValores,
+  setOcultarValores,
+} = usePrivacy();
 
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [usuarioLogado, setUsuarioLogado] = useState<boolean | null>(null);
@@ -71,7 +76,7 @@ export default function Simulador() {
   const [metaEconomiaSalva, setMetaEconomiaSalva] = useState("");
 
   const [mensagem, setMensagem] = useState("");
-  const [ocultarValores, setOcultarValores] = useState(false);
+  
   const [salvando, setSalvando] = useState(false);
 
   function formatarValorVisivel(valor: number) {

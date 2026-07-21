@@ -1,3 +1,4 @@
+import { usePrivacy } from "../context/privacyContext";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
@@ -12,12 +13,17 @@ import { getAllExpenses } from "../storage/expenseStorage";
 export default function Home() {
   const router = useRouter();
 
+  const {
+  ocultarValores,
+  setOcultarValores,
+  } = usePrivacy();
+
   const [totalHoje, setTotalHoje] = useState(0);
   const [totalMes, setTotalMes] = useState(0);
   const [registrosHoje, setRegistrosHoje] = useState(0);
   const [comparacaoTexto, setComparacaoTexto] = useState("");
   const [categoriaInsight, setCategoriaInsight] = useState("");
-  const [ocultarValores, setOcultarValores] = useState(false);
+  
 
   function formatarValorVisivel(valor: number) {
   return ocultarValores
