@@ -387,45 +387,73 @@ const limiteSeguro = receitaConsiderada - metaConsiderada - totalMesAtual;
 </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>🧠 Consultor Financeiro Pessoal</Text>
+  <Text style={styles.cardTitle}>
+    🧠 Consultor Financeiro Pessoal
+  </Text>
 
-          <Text style={styles.label}>Renda mensal</Text>
-          <TextInput
-  style={styles.input}
-  value={rendaMensal}
-            onChangeText={setRendaMensal}
-            placeholder="Ex: 5.000,00"
-            keyboardType="decimal-pad"
-          />
+  {ocultarValores ? (
+    <>
+      <Text style={styles.hiddenFinanceTitle}>
+        🔒 Dados financeiros ocultados
+      </Text>
 
-          <Text style={styles.label}>Meta de economia</Text>
-          <TextInput
-            style={styles.input}
-           value={metaEconomia}
-            onChangeText={setMetaEconomia}
-            placeholder="Ex: 500,00"
-            keyboardType="decimal-pad"
-          />
+      <Text style={styles.hiddenFinanceText}>
+        Toque no ícone 👁️ para visualizar novamente sua renda,
+        meta de economia e opções de edição.
+      </Text>
+    </>
+  ) : (
+    <>
+      <Text style={styles.label}>Renda mensal</Text>
 
-          <TouchableOpacity
-            style={[
-              styles.saveButton,
-              (!simulacaoAlterada || salvando) && styles.saveButtonDisabled,
-            ]}
-            onPress={simulacaoAlterada && !salvando ? salvarConfiguracao : undefined}
-            disabled={!simulacaoAlterada || salvando}
-          >
-            <Text style={styles.saveButtonText}>
-              {salvando
-                ? "Salvando..."
-                : simulacaoAlterada
-                ? "💾 Salvar simulação"
-                : "✅ Simulação salva"}
-            </Text>
-          </TouchableOpacity>
+      <TextInput
+        style={styles.input}
+        value={rendaMensal}
+        onChangeText={setRendaMensal}
+        placeholder="Ex: 5.000,00"
+        keyboardType="decimal-pad"
+      />
 
-          {mensagem ? <Text style={styles.successText}>{mensagem}</Text> : null}
-        </View>
+      <Text style={styles.label}>Meta de economia</Text>
+
+      <TextInput
+        style={styles.input}
+        value={metaEconomia}
+        onChangeText={setMetaEconomia}
+        placeholder="Ex: 500,00"
+        keyboardType="decimal-pad"
+      />
+
+      <TouchableOpacity
+        style={[
+          styles.saveButton,
+          (!simulacaoAlterada || salvando) &&
+            styles.saveButtonDisabled,
+        ]}
+        onPress={
+          simulacaoAlterada && !salvando
+            ? salvarConfiguracao
+            : undefined
+        }
+        disabled={!simulacaoAlterada || salvando}
+      >
+        <Text style={styles.saveButtonText}>
+          {salvando
+            ? "Salvando..."
+            : simulacaoAlterada
+            ? "💾 Salvar simulação"
+            : "✅ Simulação salva"}
+        </Text>
+      </TouchableOpacity>
+
+      {mensagem ? (
+        <Text style={styles.successText}>
+          {mensagem}
+        </Text>
+      ) : null}
+    </>
+  )}
+</View>
 
         <View
           style={[
@@ -847,6 +875,17 @@ const styles = StyleSheet.create({
 eyeButton: {
   fontSize: 20,
 },
+hiddenFinanceTitle: {
+  fontSize: 15,
+  fontWeight: "700",
+  color: "#0A8F55",
+  marginBottom: 8,
+},
 
+hiddenFinanceText: {
+  fontSize: 13,
+  color: "#666",
+  lineHeight: 18,
+},
 
 });
