@@ -58,12 +58,6 @@ function formatMoney(valor: number | null | undefined) {
   });
 }
 
-function formatarValorVisivel(valor: number) {
-  return ocultarValores
-    ? "R$ ••••••"
-    : formatMoney(valor);
-}
-
 export default function Simulador() {
   const { width } = useWindowDimensions();
   const isMobile = width < 480;
@@ -79,6 +73,12 @@ export default function Simulador() {
   const [mensagem, setMensagem] = useState("");
   const [ocultarValores, setOcultarValores] = useState(false);
   const [salvando, setSalvando] = useState(false);
+
+  function formatarValorVisivel(valor: number) {
+  return ocultarValores
+    ? "R$ ••••••"
+    : formatMoney(valor);
+}
 
   const now = new Date();
 
@@ -392,7 +392,7 @@ const limiteSeguro = receitaConsiderada - metaConsiderada - totalMesAtual;
           <Text style={styles.label}>Renda mensal</Text>
           <TextInput
   style={styles.input}
-  vvalue={rendaMensal}
+  value={rendaMensal}
             onChangeText={setRendaMensal}
             placeholder="Ex: 5.000,00"
             keyboardType="decimal-pad"
