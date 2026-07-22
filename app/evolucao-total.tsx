@@ -655,7 +655,14 @@ const barChartData = {
     value: Number(safeChartValues[index]),
   }));
  
-  
+  const rankingFinanceiro = safeChartValues
+  .map((value, index) => ({
+    label: safeChartLabels[index] || `Posição ${index + 1}`,
+    value: Number(value),
+  }))
+  .filter((item) => item.value > 0)
+  .sort((a, b) => b.value - a.value)
+  .slice(0, 5);
 
   function formatShortMoney(valor: number) {
   if (valor >= 1000) {
@@ -1037,6 +1044,36 @@ const labelX = Math.min(
 )}
   </ScrollView>
 </View>
+
+<View style={styles.rankingCard}>
+  <Text style={styles.rankingTitle}>
+    📋 Ranking Financeiro do Período
+  </Text>
+
+  {rankingFinanceiro.length === 0 ? (
+    <Text style={styles.rankingEmpty}>
+      Nenhum dado disponível para este período.
+    </Text>
+  ) : (
+    rankingFinanceiro.map((item, index) => (
+      <Text
+        key={`${item.label}-${index}`}
+        style={styles.rankingItem}
+      >
+        {index === 0
+          ? "🥇"
+          : index === 1
+          ? "🥈"
+          : index === 2
+          ? "🥉"
+          : `${index + 1}º`}{" "}
+        {item.label} → {formatMoney(item.value)}
+      </Text>
+    ))
+  )}
+</View>
+
+
 </View>
 );
 }
@@ -1294,6 +1331,32 @@ scrollHint: {
   marginBottom: 6,
 },
 
+rankingCard: {
+  backgroundColor: "#FFFFFF",
+  borderRadius: 16,
+  padding: 16,
+  marginTop: 12,
+  borderWidth: 0.5,
+  borderColor: "#E8EAEE",
+},
 
+rankingTitle: {
+  fontSize: 15,
+  fontWeight: "700",
+  color: "#0A8F55",
+  marginBottom: 10,
+},
+
+rankingItem: {
+  fontSize: 14,
+  color: "#333",
+  marginBottom: 8,
+  lineHeight: 20,
+},
+
+rankingEmpty: {
+  fontSize: 13,
+  color: "#666",
+},
 
 });
