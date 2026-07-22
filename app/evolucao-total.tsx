@@ -664,6 +664,27 @@ const barChartData = {
   .sort((a, b) => b.value - a.value)
   .slice(0, 5);
 
+  const diasComGasto = safeChartValues.filter(
+  (value) => Number(value) > 0
+).length;
+
+const diasSemGasto =
+  safeChartValues.length - diasComGasto;
+
+const top3Total = rankingFinanceiro
+  .slice(0, 3)
+  .reduce(
+    (sum, item) => sum + item.value,
+    0
+  );
+
+const percentualTop3 =
+  totalGrafico > 0
+    ? (top3Total / totalGrafico) * 100
+    : 0;
+
+const maiorDia = rankingFinanceiro[0];
+
   function formatShortMoney(valor: number) {
   if (valor >= 1000) {
     return `R$ ${(valor / 1000).toFixed(1)}k`;
@@ -1073,6 +1094,33 @@ const labelX = Math.min(
   )}
 </View>
 
+<View style={styles.insightCard}>
+  <Text style={styles.insightTitle}>
+    🔥 Insight Financeiro
+  </Text>
+
+  {maiorDia && (
+    <Text style={styles.insightItem}>
+      • O maior gasto ocorreu em {maiorDia.label},
+      totalizando {formatMoney(maiorDia.value)}.
+    </Text>
+  )}
+
+  <Text style={styles.insightItem}>
+    • Os 3 maiores dias representam
+    {` ${percentualTop3.toFixed(0)}% `}
+    dos gastos deste período.
+  </Text>
+
+  <Text style={styles.insightItem}>
+    • Houve {diasComGasto} dias com movimentação
+    financeira.
+  </Text>
+
+  <Text style={styles.insightItem}>
+    • Houve {diasSemGasto} dias sem registros.
+  </Text>
+</View>
 
 </View>
 );
@@ -1357,6 +1405,29 @@ rankingItem: {
 rankingEmpty: {
   fontSize: 13,
   color: "#666",
+},
+
+insightCard: {
+  backgroundColor: "#EEF7F3",
+  borderRadius: 16,
+  padding: 16,
+  marginTop: 12,
+  borderWidth: 0.5,
+  borderColor: "#CFE8DB",
+},
+
+insightTitle: {
+  fontSize: 15,
+  fontWeight: "700",
+  color: "#0A8F55",
+  marginBottom: 10,
+},
+
+insightItem: {
+  fontSize: 14,
+  color: "#4D6659",
+  marginBottom: 8,
+  lineHeight: 20,
 },
 
 });
