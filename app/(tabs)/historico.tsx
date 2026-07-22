@@ -4,7 +4,6 @@ import { useFocusEffect } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import AuthRequiredCard from "../components/AuthRequiredCard";
 import { getCurrentUser } from "../services/authService";
-
 import {
   Modal,
   ScrollView,
@@ -747,6 +746,26 @@ ${linhas.join("\n")}
 Gerado pelo No Controle`;
 }
 
+async function copiarRelatorio() {
+  try {
+    const texto = gerarRelatorioTexto();
+
+    await navigator.clipboard.writeText(texto);
+
+    Alert.alert(
+      "✅ Relatório copiado",
+      "O relatório foi copiado para a área de transferência."
+    );
+  } catch (error) {
+    console.error(error);
+
+    Alert.alert(
+      "Erro",
+      "Não foi possível copiar o relatório."
+    );
+  }
+}
+
       async function compartilharRelatorio() {
   const relatorio = gerarRelatorioTexto();
 
@@ -1366,7 +1385,20 @@ const selectedCategoryCountText =
     </Text>
   </View>
 
+
+
   <View style={styles.reportButtonsRow}>
+
+   <TouchableOpacity
+  style={styles.actionButton}
+  onPress={copiarRelatorio}
+>
+  <Text style={styles.actionButtonText}>
+    📋 Copiar
+  </Text>
+</TouchableOpacity>
+
+
     <TouchableOpacity
       style={styles.reportActionButton}
       onPress={compartilharRelatorio}
