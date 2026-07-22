@@ -657,38 +657,7 @@ const barChartData = {
  
   const rankingFinanceiro = safeChartValues
   .map((value, index) => {
-    let label = `Dia ${index + 1}`;
-
-    if (period === "week" || period === "weekPrev") {
-      const weekStart =
-        period === "week"
-          ? getStartOfWeek(now)
-          : getStartOfWeek(
-              new Date(
-                now.getFullYear(),
-                now.getMonth(),
-                now.getDate() - 7
-              )
-            );
-
-      const currentDate = new Date(weekStart);
-      currentDate.setDate(weekStart.getDate() + index);
-
-      const diaSemana = labelsWeek[index];
-
-      label = `${diaSemana} (${currentDate.toLocaleDateString(
-        "pt-BR"
-      )})`;
-    }
-
-    return {
-      label,
-      value: Number(value),
-    };
-  })
-  .filter((item) => item.value > 0)
-  .sort((a, b) => b.value - a.value)
-  .slice(0, 5);
+   
     let label = `Dia ${index + 1}`;
 
 if (period === "week" || period === "weekPrev") {
