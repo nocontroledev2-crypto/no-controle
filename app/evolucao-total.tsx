@@ -656,10 +656,66 @@ const barChartData = {
   }));
  
   const rankingFinanceiro = safeChartValues
-  .map((value, index) => ({
-    label: `Dia ${index + 1}`,
-    value: Number(value),
-  }))
+  .map((value, index) => {
+    let label = `Dia ${index + 1}`;
+
+    if (period === "week" || period === "weekPrev") {
+      const weekStart =
+        period === "week"
+          ? getStartOfWeek(now)
+          : getStartOfWeek(
+              new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate() - 7
+              )
+            );
+
+      const currentDate = new Date(weekStart);
+      currentDate.setDate(weekStart.getDate() + index);
+
+      const diaSemana = labelsWeek[index];
+
+      label = `${diaSemana} (${currentDate.toLocaleDateString(
+        "pt-BR"
+      )})`;
+    }
+
+    return {
+      label,
+      value: Number(value),
+    };
+  })
+  .filter((item) => item.value > 0)
+  .sort((a, b) => b.value - a.value)
+  .slice(0, 5);
+    let label = `Dia ${index + 1}`;
+
+if (period === "week" || period === "weekPrev") {
+  const weekReference =
+    period === "week"
+      ? now
+      : new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate() - 7
+        );
+
+  const startWeek = getStartOfWeek(weekReference);
+
+  const currentDate = new Date(startWeek);
+  currentDate.setDate(startWeek.getDate() + index);
+
+  label = `${labelsWeek[index]} (${currentDate.toLocaleDateString(
+    "pt-BR"
+  )})`;
+}
+
+    return {
+      label,
+      value: Number(value),
+    };
+  })
   .filter((item) => item.value > 0)
   .sort((a, b) => b.value - a.value)
   .slice(0, 5);
@@ -672,6 +728,19 @@ let diasConsiderados = safeChartValues.length;
 
 if (period === "month") {
   diasConsiderados = now.getDate();
+}
+
+if (period === "week") {
+  const diaSemana = now.getDay();
+
+  diasConsiderados =
+    diaSemana === 0
+      ? 7
+      : diaSemana;
+}
+
+if (period === "weekPrev") {
+  diasConsiderados = 7;
 }
 
 const diasSemGasto =
@@ -1001,6 +1070,7 @@ const labelY = Math.min(
   Math.max(rawLabelY, 16),
   chartHeight - 8
 );
+
 
 const horizontalPadding = isTodayPoint ? 56 : 40;
 
