@@ -1105,24 +1105,28 @@ const labelX = Math.min(
 
   {maiorDia && (
     <Text style={styles.insightItem}>
-      • O maior gasto ocorreu em {maiorDia.label},
+      • O maior gasto ocorreu no {maiorDia.label},
       totalizando {formatMoney(maiorDia.value)}.
     </Text>
   )}
 
   <Text style={styles.insightItem}>
-    • Os 3 maiores dias representam
-    {` ${percentualTop3.toFixed(0)}% `}
-    dos gastos deste período.
+    • Seus gastos estão
+    {percentualTop3 <= 30
+      ? " relativamente distribuídos"
+      : " concentrados em poucos dias"},
+    pois os 3 maiores dias representam{" "}
+    {percentualTop3.toFixed(0)}% do total do período.
   </Text>
 
   <Text style={styles.insightItem}>
-    • Houve {diasComGasto} dias com movimentação
-    financeira.
+    • Seus gastos ocorreram em {diasComGasto} dias diferentes,
+    indicando movimentação financeira frequente ao longo do período.
   </Text>
 
   <Text style={styles.insightItem}>
-    • Houve {diasSemGasto} dias sem registros.
+    • Houve {diasSemGasto} dias sem movimentação financeira,
+    mostrando períodos de menor consumo.
   </Text>
 </View>
 
