@@ -27,7 +27,7 @@ export default function EvolucaoTotal() {
 
   const [expenses, setExpenses] = useState<any[]>([]);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [chartType, setChartType] = useState<"line" | "bar">("line");
+  const [chartType, setChartType] = useState<"line" | "bar">("bar");
   const [selectedPoint, setSelectedPoint] = useState<{
   label: string;
   value: number;
