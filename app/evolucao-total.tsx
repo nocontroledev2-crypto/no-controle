@@ -657,7 +657,7 @@ const barChartData = {
  
   const rankingFinanceiro = safeChartValues
   .map((value, index) => ({
-    label: safeChartLabels[index] || `Posição ${index + 1}`,
+    label: `Dia ${index + 1}`,
     value: Number(value),
   }))
   .filter((item) => item.value > 0)
