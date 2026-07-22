@@ -726,13 +726,17 @@ const maiorDia = rankingFinanceiro[0];
   }
 
      return (
-     <View
-     style={[
+  <ScrollView
+    style={[
       styles.container,
       isMobile && styles.containerMobile,
       isDesktop && styles.containerDesktop,
-     ]}
-     >
+    ]}
+    showsVerticalScrollIndicator={true}
+    contentContainerStyle={{
+      paddingBottom: 40,
+    }}
+  >
       <TouchableOpacity onPress={() => router.back()}>
         <Text style={styles.backText}>← Voltar</Text>
       </TouchableOpacity>
@@ -1122,7 +1126,7 @@ const labelX = Math.min(
   </Text>
 </View>
 
-</View>
+</ScrollView>
 );
 }
 
