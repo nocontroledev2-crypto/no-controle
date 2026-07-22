@@ -668,8 +668,14 @@ const barChartData = {
   (value) => Number(value) > 0
 ).length;
 
+let diasConsiderados = safeChartValues.length;
+
+if (period === "month") {
+  diasConsiderados = now.getDate();
+}
+
 const diasSemGasto =
-  safeChartValues.length - diasComGasto;
+  diasConsiderados - diasComGasto;
 
 const top3Total = rankingFinanceiro
   .slice(0, 3)
@@ -684,6 +690,11 @@ const percentualTop3 =
     : 0;
 
 const maiorDia = rankingFinanceiro[0];
+
+const percentualMaiorDia =
+  maiorDia && totalGrafico > 0
+    ? (maiorDia.value / totalGrafico) * 100
+    : 0;
 
   function formatShortMoney(valor: number) {
   if (valor >= 1000) {
@@ -1104,11 +1115,12 @@ const labelX = Math.min(
   </Text>
 
   {maiorDia && (
-    <Text style={styles.insightItem}>
-      • O maior gasto ocorreu no {maiorDia.label},
-      totalizando {formatMoney(maiorDia.value)}.
-    </Text>
-  )}
+  <Text style={styles.insightItem}>
+    • O {maiorDia.label} foi responsável por{" "}
+    {percentualMaiorDia.toFixed(1)}%
+    dos gastos registrados neste período.
+  </Text>
+)}
 
   <Text style={styles.insightItem}>
     • Seus gastos estão
