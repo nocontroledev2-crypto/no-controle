@@ -574,7 +574,7 @@ if (usuarioLogado === false) {
       
       <Card
   title="💰Total gasto"
-  value={formatarValorVisivel(media)}
+  value={formatarValorVisivel(total)}
   style={styles.cardInRow}
   onPress={() =>
     router.push({
