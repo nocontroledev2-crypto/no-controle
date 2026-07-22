@@ -1390,10 +1390,10 @@ const selectedCategoryCountText =
   <View style={styles.reportButtonsRow}>
 
    <TouchableOpacity
-  style={styles.actionButton}
+  style={styles.reportActionButton}
   onPress={copiarRelatorio}
 >
-  <Text style={styles.actionButtonText}>
+  <Text style={styles.reportActionText}>
     📋 Copiar
   </Text>
 </TouchableOpacity>
