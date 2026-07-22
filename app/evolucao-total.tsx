@@ -1137,9 +1137,14 @@ const labelX = Math.min(
   </Text>
 
   <Text style={styles.insightItem}>
-    • Houve {diasSemGasto} dias sem movimentação financeira,
-    mostrando períodos de menor consumo.
-  </Text>
+  • {
+    diasSemGasto === 0
+      ? `${labelPeriod(String(period))}, até o momento, todos os dias houve movimentação financeira.`
+      : diasSemGasto <= 2
+      ? `Houve poucos dias sem movimentação financeira neste período (${diasSemGasto} dia${diasSemGasto > 1 ? "s" : ""}).`
+      : `Houve ${diasSemGasto} dias sem movimentação financeira, no período selecionado.`
+  }
+</Text>
 </View>
 
 </ScrollView>
