@@ -720,7 +720,7 @@ if (period === "week" || period === "weekPrev") {
   })
   .filter((item) => item.value > 0)
   .sort((a, b) => b.value - a.value)
-  .slice(0, 5);
+  .slice(0, 3);
 
   const diasComGasto = safeChartValues.filter(
   (value) => Number(value) > 0
@@ -777,6 +777,20 @@ const percentualTop3 =
 const maiorDia = rankingFinanceiro[0];
 
 const percentualMaiorDia =
+
+let primeiraMetade = 0;
+let segundaMetade = 0;
+
+safeChartValues.forEach((value, index) => {
+  if (Number(value) <= 0) return;
+
+  if (index < safeChartValues.length / 2) {
+    primeiraMetade += Number(value);
+  } else {
+    segundaMetade += Number(value);
+  }
+});
+
   maiorDia && totalGrafico > 0
     ? (maiorDia.value / totalGrafico) * 100
     : 0;
@@ -1250,6 +1264,15 @@ const labelX = Math.min(
       • Os gastos estão distribuídos ao longo do período, sem forte concentração em poucos dias.
     </Text>
   )}
+
+<Text style={styles.insightItem}>
+  • {
+    segundaMetade > primeiraMetade
+      ? "A maior parte dos gastos ocorreu na segunda metade do período analisado."
+      : "A maior parte dos gastos ocorreu na primeira metade do período analisado."
+  }
+</Text>
+
 </>
   )}
 </View>
