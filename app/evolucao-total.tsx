@@ -670,6 +670,7 @@ if (period === "week" || period === "weekPrev") {
           now.getDate() - 7
         );
 
+
   const startWeek = getStartOfWeek(weekReference);
 
   const currentDate = new Date(startWeek);
@@ -692,6 +693,20 @@ if (period === "week" || period === "weekPrev") {
   const diasComGasto = safeChartValues.filter(
   (value) => Number(value) > 0
 ).length;
+
+const pontosFinanceiros = diasComGasto;
+
+let nivelMaturidade = 0;
+
+if (pontosFinanceiros === 0) {
+  nivelMaturidade = 0;
+} else if (pontosFinanceiros === 1) {
+  nivelMaturidade = 1;
+} else if (pontosFinanceiros <= 3) {
+  nivelMaturidade = 2;
+} else {
+  nivelMaturidade = 3;
+}
 
 let diasConsiderados = safeChartValues.length;
 
