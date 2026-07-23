@@ -660,6 +660,38 @@ const barChartData = {
    
     let label = `Dia ${index + 1}`;
 
+if (period === "today") {
+  const currentDate = new Date(startLast7Days);
+
+  currentDate.setDate(
+    startLast7Days.getDate() + index
+  );
+
+  const hoje =
+    currentDate.toDateString() ===
+    now.toDateString();
+
+  label = hoje
+    ? `Hoje (${currentDate.toLocaleDateString("pt-BR")})`
+    : currentDate.toLocaleDateString("pt-BR");
+}
+
+if (period === "month") {
+  const currentDate = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    index + 1
+  );
+
+  const hoje =
+    currentDate.toDateString() ===
+    now.toDateString();
+
+  label = hoje
+    ? `Hoje (${currentDate.toLocaleDateString("pt-BR")})`
+    : currentDate.toLocaleDateString("pt-BR");
+}
+
 if (period === "week" || period === "weekPrev") {
   const weekReference =
     period === "week"
