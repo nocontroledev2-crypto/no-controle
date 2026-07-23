@@ -1169,8 +1169,8 @@ const labelX = Math.min(
 
 <View style={styles.rankingCard}>
   <Text style={styles.rankingTitle}>
-    📋 Ranking Financeiro do Período
-  </Text>
+  🔍 Dias que Mais Impactaram o Período
+</Text>
 
   {rankingFinanceiro.length === 0 ? (
     <Text style={styles.rankingEmpty}>
@@ -1182,13 +1182,8 @@ const labelX = Math.min(
         key={`${item.label}-${index}`}
         style={styles.rankingItem}
       >
-        {index === 0
-          ? "🥇"
-          : index === 1
-          ? "🥈"
-          : index === 2
-          ? "🥉"
-          : `${index + 1}º`}{" "}
+        
+           `${index + 1}º`}{" "}
         {item.label} → {formatMoney(item.value)}
       </Text>
     ))
@@ -1225,16 +1220,12 @@ const labelX = Math.min(
   )}
 
   {nivelMaturidade === 2 && (
-    <>
-      <Text style={styles.insightItem}>
-        • Seus gastos ocorreram em {diasComGasto} dias diferentes durante o período analisado.
-      </Text>
-
-      <Text style={styles.insightItem}>
-        • Já existem informações suficientes para observações iniciais, mas ainda não há dados suficientes para conclusões mais avançadas.
-      </Text>
-    </>
-  )}
+  <>
+    <Text style={styles.insightItem}>
+      • Ainda não existem dados suficientes para gerar análises financeiras confiáveis.
+    </Text>
+  </>
+)}
 
   {nivelMaturidade >= 3 && (
     <>
