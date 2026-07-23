@@ -1183,7 +1183,7 @@ const labelX = Math.min(
         style={styles.rankingItem}
       >
         
-           {"*"}.{" "}
+           {"*"}{" "}
         {item.label} → {formatMoney(item.value)}
       </Text>
     ))
