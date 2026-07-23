@@ -777,6 +777,9 @@ const percentualTop3 =
 const maiorDia = rankingFinanceiro[0];
 
 const percentualMaiorDia =
+  maiorDia && totalGrafico > 0
+    ? (maiorDia.value / totalGrafico) * 100
+    : 0;
 
 let primeiraMetade = 0;
 let segundaMetade = 0;
@@ -790,10 +793,6 @@ safeChartValues.forEach((value, index) => {
     segundaMetade += Number(value);
   }
 });
-
-  maiorDia && totalGrafico > 0
-    ? (maiorDia.value / totalGrafico) * 100
-    : 0;
 
   function formatShortMoney(valor: number) {
   if (valor >= 1000) {
