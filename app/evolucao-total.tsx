@@ -1229,21 +1229,28 @@ const labelX = Math.min(
 
   {nivelMaturidade >= 3 && (
     <>
-      {maiorDia && (
-        <Text style={styles.insightItem}>
-          • O {maiorDia.label} foi responsável por{" "}
-          {percentualMaiorDia.toFixed(1)}% dos gastos registrados neste período.
-        </Text>
-      )}
+  {maiorDia && (
+    <Text style={styles.insightItem}>
+      • O dia de maior impacto financeiro deste período foi {maiorDia.label},
+      responsável por {percentualMaiorDia.toFixed(1)}% do total gasto.
+    </Text>
+  )}
 
-      <Text style={styles.insightItem}>
-        • Os 3 maiores dias representam {percentualTop3.toFixed(0)}% do total gasto no período.
-      </Text>
+  <Text style={styles.insightItem}>
+    • Os 3 dias que mais impactaram o período representam{" "}
+    {percentualTop3.toFixed(0)}% de todo o valor gasto.
+  </Text>
 
-      <Text style={styles.insightItem}>
-        • Seus gastos ocorreram em {diasComGasto} dias diferentes durante o período analisado.
-      </Text>
-    </>
+  {percentualTop3 >= 70 ? (
+    <Text style={styles.insightItem}>
+      • Grande parte dos gastos está concentrada em poucos dias, indicando momentos específicos de maior impacto financeiro.
+    </Text>
+  ) : (
+    <Text style={styles.insightItem}>
+      • Os gastos estão distribuídos ao longo do período, sem forte concentração em poucos dias.
+    </Text>
+  )}
+</>
   )}
 </View>
 
