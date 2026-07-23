@@ -1168,37 +1168,60 @@ const labelX = Math.min(
     🔥 Insight Financeiro
   </Text>
 
-  {maiorDia && (
-  <Text style={styles.insightItem}>
-    • O {maiorDia.label} foi responsável por{" "}
-    {percentualMaiorDia.toFixed(1)}%
-    dos gastos registrados neste período.
-  </Text>
-)}
+  {nivelMaturidade === 0 && (
+    <>
+      <Text style={styles.insightItem}>
+        • Nenhuma movimentação financeira foi identificada neste período.
+      </Text>
 
-  <Text style={styles.insightItem}>
-    • Seus gastos estão
-    {percentualTop3 <= 30
-      ? " relativamente distribuídos"
-      : " concentrados em poucos dias"},
-    pois os 3 maiores dias representam{" "}
-    {percentualTop3.toFixed(0)}% do total do período.
-  </Text>
+      <Text style={styles.insightItem}>
+        • Registre seus gastos para desbloquear análises inteligentes do No Controle.
+      </Text>
+    </>
+  )}
 
-  <Text style={styles.insightItem}>
-    • Seus gastos ocorreram em {diasComGasto} dias diferentes,
-    indicando movimentação financeira frequente ao longo do período.
-  </Text>
+  {nivelMaturidade === 1 && (
+    <>
+      <Text style={styles.insightItem}>
+        • Apenas um dia com movimentação financeira foi identificado neste período.
+      </Text>
 
-  <Text style={styles.insightItem}>
-  • {
-    diasSemGasto === 0
-      ? `${labelPeriod(String(period))}, até o momento, todos os dias houve movimentação financeira.`
-      : diasSemGasto <= 2
-      ? `Houve poucos dias sem movimentação financeira neste período (${diasSemGasto} dia${diasSemGasto > 1 ? "s" : ""}).`
-      : `Houve ${diasSemGasto} dias sem movimentação financeira, no período selecionado.`
-  }
-</Text>
+      <Text style={styles.insightItem}>
+        • Continue registrando seus gastos para que o No Controle possa identificar padrões e gerar análises mais completas.
+      </Text>
+    </>
+  )}
+
+  {nivelMaturidade === 2 && (
+    <>
+      <Text style={styles.insightItem}>
+        • Seus gastos ocorreram em {diasComGasto} dias diferentes durante o período analisado.
+      </Text>
+
+      <Text style={styles.insightItem}>
+        • Já existem informações suficientes para observações iniciais, mas ainda não há dados suficientes para conclusões mais avançadas.
+      </Text>
+    </>
+  )}
+
+  {nivelMaturidade >= 3 && (
+    <>
+      {maiorDia && (
+        <Text style={styles.insightItem}>
+          • O {maiorDia.label} foi responsável por{" "}
+          {percentualMaiorDia.toFixed(1)}% dos gastos registrados neste período.
+        </Text>
+      )}
+
+      <Text style={styles.insightItem}>
+        • Os 3 maiores dias representam {percentualTop3.toFixed(0)}% do total gasto no período.
+      </Text>
+
+      <Text style={styles.insightItem}>
+        • Seus gastos ocorreram em {diasComGasto} dias diferentes durante o período analisado.
+      </Text>
+    </>
+  )}
 </View>
 
 </ScrollView>
