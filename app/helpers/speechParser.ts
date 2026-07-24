@@ -309,6 +309,15 @@ if (daquiTextoMatch) {
   }
 }
 
+if (
+  normalizedText.includes("semana retrasada")
+) {
+  const data = new Date(now);
+
+  data.setDate(now.getDate() - 14);
+
+  return data;
+}
 if (normalizedText.includes("semana passada")) {
   const data = new Date(now);
   data.setDate(now.getDate() - 7);
