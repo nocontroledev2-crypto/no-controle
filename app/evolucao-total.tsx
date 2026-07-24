@@ -660,6 +660,8 @@ const barChartData = {
    
     let label = `Dia ${index + 1}`;
 
+
+    
 if (period === "today") {
   const currentDate = new Date(startLast7Days);
 
@@ -690,6 +692,20 @@ if (period === "month") {
   label = hoje
     ? `Hoje (${currentDate.toLocaleDateString("pt-BR")})`
     : currentDate.toLocaleDateString("pt-BR");
+}
+if (
+  period === "year" ||
+  period === "lastYear"
+) {
+  label = labelsMonth[index];
+}
+
+if (
+  period === "custom" &&
+  safeChartLabels.length <= 12 &&
+  safeChartLabels[0]?.includes("/")
+) {
+  label = safeChartLabels[index];
 }
 
 if (period === "week" || period === "weekPrev") {
@@ -727,7 +743,24 @@ if (period === "week" || period === "weekPrev") {
 ).length;
 
 const pontosFinanceiros = diasComGasto;
+let unidadeSingular = "dia";
+let unidadePlural = "dias";
 
+if (
+  period === "year" ||
+  period === "lastYear"
+) {
+  unidadeSingular = "mês";
+  unidadePlural = "meses";
+}
+
+if (
+  period === "all" &&
+  yearlyData.labels.length > 1
+) {
+  unidadeSingular = "ano";
+  unidadePlural = "anos";
+}
 let nivelMaturidade = 0;
 
 if (pontosFinanceiros === 0) {
@@ -1223,7 +1256,7 @@ const labelX = Math.min(
   {nivelMaturidade === 1 && (
     <>
       <Text style={styles.insightItem}>
-        • Apenas um dia com movimentação financeira foi identificado neste período.
+        • Apenas um {unidadeSingular} com movimentação financeira foi identificado neste período.
       </Text>
 
       <Text style={styles.insightItem}>
