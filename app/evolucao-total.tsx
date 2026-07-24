@@ -746,12 +746,29 @@ const pontosFinanceiros = diasComGasto;
 let unidadeSingular = "dia";
 let unidadePlural = "dias";
 
+const primeiroLabel = safeChartLabels[0] || "";
+
 if (
   period === "year" ||
   period === "lastYear"
 ) {
   unidadeSingular = "mês";
   unidadePlural = "meses";
+}
+
+if (
+  period === "custom" &&
+  primeiroLabel.includes("/")
+) {
+  const partes = primeiroLabel.split("/");
+
+  if (
+    partes.length === 2 &&
+    partes[1].length === 2
+  ) {
+    unidadeSingular = "mês";
+    unidadePlural = "meses";
+  }
 }
 
 if (
