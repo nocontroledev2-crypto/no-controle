@@ -62,7 +62,7 @@ export function matchCategory(text: string): string {
     t.includes("gas de cozinha") ||
     t.includes("botijao")
   ) {
-    return "Contas";
+    return "Contas da Casa";
   }
 
   /* 📺 ASSINATURAS */
@@ -108,7 +108,7 @@ export function matchCategory(text: string): string {
     t.includes("credito") ||
     t.includes("fatura")
   ) {
-    return "Cartão de crédito";
+    return "Financeiro";
   }
 
   return "Outros";
