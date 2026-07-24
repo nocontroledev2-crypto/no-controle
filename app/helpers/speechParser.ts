@@ -243,6 +243,39 @@ if (
   anteontem.setDate(now.getDate() - 2);
   return anteontem;
 }
+const haDiasNumeroMatch = normalizedText.match(
+  /(?:ha|há|a|faz)\s+(\d+)\s+dias?/
+);
+
+if (haDiasNumeroMatch) {
+  const dias = Number(haDiasNumeroMatch[1]);
+
+  if (!isNaN(dias)) {
+    const data = new Date(now);
+
+    data.setDate(now.getDate() - dias);
+
+    return data;
+  }
+}
+
+const haDiasTextoMatch = normalizedText.match(
+  /(?:ha|há|a|faz)\s+([a-z\s]+?)\s+dias?/
+);
+
+if (haDiasTextoMatch) {
+  const dias = parseNumberWordsText(
+    haDiasTextoMatch[1]
+  );
+
+  if (dias > 0) {
+    const data = new Date(now);
+
+    data.setDate(now.getDate() - dias);
+
+    return data;
+  }
+}
   if (
     normalizedText.includes("amanha") ||
     normalizedText.includes("amanhã")
