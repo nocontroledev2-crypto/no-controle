@@ -47,6 +47,12 @@ const numberWords: Record<string, number> = {
   setecentos: 700,
   oitocentos: 800,
   novecentos: 900,
+  mil: 1000,
+  milhar: 1000,
+  milhao: 1000000,
+  milhão: 1000000,
+  milhoes: 1000000,
+  milhões: 1000000,
 };
 
 const months: Record<string, number> = {
