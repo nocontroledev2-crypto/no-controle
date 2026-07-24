@@ -195,11 +195,13 @@ if (brlWithCents) {
   );
 }
 
-  const digit = text.match(/\d+/);
+  const allDigits = [...text.matchAll(/\d+/g)];
 
-  if (digit) {
-    return Number(digit[0]);
-  }
+if (allDigits.length > 0) {
+  return Number(
+    allDigits[allDigits.length - 1][0]
+  );
+}
 
   const tokens = text
     .split(" ")
