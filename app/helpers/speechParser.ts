@@ -417,6 +417,74 @@ if (diasAtrasTextoMatch) {
   }
 }
 
+const haSemanasNumeroMatch = normalizedText.match(
+  /(?:ha|a|faz|fez|fas|fes)\s+(\d+)\s+semanas?/
+);
+
+if (haSemanasNumeroMatch) {
+  const semanas = Number(haSemanasNumeroMatch[1]);
+
+  if (!isNaN(semanas)) {
+    const data = new Date(now);
+
+    data.setDate(now.getDate() - semanas * 7);
+
+    return data;
+  }
+}
+
+const haSemanasTextoMatch = normalizedText.match(
+  /(?:ha|a|faz|fez|fas|fes)\s+([a-z\s]+?)\s+semanas?/
+);
+
+if (haSemanasTextoMatch) {
+  const semanas = parseNumberWordsText(
+    haSemanasTextoMatch[1]
+  );
+
+  if (semanas > 0) {
+    const data = new Date(now);
+
+    data.setDate(now.getDate() - semanas * 7);
+
+    return data;
+  }
+}
+
+const semanasAtrasNumeroMatch = normalizedText.match(
+  /(\d+)\s+semanas?\s+(?:atras|atraz|tras)/
+);
+
+if (semanasAtrasNumeroMatch) {
+  const semanas = Number(semanasAtrasNumeroMatch[1]);
+
+  if (!isNaN(semanas)) {
+    const data = new Date(now);
+
+    data.setDate(now.getDate() - semanas * 7);
+
+    return data;
+  }
+}
+
+const semanasAtrasTextoMatch = normalizedText.match(
+  /([a-z\s]+?)\s+semanas?\s+(?:atras|atraz|tras)/
+);
+
+if (semanasAtrasTextoMatch) {
+  const semanas = parseNumberWordsText(
+    semanasAtrasTextoMatch[1]
+  );
+
+  if (semanas > 0) {
+    const data = new Date(now);
+
+    data.setDate(now.getDate() - semanas * 7);
+
+    return data;
+  }
+}
+
   if (
     normalizedText.includes("depois de amanha") ||
     normalizedText.includes("depois de amanhã")
