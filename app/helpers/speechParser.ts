@@ -537,6 +537,40 @@ if (emDiasTextoMatch) {
   }
 }
 
+const emSemanasNumeroMatch = normalizedText.match(
+  /em\s+(\d+)\s+semanas?/
+);
+
+if (emSemanasNumeroMatch) {
+  const semanas = Number(emSemanasNumeroMatch[1]);
+
+  if (!isNaN(semanas)) {
+    const data = new Date(now);
+
+    data.setDate(now.getDate() + semanas * 7);
+
+    return data;
+  }
+}
+
+const emSemanasTextoMatch = normalizedText.match(
+  /em\s+([a-z\s]+?)\s+semanas?/
+);
+
+if (emSemanasTextoMatch) {
+  const semanas = parseNumberWordsText(
+    emSemanasTextoMatch[1]
+  );
+
+  if (semanas > 0) {
+    const data = new Date(now);
+
+    data.setDate(now.getDate() + semanas * 7);
+
+    return data;
+  }
+}
+
 const daquiDiasMatch = normalizedText.match(
   /daqui\s+(\d+)\s+dias?/
 );
@@ -571,6 +605,40 @@ if (daquiNumeroMatch) {
 const daquiTextoMatch = normalizedText.match(
   /daqui\s+(?:a\s+)?([a-z\s]+?)\s+dias?/
 );
+
+const daquiSemanasNumeroMatch = normalizedText.match(
+  /daqui\s+(?:a\s+)?(\d+)\s+semanas?/
+);
+
+if (daquiSemanasNumeroMatch) {
+  const semanas = Number(daquiSemanasNumeroMatch[1]);
+
+  if (!isNaN(semanas)) {
+    const data = new Date(now);
+
+    data.setDate(now.getDate() + semanas * 7);
+
+    return data;
+  }
+}
+
+const daquiSemanasTextoMatch = normalizedText.match(
+  /daqui\s+(?:a\s+)?([a-z\s]+?)\s+semanas?/
+);
+
+if (daquiSemanasTextoMatch) {
+  const semanas = parseNumberWordsText(
+    daquiSemanasTextoMatch[1]
+  );
+
+  if (semanas > 0) {
+    const data = new Date(now);
+
+    data.setDate(now.getDate() + semanas * 7);
+
+    return data;
+  }
+}
 
 if (daquiTextoMatch) {
   const dias = parseNumberWordsText(
