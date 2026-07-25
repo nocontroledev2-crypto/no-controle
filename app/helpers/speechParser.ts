@@ -348,8 +348,9 @@ function parseDateFromSpeech(text: string): Date {
     ontem.setDate(now.getDate() - 1);
     return ontem;
   }
+
 const haDiasNumeroMatch = normalizedText.match(
-  /(?:ha|há|a|faz)\s+(\d+)\s+dias?/
+  /(?:ha|a|faz|fez|fas|fes)\s+(\d+)\s+dias?/
 );
 
 if (haDiasNumeroMatch) {
@@ -365,7 +366,7 @@ if (haDiasNumeroMatch) {
 }
 
 const haDiasTextoMatch = normalizedText.match(
-  /(?:ha|há|a|faz)\s+([a-z\s]+?)\s+dias?/
+  /(?:ha|a|faz|fez|fas|fes)\s+([a-z\s]+?)\s+dias?/
 );
 
 if (haDiasTextoMatch) {
@@ -381,6 +382,41 @@ if (haDiasTextoMatch) {
     return data;
   }
 }
+
+const diasAtrasNumeroMatch = normalizedText.match(
+  /(\d+)\s+dias?\s+(?:atras|atraz|tras)/
+);
+
+if (diasAtrasNumeroMatch) {
+  const dias = Number(diasAtrasNumeroMatch[1]);
+
+  if (!isNaN(dias)) {
+    const data = new Date(now);
+
+    data.setDate(now.getDate() - dias);
+
+    return data;
+  }
+}
+
+const diasAtrasTextoMatch = normalizedText.match(
+  /([a-z\s]+?)\s+dias?\s+(?:atras|atraz|tras)/
+);
+
+if (diasAtrasTextoMatch) {
+  const dias = parseNumberWordsText(
+    diasAtrasTextoMatch[1]
+  );
+
+  if (dias > 0) {
+    const data = new Date(now);
+
+    data.setDate(now.getDate() - dias);
+
+    return data;
+  }
+}
+
   if (
     normalizedText.includes("depois de amanha") ||
     normalizedText.includes("depois de amanhã")
