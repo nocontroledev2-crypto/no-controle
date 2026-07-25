@@ -503,6 +503,40 @@ if (semanasAtrasTextoMatch) {
     return amanha;
   }
 
+ const emDiasNumeroMatch = normalizedText.match(
+  /em\s+(\d+)\s+dias?/
+);
+
+if (emDiasNumeroMatch) {
+  const dias = Number(emDiasNumeroMatch[1]);
+
+  if (!isNaN(dias)) {
+    const data = new Date(now);
+
+    data.setDate(now.getDate() + dias);
+
+    return data;
+  }
+}
+
+const emDiasTextoMatch = normalizedText.match(
+  /em\s+([a-z\s]+?)\s+dias?/
+);
+
+if (emDiasTextoMatch) {
+  const dias = parseNumberWordsText(
+    emDiasTextoMatch[1]
+  );
+
+  if (dias > 0) {
+    const data = new Date(now);
+
+    data.setDate(now.getDate() + dias);
+
+    return data;
+  }
+}
+
 const daquiDiasMatch = normalizedText.match(
   /daqui\s+(\d+)\s+dias?/
 );
