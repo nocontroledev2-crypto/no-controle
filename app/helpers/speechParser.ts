@@ -734,7 +734,115 @@ for (const item of proximosDiasSemana) {
     return data;
   }
 }
-  
+ 
+
+const diasSemana = [
+  {
+    dia: 1,
+    termos: ["segunda feira", "segunda-feira", "segunda"],
+  },
+  {
+    dia: 2,
+    termos: ["terca feira", "terça feira", "terça-feira", "terca-feira", "terca", "terça"],
+  },
+  {
+    dia: 3,
+    termos: ["quarta feira", "quarta-feira", "quarta"],
+  },
+  {
+    dia: 4,
+    termos: ["quinta feira", "quinta-feira", "quinta"],
+  },
+  {
+    dia: 5,
+    termos: ["sexta feira", "sexta-feira", "sexta"],
+  },
+  {
+    dia: 6,
+    termos: ["sabado", "sábado"],
+  },
+  {
+    dia: 0,
+    termos: ["domingo"],
+  },
+];
+
+const palavrasDeFuturo = [
+  "vou",
+  "irei",
+  "irei pagar",
+  "vou pagar",
+  "vou gastar",
+  "vou comprar",
+  "pagarei",
+  "gastarei",
+  "comprarei",
+  "precisarei pagar",
+  "vou precisar pagar",
+];
+
+function contemTermoDeDiaSemana(termo: string) {
+  const termoNormalizado = normalize(termo);
+
+  const regex = new RegExp(
+    `(^|\\s)${termoNormalizado}(\\s|$)`
+  );
+
+  return regex.test(normalizedText);
+}
+
+function deveIgnorarDiaSemana(termo: string) {
+  const termoNormalizado = normalize(termo);
+
+  const falsosContextos = [
+    `${termoNormalizado} parcela`,
+    `${termoNormalizado} prestacao`,
+    `${termoNormalizado} prestação`,
+    `${termoNormalizado} via`,
+    `${termoNormalizado} vez`,
+  ];
+
+  return falsosContextos.some((contexto) =>
+    normalizedText.includes(contexto)
+  );
+}
+
+const fraseIndicaFuturo = palavrasDeFuturo.some((palavra) =>
+  normalizedText.includes(normalize(palavra))
+);
+
+for (const item of diasSemana) {
+  const encontrouDiaSemana = item.termos.some((termo) => {
+    return (
+      contemTermoDeDiaSemana(termo) &&
+      !deveIgnorarDiaSemana(termo)
+    );
+  });
+
+  if (encontrouDiaSemana) {
+    const data = new Date(now);
+
+    if (fraseIndicaFuturo) {
+      let diasAAdicionar =
+        (item.dia - now.getDay() + 7) % 7;
+
+      if (diasAAdicionar === 0) {
+        diasAAdicionar = 7;
+      }
+
+      data.setDate(now.getDate() + diasAAdicionar);
+
+      return data;
+    }
+
+    const diasASubtrair =
+      (now.getDay() - item.dia + 7) % 7;
+
+    data.setDate(now.getDate() - diasASubtrair);
+
+    return data;
+  }
+}
 
   let day: number | null = null;
   let month: number | null = null;
