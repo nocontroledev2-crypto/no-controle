@@ -333,19 +333,21 @@ function parseDateFromSpeech(text: string): Date {
     return now;
   }
 
+  if (
+    normalizedText.includes("anteontem") ||
+    normalizedText.includes("antes de ontem") ||
+    normalizedText.includes("antesontem")
+  ) {
+    const anteontem = new Date(now);
+    anteontem.setDate(now.getDate() - 2);
+    return anteontem;
+  }
+
   if (normalizedText.includes("ontem")) {
     const ontem = new Date(now);
     ontem.setDate(now.getDate() - 1);
     return ontem;
   }
-if (
-  normalizedText.includes("anteontem") ||
-  normalizedText.includes("antes de ontem")
-) {
-  const anteontem = new Date(now);
-  anteontem.setDate(now.getDate() - 2);
-  return anteontem;
-}
 const haDiasNumeroMatch = normalizedText.match(
   /(?:ha|há|a|faz)\s+(\d+)\s+dias?/
 );
@@ -380,6 +382,15 @@ if (haDiasTextoMatch) {
   }
 }
   if (
+    normalizedText.includes("depois de amanha") ||
+    normalizedText.includes("depois de amanhã")
+  ) {
+    const depoisDeAmanha = new Date(now);
+    depoisDeAmanha.setDate(now.getDate() + 2);
+    return depoisDeAmanha;
+  }
+
+  if (
     normalizedText.includes("amanha") ||
     normalizedText.includes("amanhã")
   ) {
@@ -387,14 +398,6 @@ if (haDiasTextoMatch) {
     amanha.setDate(now.getDate() + 1);
     return amanha;
   }
-if (
-  normalizedText.includes("depois de amanha") ||
-  normalizedText.includes("depois de amanhã")
-) {
-  const depoisDeAmanha = new Date(now);
-  depoisDeAmanha.setDate(now.getDate() + 2);
-  return depoisDeAmanha;
-}
 
 const daquiDiasMatch = normalizedText.match(
   /daqui\s+(\d+)\s+dias?/
