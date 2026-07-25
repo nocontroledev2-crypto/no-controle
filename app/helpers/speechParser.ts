@@ -164,6 +164,18 @@ function removerReferenciasTemporais(text: string): string {
       /(?:daqui|em)\s+(?:a\s+)?(\d+|[a-z\s]+?)\s+semanas?/g,
       " "
     )
+        .replace(
+      /mes\s+(?:passado|retrasado)/g,
+      " "
+    )
+    .replace(
+      /(?:daqui|em)\s+(?:a\s+)?(\d+|[a-z\s]+?)\s+mes(?:es)?/g,
+      " "
+    )
+    .replace(
+      /(?:de hoje|doje|deoje|dehoje)\s+a\s+(\d+|[a-z\s]+?)\s+mes(?:es)?/g,
+      " "
+    )
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -677,6 +689,15 @@ if (
   return data;
 }
 if (
+  normalizedText.includes("mes retrasado")
+) {
+  const data = new Date(now);
+
+  data.setMonth(now.getMonth() - 2);
+
+  return data;
+}
+if (
   normalizedText.includes("mes passado") ||
   normalizedText.includes("mês passado")
 ) {
@@ -684,7 +705,73 @@ if (
   data.setMonth(now.getMonth() - 1);
   return data;
 }
+const daquiMesesNumeroMatch = normalizedText.match(
+  /(?:daqui|em)\s+(?:a\s+)?(\d+)\s+mes(?:es)?/
+);
 
+if (daquiMesesNumeroMatch) {
+  const meses = Number(daquiMesesNumeroMatch[1]);
+
+  if (!isNaN(meses)) {
+    const data = new Date(now);
+
+    data.setMonth(now.getMonth() + meses);
+
+    return data;
+  }
+}
+
+const daquiMesesTextoMatch = normalizedText.match(
+  /(?:daqui|em)\s+(?:a\s+)?([a-z\s]+?)\s+mes(?:es)?/
+);
+
+if (daquiMesesTextoMatch) {
+  const meses = parseNumberWordsText(
+    daquiMesesTextoMatch[1]
+  );
+
+  if (meses > 0) {
+    const data = new Date(now);
+
+    data.setMonth(now.getMonth() + meses);
+
+    return data;
+  }
+}
+
+const deHojeMesesNumeroMatch = normalizedText.match(
+  /(?:de hoje|doje|deoje|dehoje)\s+a\s+(\d+)\s+mes(?:es)?/
+);
+
+if (deHojeMesesNumeroMatch) {
+  const meses = Number(deHojeMesesNumeroMatch[1]);
+
+  if (!isNaN(meses)) {
+    const data = new Date(now);
+
+    data.setMonth(now.getMonth() + meses);
+
+    return data;
+  }
+}
+
+const deHojeMesesTextoMatch = normalizedText.match(
+  /(?:de hoje|doje|deoje|dehoje)\s+a\s+([a-z\s]+?)\s+mes(?:es)?/
+);
+
+if (deHojeMesesTextoMatch) {
+  const meses = parseNumberWordsText(
+    deHojeMesesTextoMatch[1]
+  );
+
+  if (meses > 0) {
+    const data = new Date(now);
+
+    data.setMonth(now.getMonth() + meses);
+
+    return data;
+  }
+}
 if (
   normalizedText.includes("mes que vem") ||
   normalizedText.includes("mês que vem")
