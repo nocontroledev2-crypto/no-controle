@@ -340,6 +340,40 @@ return total > 0 ? total : null;
 function parseDateFromSpeech(text: string): Date {
   const now = new Date();
   const normalizedText = normalize(text);
+  
+  const deHojeMesesNumeroPrioritarioMatch = normalizedText.match(
+  /(?:de hoje|doje|deoje|dehoje)\s+a\s+(\d+)\s+mes(?:es)?/
+);
+
+if (deHojeMesesNumeroPrioritarioMatch) {
+  const meses = Number(deHojeMesesNumeroPrioritarioMatch[1]);
+
+  if (!isNaN(meses)) {
+    const data = new Date(now);
+
+    data.setMonth(now.getMonth() + meses);
+
+    return data;
+  }
+}
+
+const deHojeMesesTextoPrioritarioMatch = normalizedText.match(
+  /(?:de hoje|doje|deoje|dehoje)\s+a\s+([a-z\s]+?)\s+mes(?:es)?/
+);
+
+if (deHojeMesesTextoPrioritarioMatch) {
+  const meses = parseNumberWordsText(
+    deHojeMesesTextoPrioritarioMatch[1]
+  );
+
+  if (meses > 0) {
+    const data = new Date(now);
+
+    data.setMonth(now.getMonth() + meses);
+
+    return data;
+  }
+}
 
   if (normalizedText.includes("hoje")) {
     return now;
