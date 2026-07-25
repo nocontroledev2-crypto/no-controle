@@ -82,21 +82,90 @@ function normalize(text: string): string {
 }
 
 function parseNumberWordsText(text: string): number {
-  const wordsToIgnore = ["e", "real", "reais", "centavo", "centavos", "de"];
+  const wordsToIgnore = [
+    "e",
+    "real",
+    "reais",
+    "centavo",
+    "centavos",
+    "de",
+    "do",
+    "da",
+    "dos",
+    "das",
+    "no",
+    "na",
+    "em",
+    "por",
+  ];
 
   const tokens = normalize(text)
     .split(" ")
     .filter((word) => word && !wordsToIgnore.includes(word));
 
   let total = 0;
+  let current = 0;
 
   for (const token of tokens) {
+    const isMilhao =
+      token === "milhao" ||
+      token === "milhão" ||
+      token === "milhoes" ||
+      token === "milhões";
+
+    const isMil =
+      token === "mil" ||
+      token === "milhar";
+
+    if (isMilhao) {
+      total += (current || 1) * 1000000;
+      current = 0;
+      continue;
+    }
+
+    if (isMil) {
+      total += (current || 1) * 1000;
+      current = 0;
+      continue;
+    }
+
     if (numberWords[token] !== undefined) {
-      total += numberWords[token];
+      current += numberWords[token];
     }
   }
 
-  return total;
+  return total + current;
+}
+
+
+function removerReferenciasTemporais(text: string): string {
+  return text
+    .replace(
+      /(?:ha|há|a|faz|fez|fas|fes|fáz|fês|fêz)\s+(\d+|[a-z\s]+?)\s+dias?/g,
+      " "
+    )
+    .replace(
+      /(\d+|[a-z\s]+?)\s+dias?\s+(?:atras|atrás|atraz|atráz|tras|trás)/g,
+      " "
+    )
+    .replace(
+      /(?:daqui|em)\s+(?:a\s+)?(\d+|[a-z\s]+?)\s+dias?/g,
+      " "
+    )
+    .replace(
+      /(?:ha|há|a|faz|fez|fas|fes|fáz|fês|fêz)\s+(\d+|[a-z\s]+?)\s+semanas?/g,
+      " "
+    )
+    .replace(
+      /(\d+|[a-z\s]+?)\s+semanas?\s+(?:atras|atrás|atraz|atráz|tras|trás)/g,
+      " "
+    )
+    .replace(
+      /(?:daqui|em)\s+(?:a\s+)?(\d+|[a-z\s]+?)\s+semanas?/g,
+      " "
+    )
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function parseValue(rawText: string): number | null {
@@ -154,35 +223,36 @@ if (brIntegerWithThousandsMatch) {
 }
 
 const text = normalize(rawText);
+const textSemTempo = removerReferenciasTemporais(text);
 
-  const digitWithCents = text.match(
+const digitWithCents = textSemTempo.match(
   /(\d+)\s*(?:reais?|real|brl)?\s*(?:e|com)\s*(\d{1,2})\s*(?:centavos?|centavo)?/
 );
 
-  if (digitWithCents) {
-    const reais = Number(digitWithCents[1]);
-    const centavos = Number(digitWithCents[2]);
+if (digitWithCents) {
+  const reais = Number(digitWithCents[1]);
+  const centavos = Number(digitWithCents[2]);
 
-    if (Number.isFinite(reais) && Number.isFinite(centavos)) {
-      return Number((reais + centavos / 100).toFixed(2));
-    }
+  if (Number.isFinite(reais) && Number.isFinite(centavos)) {
+    return Number((reais + centavos / 100).toFixed(2));
   }
+}
 
-  if (text.includes("centavo")) {
-    const partesReais = text.split(/reais|real/);
-    const textoReais = partesReais[0] ?? "";
-    const textoCentavos =
-      partesReais[1]?.replace(/centavos|centavo/g, "") ?? "";
+if (textSemTempo.includes("centavo")) {
+  const partesReais = textSemTempo.split(/reais|real/);
+  const textoReais = partesReais[0] ?? "";
+  const textoCentavos =
+    partesReais[1]?.replace(/centavos|centavo/g, "") ?? "";
 
-    const reais = parseNumberWordsText(textoReais);
-    const centavos = parseNumberWordsText(textoCentavos);
+  const reais = parseNumberWordsText(textoReais);
+  const centavos = parseNumberWordsText(textoCentavos);
 
-    if (reais > 0 || centavos > 0) {
-      return Number((reais + centavos / 100).toFixed(2));
-    }
+  if (reais > 0 || centavos > 0) {
+    return Number((reais + centavos / 100).toFixed(2));
   }
+}
 
-const brlWithCents = text.match(
+const brlWithCents = textSemTempo.match(
   /(\d+)\s*brl\s*e\s*(\d{1,2})/
 );
 
@@ -195,7 +265,7 @@ if (brlWithCents) {
   );
 }
 
-  const allDigits = [...text.matchAll(/\d+/g)];
+const allDigits = [...textSemTempo.matchAll(/\d+/g)];
 
 if (allDigits.length > 0) {
   return Number(
@@ -203,25 +273,56 @@ if (allDigits.length > 0) {
   );
 }
 
-  const tokens = text
-    .split(" ")
-    .filter((word) => numberWords[word] !== undefined);
+const verbosFinanceiros = [
+  "gastei",
+  "gasto",
+  "paguei",
+  "pago",
+  "pagarei",
+  "pagar",
+  "custou",
+  "custa",
+  "deu",
+  "saiu",
+  "desembolsei",
+  "valor",
+];
 
-  if (tokens.length >= 4) {
-    const reaisTokens = tokens.slice(0, tokens.length - 2).join(" ");
-    const centavosTokens = tokens.slice(tokens.length - 2).join(" ");
+for (const verbo of verbosFinanceiros) {
+  const index = textSemTempo.indexOf(verbo);
 
-    const reais = parseNumberWordsText(reaisTokens);
-    const centavos = parseNumberWordsText(centavosTokens);
+  if (index >= 0) {
+    const trechoDepoisDoVerbo = textSemTempo.slice(
+      index + verbo.length
+    );
 
-    if (reais > 0 && centavos > 0 && centavos < 100) {
-      return Number((reais + centavos / 100).toFixed(2));
+    const valorPorExtenso = parseNumberWordsText(
+      trechoDepoisDoVerbo
+    );
+
+    if (valorPorExtenso > 0) {
+      return valorPorExtenso;
     }
   }
+}
 
-  const total = parseNumberWordsText(text);
+const valorDepoisDePor = textSemTempo.match(
+  /\bpor\s+([a-z\s]+)/
+);
 
-  return total > 0 ? total : null;
+if (valorDepoisDePor) {
+  const valorPorExtenso = parseNumberWordsText(
+    valorDepoisDePor[1]
+  );
+
+  if (valorPorExtenso > 0) {
+    return valorPorExtenso;
+  }
+}
+
+const total = parseNumberWordsText(textSemTempo);
+
+return total > 0 ? total : null;
 }
 
 function parseDateFromSpeech(text: string): Date {

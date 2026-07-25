@@ -14,7 +14,6 @@ export function matchCategory(text: string): string {
     t.includes("uber") ||
     t.includes("99") ||
     t.includes("taxi") ||
-    t.includes("gas") ||
     t.includes("combus")
   ) {
     return "Transporte";
