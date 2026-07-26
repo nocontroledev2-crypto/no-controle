@@ -862,7 +862,6 @@ export const CATEGORY_DICTIONARY_RULES: CategoryRule[] = [
     "colégio",
     "colegio",
     "mensalidade escolar",
-    "material escolar",
     "ensino fundamental",
     "ensino medio",
     "ensino médio",
