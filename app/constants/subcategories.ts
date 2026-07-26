@@ -47,6 +47,7 @@ export const SUBCATEGORIES_BY_MASTER: Record<string, string[]> = {
     "Estacionamento",
     "Manutenção Veículo",
     "Seguro Veículo",
+    "Financiamento Veículo",
     "IPVA",
     "Licenciamento",
   ],
