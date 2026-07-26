@@ -808,7 +808,7 @@ export const CATEGORY_DICTIONARY_RULES: CategoryRule[] = [
     "mestrado",
     "doutorado",
     "mensalidade faculdade",
-    "mensalidade universidade"
+    "mensalidade universidade",
       "puc rio",
       "puc-rio",
       "pucrio",
