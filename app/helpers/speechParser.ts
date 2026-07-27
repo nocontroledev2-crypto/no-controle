@@ -183,6 +183,32 @@ function removerReferenciasTemporais(text: string): string {
 function parseValue(rawText: string): number | null {
   const raw = rawText.toLowerCase();
 
+    const normalizedRaw = normalize(rawText);
+
+  const digitMillionMatch = normalizedRaw.match(
+    /\b(\d+)\s*(milhao|milhão|milhoes|milhões)\b/
+  );
+
+  if (digitMillionMatch) {
+    return Number(digitMillionMatch[1]) * 1000000;
+  }
+
+  const digitMilMatch = normalizedRaw.match(
+    /\b(\d+)\s*mil\b/
+  );
+
+  if (digitMilMatch) {
+    return Number(digitMilMatch[1]) * 1000;
+  }
+
+  const plainLargeNumberMatch = normalizedRaw.match(
+    /\b\d{7,}\b/
+  );
+
+  if (plainLargeNumberMatch) {
+    return Number(plainLargeNumberMatch[0]);
+  }
+
 /*
   Valores digitados em formato brasileiro:
   - "1.254,78" -> 1254.78
@@ -985,10 +1011,31 @@ for (const item of diasSemana) {
     return new Date(year, month, day);
   }
 
-  const yearMatch = normalizedText.match(/\b(20\d{2})\b/);
+  const yearMatches = [
+    ...normalizedText.matchAll(/\b(20\d{2})\b/g),
+  ];
 
-  if (yearMatch) {
-    year = Number(yearMatch[1]);
+  for (const match of yearMatches) {
+    const index = match.index ?? 0;
+
+    const trechoDepois = normalizedText.slice(
+      index,
+      index + 20
+    );
+
+    const trechoAntes = normalizedText.slice(
+      Math.max(0, index - 5),
+      index
+    );
+
+    const pareceValor =
+      /\b(reais?|brl)\b/.test(trechoDepois) ||
+      /r\s*$/.test(trechoAntes);
+
+    if (!pareceValor) {
+      year = Number(match[1]);
+      break;
+    }
   }
 
   const monthNames = Object.keys(months);
