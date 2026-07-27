@@ -179,9 +179,11 @@ useFocusEffect(
     recognition.onstart = () => setState("listening");
 
     recognition.onresult = (event: any) => {
-      const textoFalado = event.results[0][0].transcript;
+    const textoFalado = event.results[0][0].transcript;
 
-      const parsed = parseSpeech(textoFalado);
+    setTextoInteligente(textoFalado);
+
+    const parsed = parseSpeech(textoFalado);
 
       if (parsed.valor !== null) {
         const valorVoz = Number(parsed.valor);
@@ -407,6 +409,11 @@ if (usuarioLogado === false) {
       ? "🧾 Revisar despesa"
       : "🧾 Preencher manualmente"}
   </Text>
+  {state === "confirm" && textoInteligente ? (
+  <Text style={styles.detailText}>
+    Texto entendido: {textoInteligente}
+  </Text>
+) : null}
 
             <Text style={styles.label}>Valor</Text>
             <TextInput
