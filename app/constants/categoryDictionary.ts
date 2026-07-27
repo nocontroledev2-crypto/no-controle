@@ -163,6 +163,33 @@ export const CATEGORY_DICTIONARY_RULES: CategoryRule[] = [
       "zona azul",
     ],
   },
+
+   {
+    categoria: "Transporte",
+    subcategoria: "Seguro Veículo",
+    termos: [
+      "seguro do carro",
+      "seguro de carro",
+      "seguro carro",
+      "seguro do veiculo",
+      "seguro do veículo",
+      "seguro de veiculo",
+      "seguro de veículo",
+      "seguro veiculo",
+      "seguro veículo",
+      "seguro automotivo",
+      "seguro auto",
+      "seguro da moto",
+      "seguro de moto",
+      "seguro moto",
+      "porto seguro carro",
+      "tokio marine carro",
+      "azul seguros carro",
+      "mapfre carro",
+      "liberty seguros carro",
+    ],
+  },
+
   {
     categoria: "Transporte",
     subcategoria: "Financiamento Veículo",
@@ -397,6 +424,28 @@ export const CATEGORY_DICTIONARY_RULES: CategoryRule[] = [
       "iptu",
     ],
   },
+
+    {
+    categoria: "Moradia",
+    subcategoria: "Seguro Residencial",
+    termos: [
+      "seguro residencial",
+      "seguro da casa",
+      "seguro de casa",
+      "seguro casa",
+      "seguro do apartamento",
+      "seguro de apartamento",
+      "seguro apartamento",
+      "seguro do imovel",
+      "seguro do imóvel",
+      "seguro de imovel",
+      "seguro de imóvel",
+      "porto seguro residencial",
+      "tokio marine residencial",
+      "mapfre residencial",
+    ],
+  },
+
     {
     categoria: "Moradia",
     subcategoria: "Financiamento Imobiliário",
@@ -1087,6 +1136,27 @@ export const CATEGORY_DICTIONARY_RULES: CategoryRule[] = [
     ],
   },
 
+    {
+    categoria: "Compras",
+    subcategoria: "Seguro de Equipamento",
+    termos: [
+      "seguro do celular",
+      "seguro de celular",
+      "seguro celular",
+      "seguro do notebook",
+      "seguro de notebook",
+      "seguro notebook",
+      "seguro do computador",
+      "seguro de computador",
+      "seguro computador",
+      "seguro do iphone",
+      "seguro de iphone",
+      "seguro iphone",
+      "garantia estendida",
+      "garantia extendida",
+    ],
+  },
+
   {
     categoria: "Transporte",
     subcategoria: "Manutenção Veículo",
@@ -1415,6 +1485,22 @@ export const CATEGORY_DICTIONARY_RULES: CategoryRule[] = [
       "sicoob",
     ],
   },
+
+    {
+    categoria: "Financeiro",
+    subcategoria: "Seguro de Vida",
+    termos: [
+      "seguro de vida",
+      "seguro vida",
+      "seguro pessoal",
+      "seguro familiar",
+      "seguro morte",
+      "seguro invalidez",
+      "seguro prestamista",
+      "prestamista",
+    ],
+  },
+
   {
     categoria: "Financeiro",
     subcategoria: "Empréstimo",
