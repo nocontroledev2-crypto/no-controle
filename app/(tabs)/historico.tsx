@@ -49,7 +49,6 @@ const {
     setOcultarValores,
   } = usePrivacy();
 
-
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [period, setPeriod] = useState<Period>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("lancamentos");
@@ -107,6 +106,18 @@ const now = new Date();
         currency: "BRL",
       }
     );
+  }
+
+    function formatPercentualRelatorio(percentual: number) {
+    if (!Number.isFinite(percentual) || percentual <= 0) {
+      return "0%";
+    }
+
+    if (percentual > 0 && percentual < 1) {
+      return "<1%";
+    }
+
+    return `${percentual.toFixed(0)}%`;
   }
 
   function formatDateBR(dateStr: string) {
@@ -686,16 +697,16 @@ const unicaSubcategoria =
   if (unicaSubcategoria === "Sem detalhe") {
     return `${categoria} • ${formatMoney(
       info.total
-    )} • ${percentualCategoria.toFixed(
-      0
-    )}% do período`;
+    )} • ${formatPercentualRelatorio(
+      percentualCategoria
+    )} do período`;
   }
 
   return `${categoria} • ${formatMoney(
     info.total
-  )} • ${unicaSubcategoria} • ${percentualCategoria.toFixed(
-    0
-  )}% do período`;
+  )} • ${unicaSubcategoria} • ${formatPercentualRelatorio(
+    percentualCategoria
+  )} do período`;
 }
 
 const subcategoriasTexto = subcategoriasEntries
@@ -707,17 +718,17 @@ const subcategoriasTexto = subcategoriasEntries
 
     return `• ${subcategoria} • ${formatMoney(
       total
-    )} • ${percentualSubcategoria.toFixed(
-      0
-    )}% da categoria`;
+    )} • ${formatPercentualRelatorio(
+      percentualSubcategoria
+    )} da categoria`;
   })
   .join("\n");
 
 return `${categoria} • ${formatMoney(
   info.total
-)} • ${percentualCategoria.toFixed(
-  0
-)}% do período
+)} • ${formatPercentualRelatorio(
+  percentualCategoria
+)} do período
 
 ${subcategoriasTexto}`;
     })
@@ -1354,7 +1365,7 @@ const selectedCategoryCountText =
   <Text style={styles.categorySummary}>
     {formatMoney(group.total)} •{" "}
     {group.qtd === 1 ? "1 registro" : `${group.qtd} registros`} •{" "}
-    {group.percentual.toFixed(0)}% do período
+    {formatPercentualRelatorio(group.percentual)} do período
   </Text>
 </TouchableOpacity>
 ))}
@@ -1386,7 +1397,6 @@ const selectedCategoryCountText =
   </View>
 
 
-
   <View style={styles.reportButtonsRow}>
 
    <TouchableOpacity
@@ -1397,7 +1407,6 @@ const selectedCategoryCountText =
     📋 Copiar
   </Text>
 </TouchableOpacity>
-
 
     <TouchableOpacity
       style={styles.reportActionButton}
