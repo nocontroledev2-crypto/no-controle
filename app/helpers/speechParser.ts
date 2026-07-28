@@ -173,7 +173,7 @@ function removerReferenciasTemporais(text: string): string {
       " "
     )
     .replace(
-      /(?:de hoje|doje|deoje|dehoje)\s+a\s+(\d+|[a-z\s]+?)\s+mes(?:es)?/g,
+      /(?:de hoje|do hoje|doje|deoje|dehoje|12)\s+a\s+(\d+|[a-z\s]+?)\s+mes(?:es)?/g,
       " "
     )
     .replace(/\s+/g, " ")
@@ -368,7 +368,7 @@ function parseDateFromSpeech(text: string): Date {
   const normalizedText = normalize(text);
   
   const deHojeMesesNumeroPrioritarioMatch = normalizedText.match(
-  /(?:de hoje|doje|deoje|dehoje)\s+a\s+(\d+)\s+mes(?:es)?/
+  /(?:de hoje|do hoje|doje|deoje|dehoje|12)\s+a\s+(\d+)\s+mes(?:es)?/
 );
 
 if (deHojeMesesNumeroPrioritarioMatch) {
@@ -384,7 +384,7 @@ if (deHojeMesesNumeroPrioritarioMatch) {
 }
 
 const deHojeMesesTextoPrioritarioMatch = normalizedText.match(
-  /(?:de hoje|doje|deoje|dehoje)\s+a\s+([a-z\s]+?)\s+mes(?:es)?/
+  /(?:de hoje|do hoje|doje|deoje|dehoje|12)\s+a\s+([a-z\s]+?)\s+mes(?:es)?/
 );
 
 if (deHojeMesesTextoPrioritarioMatch) {
@@ -902,7 +902,7 @@ if (daquiMesesTextoMatch) {
 }
 
 const deHojeMesesNumeroMatch = normalizedText.match(
-  /(?:de hoje|doje|deoje|dehoje)\s+a\s+(\d+)\s+mes(?:es)?/
+  /(?:de hoje|do hoje|doje|deoje|dehoje|12)\s+a\s+(\d+)\s+mes(?:es)?/
 );
 
 if (deHojeMesesNumeroMatch) {
@@ -918,7 +918,7 @@ if (deHojeMesesNumeroMatch) {
 }
 
 const deHojeMesesTextoMatch = normalizedText.match(
-  /(?:de hoje|doje|deoje|dehoje)\s+a\s+([a-z\s]+?)\s+mes(?:es)?/
+  /(?:de hoje|do hoje|doje|deoje|dehoje|12)\s+a\s+([a-z\s]+?)\s+mes(?:es)?/
 );
 
 if (deHojeMesesTextoMatch) {
