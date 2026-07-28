@@ -401,6 +401,108 @@ if (deHojeMesesTextoPrioritarioMatch) {
   }
 }
 
+const daquiDiasNumeroPrioritarioMatch = normalizedText.match(
+  /daqui\s+(?:a\s+)?(\d+)\s+dias?/
+);
+
+if (daquiDiasNumeroPrioritarioMatch) {
+  const dias = Number(daquiDiasNumeroPrioritarioMatch[1]);
+
+  if (!isNaN(dias)) {
+    const data = new Date(now);
+
+    data.setDate(now.getDate() + dias);
+
+    return data;
+  }
+}
+
+const daquiDiasTextoPrioritarioMatch = normalizedText.match(
+  /daqui\s+(?:a\s+)?([a-z\s]+?)\s+dias?/
+);
+
+if (daquiDiasTextoPrioritarioMatch) {
+  const dias = parseNumberWordsText(
+    daquiDiasTextoPrioritarioMatch[1]
+  );
+
+  if (dias > 0) {
+    const data = new Date(now);
+
+    data.setDate(now.getDate() + dias);
+
+    return data;
+  }
+}
+
+const daquiSemanasNumeroPrioritarioMatch = normalizedText.match(
+  /daqui\s+(?:a\s+)?(\d+)\s+semanas?/
+);
+
+if (daquiSemanasNumeroPrioritarioMatch) {
+  const semanas = Number(daquiSemanasNumeroPrioritarioMatch[1]);
+
+  if (!isNaN(semanas)) {
+    const data = new Date(now);
+
+    data.setDate(now.getDate() + semanas * 7);
+
+    return data;
+  }
+}
+
+const daquiSemanasTextoPrioritarioMatch = normalizedText.match(
+  /daqui\s+(?:a\s+)?([a-z\s]+?)\s+semanas?/
+);
+
+if (daquiSemanasTextoPrioritarioMatch) {
+  const semanas = parseNumberWordsText(
+    daquiSemanasTextoPrioritarioMatch[1]
+  );
+
+  if (semanas > 0) {
+    const data = new Date(now);
+
+    data.setDate(now.getDate() + semanas * 7);
+
+    return data;
+  }
+}
+
+const daquiMesesNumeroPrioritarioMatch = normalizedText.match(
+  /daqui\s+(?:a\s+)?(\d+)\s+mes(?:es)?/
+);
+
+if (daquiMesesNumeroPrioritarioMatch) {
+  const meses = Number(daquiMesesNumeroPrioritarioMatch[1]);
+
+  if (!isNaN(meses)) {
+    const data = new Date(now);
+
+    data.setMonth(now.getMonth() + meses);
+
+    return data;
+  }
+}
+
+const daquiMesesTextoPrioritarioMatch = normalizedText.match(
+  /daqui\s+(?:a\s+)?([a-z\s]+?)\s+mes(?:es)?/
+);
+
+if (daquiMesesTextoPrioritarioMatch) {
+  const meses = parseNumberWordsText(
+    daquiMesesTextoPrioritarioMatch[1]
+  );
+
+  if (meses > 0) {
+    const data = new Date(now);
+
+    data.setMonth(now.getMonth() + meses);
+
+    return data;
+  }
+}
+
   if (normalizedText.includes("hoje")) {
     return now;
   }
