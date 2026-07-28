@@ -176,6 +176,10 @@ function removerReferenciasTemporais(text: string): string {
       /(?:de hoje|do hoje|doje|deoje|dehoje|12)\s+a\s+(\d+|[a-z\s]+?)\s+mes(?:es)?/g,
       " "
     )
+    .replace(
+      /(?:de hoje|do hoje|doje|deoje|dehoje|12)\s+a\s+(\d+|[a-z\s]+?)\s+dias?/g,
+      " "
+    )
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -498,6 +502,40 @@ if (daquiMesesTextoPrioritarioMatch) {
     const data = new Date(now);
 
     data.setMonth(now.getMonth() + meses);
+
+    return data;
+  }
+}
+
+const deHojeDiasNumeroPrioritarioMatch = normalizedText.match(
+  /(?:de hoje|do hoje|doje|deoje|dehoje|12)\s+a\s+(\d+)\s+dias?/
+);
+
+if (deHojeDiasNumeroPrioritarioMatch) {
+  const dias = Number(deHojeDiasNumeroPrioritarioMatch[1]);
+
+  if (!isNaN(dias)) {
+    const data = new Date(now);
+
+    data.setDate(now.getDate() + dias);
+
+    return data;
+  }
+}
+
+const deHojeDiasTextoPrioritarioMatch = normalizedText.match(
+  /(?:de hoje|do hoje|doje|deoje|dehoje|12)\s+a\s+([a-z\s]+?)\s+dias?/
+);
+
+if (deHojeDiasTextoPrioritarioMatch) {
+  const dias = parseNumberWordsText(
+    deHojeDiasTextoPrioritarioMatch[1]
+  );
+
+  if (dias > 0) {
+    const data = new Date(now);
+
+    data.setDate(now.getDate() + dias);
 
     return data;
   }
