@@ -969,7 +969,7 @@ export const CATEGORY_DICTIONARY_RULES: CategoryRule[] = [
     "matricula da anhanguera",
     "matrícula da anhanguera",
     "matricula da unicesumar",
-    "matrícula da unicesumar"
+    "matrícula da unicesumar",
     "unter",
     "mensalidade da unter",
     "mensalidade unter",
