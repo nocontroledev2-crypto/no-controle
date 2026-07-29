@@ -980,6 +980,7 @@ export const CATEGORY_DICTIONARY_RULES: CategoryRule[] = [
   ],
 },
 
+
     {
   categoria: "Educação",
   subcategoria: "Cursos",
