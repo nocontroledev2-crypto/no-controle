@@ -138,6 +138,19 @@ useFocusEffect(
     return Number(texto);
   }
 
+  function formatarValorParaCampo(valorRecebido: number | string) {
+    const numero = Number(valorRecebido);
+
+    if (!Number.isFinite(numero)) {
+      return "";
+    }
+
+    return numero.toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }
+
   useEffect(() => {
     if (state === "listening") {
       Animated.loop(
@@ -185,11 +198,11 @@ useFocusEffect(
 
     const parsed = parseSpeech(textoFalado);
 
-      if (parsed.valor !== null) {
+            if (parsed.valor !== null) {
         const valorVoz = Number(parsed.valor);
 
         if (Number.isFinite(valorVoz)) {
-          setValor(String(valorVoz).replace(".", ","));
+          setValor(formatarValorParaCampo(valorVoz));
         }
       }
 
@@ -229,8 +242,7 @@ useFocusEffect(
     const parsed = parseSpeech(texto);
 
     if (parsed.valor !== null) {
-      const valorTexto = String(parsed.valor).replace(".", ",");
-      setValor(valorTexto);
+      setValor(formatarValorParaCampo(parsed.valor));
     }
 
     const categoriaDetectada = normalizarCategoriaDetectada(parsed.categoria);
