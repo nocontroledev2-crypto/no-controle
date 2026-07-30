@@ -970,6 +970,110 @@ const textoMetadePeriodo = escolherTexto(
   `${chaveInsights}-metade`
 );
 
+const indiceHojeNoGrafico = (() => {
+  if (period === "today") {
+    return safeChartValues.length - 1;
+  }
+
+  if (period === "week") {
+    const diaSemana = now.getDay();
+
+    return diaSemana === 0 ? 6 : diaSemana - 1;
+  }
+
+  if (period === "month") {
+    return now.getDate() - 1;
+  }
+
+  if (
+    period === "custom" &&
+    startDateInput &&
+    endDateInput
+  ) {
+    const start = parseDateSafe(startDateInput);
+    const end = parseDateSafe(endDateInput);
+
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+
+    const hoje = new Date(now);
+    hoje.setHours(0, 0, 0, 0);
+
+    const diffDays =
+      Math.floor(
+        (end.getTime() - start.getTime()) /
+          (1000 * 60 * 60 * 24)
+      ) + 1;
+
+    if (
+      diffDays <= 31 &&
+      hoje >= start &&
+      hoje <= end
+    ) {
+      return Math.floor(
+        (hoje.getTime() - start.getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
+    }
+  }
+
+  return -1;
+})();
+
+const valorHojeNoGrafico =
+  indiceHojeNoGrafico >= 0
+    ? Number(safeChartValues[indiceHojeNoGrafico] || 0)
+    : 0;
+
+const mediaDiasComMovimentacao =
+  diasComGasto > 0
+    ? totalGrafico / diasComGasto
+    : 0;
+
+const percentualHojeVsMedia =
+  mediaDiasComMovimentacao > 0
+    ? ((valorHojeNoGrafico - mediaDiasComMovimentacao) /
+        mediaDiasComMovimentacao) *
+      100
+    : 0;
+
+const deveMostrarHojeVsMedia =
+  nivelMaturidade >= 3 &&
+  valorHojeNoGrafico > 0 &&
+  mediaDiasComMovimentacao > 0 &&
+  indiceHojeNoGrafico >= 0;
+
+const textoHojeVsMedia = escolherTexto(
+  percentualHojeVsMedia >= 20
+    ? [
+        `Hoje está ${percentualHojeVsMedia.toFixed(
+          0
+        )}% acima da média dos dias com movimentação deste período.`,
+        `O gasto de hoje ficou ${percentualHojeVsMedia.toFixed(
+          0
+        )}% acima da média dos dias em que houve movimentação.`,
+        `Hoje apresentou um gasto acima da média dos dias movimentados do período, com diferença de ${percentualHojeVsMedia.toFixed(
+          0
+        )}%.`,
+      ]
+    : percentualHojeVsMedia <= -20
+    ? [
+        `Hoje está ${Math.abs(percentualHojeVsMedia).toFixed(
+          0
+        )}% abaixo da média dos dias com movimentação deste período.`,
+        `O gasto de hoje ficou abaixo da média dos dias movimentados em ${Math.abs(
+          percentualHojeVsMedia
+        ).toFixed(0)}%.`,
+        `Hoje teve um impacto menor que a média dos dias com movimentação do período.`,
+      ]
+    : [
+        "Hoje está próximo da média dos dias com movimentação deste período.",
+        "O gasto de hoje ficou em uma faixa próxima da média dos dias movimentados.",
+        "Hoje não se distanciou muito da média dos dias em que houve gastos.",
+      ],
+  `${chaveInsights}-hoje-media`
+);
+
   function formatShortMoney(valor: number) {
   if (valor >= 1000) {
     return `R$ ${(valor / 1000).toFixed(1)}k`;
@@ -1429,14 +1533,20 @@ const labelX = Math.min(
       </Text>
 
       <Text style={styles.insightItem}>
-        • {percentualTop3 >= 70
-          ? textoConcentracaoAlta
-          : textoConcentracaoBaixa}
-      </Text>
+  • {percentualTop3 >= 70
+    ? textoConcentracaoAlta
+    : textoConcentracaoBaixa}
+</Text>
 
-      <Text style={styles.insightItem}>
-        • {textoMetadePeriodo}
-      </Text>
+{deveMostrarHojeVsMedia && (
+  <Text style={styles.insightItem}>
+    • {textoHojeVsMedia}
+  </Text>
+)}
+
+<Text style={styles.insightItem}>
+  • {textoMetadePeriodo}
+</Text>
     </>
   )}
 </View>
