@@ -844,6 +844,132 @@ safeChartValues.forEach((value, index) => {
   }
 });
 
+function escolherTexto(opcoes: string[], chave: string) {
+  if (opcoes.length === 0) {
+    return "";
+  }
+
+  const soma = chave
+    .split("")
+    .reduce((total, letra) => total + letra.charCodeAt(0), 0);
+
+  return opcoes[soma % opcoes.length];
+}
+
+const chaveInsights = `${period}-${safeChartValues.join("|")}-${Math.round(
+  totalGrafico
+)}-${diasComGasto}`;
+
+const textoSemMovimentacao = escolherTexto(
+  [
+    "Nenhuma movimentação financeira foi identificada neste período.",
+    "Ainda não há gastos registrados no período selecionado.",
+    "O No Controle não encontrou movimentações financeiras para este período.",
+  ],
+  `${chaveInsights}-sem-movimentacao`
+);
+
+const textoDesbloquearAnalises = escolherTexto(
+  [
+    "Registre seus gastos para desbloquear análises inteligentes do No Controle.",
+    "Assim que houver registros, o No Controle começará a transformar seus dados em entendimento.",
+    "Com novos registros, o No Controle poderá gerar análises mais úteis para você.",
+  ],
+  `${chaveInsights}-desbloquear`
+);
+
+const textoPrimeiraMovimentacao = escolherTexto(
+  [
+    `Apenas um ${unidadeSingular} com movimentação financeira foi identificado neste período.`,
+    `Este período ainda possui somente um ${unidadeSingular} com gasto registrado.`,
+    `Até agora, há movimentação financeira em apenas um ${unidadeSingular} deste período.`,
+  ],
+  `${chaveInsights}-primeira`
+);
+
+const textoContinuarRegistrando = escolherTexto(
+  [
+    "Continue registrando seus gastos para que o No Controle possa identificar padrões e gerar análises mais completas.",
+    "Com mais registros, o No Controle conseguirá enxergar melhor seu comportamento financeiro.",
+    "Quanto mais informações forem registradas, mais precisas serão as análises do No Controle.",
+  ],
+  `${chaveInsights}-continuar`
+);
+
+const textoDadosInsuficientes = escolherTexto(
+  [
+    "Ainda não existem dados suficientes para gerar análises financeiras confiáveis.",
+    "O período ainda possui poucos dados para conclusões financeiras mais completas.",
+    "O No Controle ainda precisa de mais movimentações neste período para gerar uma análise confiável.",
+  ],
+  `${chaveInsights}-insuficiente`
+);
+
+const textoMaiorImpacto = maiorDia
+  ? escolherTexto(
+      [
+        `O ${unidadeSingular} de maior impacto financeiro deste período foi ${maiorDia.label}, responsável por ${percentualMaiorDia.toFixed(
+          1
+        )}% do total gasto.`,
+        `${maiorDia.label} concentrou ${percentualMaiorDia.toFixed(
+          1
+        )}% de todo o valor gasto neste período.`,
+        `O maior impacto financeiro do período ocorreu em ${maiorDia.label}, representando ${percentualMaiorDia.toFixed(
+          1
+        )}% do total.`,
+      ],
+      `${chaveInsights}-maior-impacto`
+    )
+  : "";
+
+const textoTop3Impacto = escolherTexto(
+  [
+    `Os 3 ${unidadePlural} que mais impactaram o período representam ${percentualTop3.toFixed(
+      0
+    )}% de todo o valor gasto.`,
+    `A soma dos 3 principais ${unidadePlural} representa ${percentualTop3.toFixed(
+      0
+    )}% dos gastos do período.`,
+    `Os 3 maiores impactos financeiros concentram ${percentualTop3.toFixed(
+      0
+    )}% do total analisado.`,
+  ],
+  `${chaveInsights}-top3`
+);
+
+const textoConcentracaoAlta = escolherTexto(
+  [
+    "Grande parte dos gastos está concentrada em poucos momentos, indicando pontos específicos de maior impacto financeiro.",
+    "Poucos momentos concentraram boa parte do valor gasto neste período.",
+    "Os maiores gastos ficaram concentrados em um pequeno grupo de movimentações do período.",
+  ],
+  `${chaveInsights}-concentracao-alta`
+);
+
+const textoConcentracaoBaixa = escolherTexto(
+  [
+    "Os gastos estão distribuídos ao longo do período, sem forte concentração em poucos momentos.",
+    "Não houve uma concentração forte dos gastos em poucos pontos do período.",
+    "Os valores aparecem mais espalhados ao longo do período analisado.",
+  ],
+  `${chaveInsights}-concentracao-baixa`
+);
+
+const textoMetadePeriodo = escolherTexto(
+  segundaMetade > primeiraMetade
+    ? [
+        "A maior parte dos gastos ocorreu na segunda metade do período analisado.",
+        "Os gastos ficaram mais concentrados na parte final do período.",
+        "O maior volume financeiro apareceu na segunda metade do período.",
+      ]
+    : [
+        "A maior parte dos gastos ocorreu na primeira metade do período analisado.",
+        "Os gastos ficaram mais concentrados na parte inicial do período.",
+        "O maior volume financeiro apareceu na primeira metade do período.",
+      ],
+  `${chaveInsights}-metade`
+);
+
   function formatShortMoney(valor: number) {
   if (valor >= 1000) {
     return `R$ ${(valor / 1000).toFixed(1)}k`;
@@ -1261,11 +1387,11 @@ const labelX = Math.min(
   {nivelMaturidade === 0 && (
     <>
       <Text style={styles.insightItem}>
-        • Nenhuma movimentação financeira foi identificada neste período.
+        • {textoSemMovimentacao}
       </Text>
 
       <Text style={styles.insightItem}>
-        • Registre seus gastos para desbloquear análises inteligentes do No Controle.
+        • {textoDesbloquearAnalises}
       </Text>
     </>
   )}
@@ -1273,56 +1399,45 @@ const labelX = Math.min(
   {nivelMaturidade === 1 && (
     <>
       <Text style={styles.insightItem}>
-        • Apenas um {unidadeSingular} com movimentação financeira foi identificado neste período.
+        • {textoPrimeiraMovimentacao}
       </Text>
 
       <Text style={styles.insightItem}>
-        • Continue registrando seus gastos para que o No Controle possa identificar padrões e gerar análises mais completas.
+        • {textoContinuarRegistrando}
       </Text>
     </>
   )}
 
   {nivelMaturidade === 2 && (
-  <>
-    <Text style={styles.insightItem}>
-      • Ainda não existem dados suficientes para gerar análises financeiras confiáveis.
-    </Text>
-  </>
-)}
+    <>
+      <Text style={styles.insightItem}>
+        • {textoDadosInsuficientes}
+      </Text>
+    </>
+  )}
 
   {nivelMaturidade >= 3 && (
     <>
-  {maiorDia && (
-    <Text style={styles.insightItem}>
-      • O dia de maior impacto financeiro deste período foi {maiorDia.label},
-      responsável por {percentualMaiorDia.toFixed(1)}% do total gasto.
-    </Text>
-  )}
+      {maiorDia && (
+        <Text style={styles.insightItem}>
+          • {textoMaiorImpacto}
+        </Text>
+      )}
 
-  <Text style={styles.insightItem}>
-    • Os 3 dias que mais impactaram o período representam{" "}
-    {percentualTop3.toFixed(0)}% de todo o valor gasto.
-  </Text>
+      <Text style={styles.insightItem}>
+        • {textoTop3Impacto}
+      </Text>
 
-  {percentualTop3 >= 70 ? (
-    <Text style={styles.insightItem}>
-      • Grande parte dos gastos está concentrada em poucos dias, indicando momentos específicos de maior impacto financeiro.
-    </Text>
-  ) : (
-    <Text style={styles.insightItem}>
-      • Os gastos estão distribuídos ao longo do período, sem forte concentração em poucos dias.
-    </Text>
-  )}
+      <Text style={styles.insightItem}>
+        • {percentualTop3 >= 70
+          ? textoConcentracaoAlta
+          : textoConcentracaoBaixa}
+      </Text>
 
-<Text style={styles.insightItem}>
-  • {
-    segundaMetade > primeiraMetade
-      ? "A maior parte dos gastos ocorreu na segunda metade do período analisado."
-      : "A maior parte dos gastos ocorreu na primeira metade do período analisado."
-  }
-</Text>
-
-</>
+      <Text style={styles.insightItem}>
+        • {textoMetadePeriodo}
+      </Text>
+    </>
   )}
 </View>
 
