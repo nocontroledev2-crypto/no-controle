@@ -1064,19 +1064,61 @@ const textoConcentracaoBaixa = escolherTexto(
   `${chaveInsights}-concentracao-baixa`
 );
 
-const textoMetadePeriodo = escolherTexto(
-  segundaMetade > primeiraMetade
+const diferencaEntreMetades =
+  primeiraMetade > 0
+    ? ((segundaMetade - primeiraMetade) / primeiraMetade) * 100
+    : segundaMetade > 0
+    ? 100
+    : 0;
+
+let tipoTendenciaPeriodo:
+  | "aumento-forte"
+  | "aumento-moderado"
+  | "queda-forte"
+  | "queda-moderada"
+  | "estavel" = "estavel";
+
+if (diferencaEntreMetades >= 40) {
+  tipoTendenciaPeriodo = "aumento-forte";
+} else if (diferencaEntreMetades >= 15) {
+  tipoTendenciaPeriodo = "aumento-moderado";
+} else if (diferencaEntreMetades <= -40) {
+  tipoTendenciaPeriodo = "queda-forte";
+} else if (diferencaEntreMetades <= -15) {
+  tipoTendenciaPeriodo = "queda-moderada";
+}
+
+const textoTendenciaPeriodo = escolherTexto(
+  tipoTendenciaPeriodo === "aumento-forte"
     ? [
-        "A maior parte dos gastos ocorreu na segunda metade do período analisado.",
-        "Os gastos ficaram mais concentrados na parte final do período.",
-        "O maior volume financeiro apareceu na segunda metade do período.",
+        "Os gastos ficaram mais fortes na parte final do período. Vale observar se esse aumento foi planejado ou se aconteceu sem perceber.",
+        "A parte final do período concentrou mais gastos. Esse é um bom ponto para revisar se houve contas concentradas, compras extras ou gastos não planejados.",
+        "Os gastos cresceram bastante na parte final do período, indicando um aumento importante no impacto financeiro mais recente.",
+      ]
+    : tipoTendenciaPeriodo === "aumento-moderado"
+    ? [
+        "Houve aumento nos gastos na parte final do período, mas sem uma mudança muito brusca.",
+        "Os gastos ficaram um pouco mais altos na parte final do período. Vale acompanhar se isso começa a se repetir.",
+        "A parte final do período teve mais gastos que a parte inicial, indicando uma leve alta no comportamento financeiro.",
+      ]
+    : tipoTendenciaPeriodo === "queda-forte"
+    ? [
+        "Os gastos diminuíram bastante na parte final do período. Se essa redução foi intencional, pode ser um bom sinal de controle.",
+        "A parte final do período teve bem menos gastos que a parte inicial. Vale observar se isso representa economia ou apenas menos registros.",
+        "Houve uma queda importante nos gastos na parte final do período, reduzindo o impacto financeiro mais recente.",
+      ]
+    : tipoTendenciaPeriodo === "queda-moderada"
+    ? [
+        "Os gastos apresentaram queda na parte final do período.",
+        "A parte final do período teve menos gastos que a parte inicial, indicando uma redução moderada.",
+        "Os valores ficaram menores na parte final do período. Isso pode ajudar no planejamento, se a redução foi intencional.",
       ]
     : [
-        "A maior parte dos gastos ocorreu na primeira metade do período analisado.",
-        "Os gastos ficaram mais concentrados na parte inicial do período.",
-        "O maior volume financeiro apareceu na primeira metade do período.",
+        "Os gastos ficaram relativamente equilibrados entre a primeira e a segunda metade do período.",
+        "Não houve grande diferença entre o começo e o fim do período analisado.",
+        "Os valores ficaram próximos entre as duas partes do período, o que pode facilitar o planejamento financeiro.",
       ],
-  `${chaveInsights}-metade`
+  `${chaveInsights}-tendencia-periodo`
 );
 
 const indiceHojeNoGrafico = (() => {
@@ -1662,7 +1704,7 @@ const labelX = Math.min(
 )}
 
 <Text style={styles.insightItem}>
-  • {textoMetadePeriodo}
+  • {textoTendenciaPeriodo}
 </Text>
     </>
   )}
