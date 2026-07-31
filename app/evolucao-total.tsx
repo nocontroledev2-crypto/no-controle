@@ -748,6 +748,12 @@ let unidadePlural = "dias";
 
 const primeiroLabel = safeChartLabels[0] || "";
 
+const labelPareceMesAno =
+  /^[A-Za-zÀ-ÿ]{3}\/\d{2}$/.test(primeiroLabel);
+
+const labelPareceAno =
+  /^\d{4}$/.test(primeiroLabel);
+
 if (
   period === "year" ||
   period === "lastYear"
@@ -758,17 +764,18 @@ if (
 
 if (
   period === "custom" &&
-  primeiroLabel.includes("/")
+  labelPareceMesAno
 ) {
-  const partes = primeiroLabel.split("/");
+  unidadeSingular = "mês";
+  unidadePlural = "meses";
+}
 
-  if (
-    partes.length === 2 &&
-    partes[1].length === 2
-  ) {
-    unidadeSingular = "mês";
-    unidadePlural = "meses";
-  }
+if (
+  period === "custom" &&
+  labelPareceAno
+) {
+  unidadeSingular = "ano";
+  unidadePlural = "anos";
 }
 
 if (
@@ -778,12 +785,25 @@ if (
   unidadeSingular = "ano";
   unidadePlural = "anos";
 }
+
+if (
+  period === "all" &&
+  yearlyData.labels.length <= 1 &&
+  safeChartLabels.length > 0
+) {
+  unidadeSingular = "mês";
+  unidadePlural = "meses";
+}
 let nivelMaturidade = 0;
 
 if (pontosFinanceiros === 0) {
   nivelMaturidade = 0;
 } else if (pontosFinanceiros === 1) {
   nivelMaturidade = 1;
+} else if (unidadeSingular === "mês") {
+  nivelMaturidade = pontosFinanceiros >= 3 ? 3 : 2;
+} else if (unidadeSingular === "ano") {
+  nivelMaturidade = pontosFinanceiros >= 2 ? 3 : 2;
 } else if (pontosFinanceiros <= 3) {
   nivelMaturidade = 2;
 } else {
