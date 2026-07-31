@@ -762,6 +762,38 @@ if (
   }
 }
 
+if (
+  period === "custom" &&
+  startDateInput &&
+  endDateInput
+) {
+  const start = parseDateSafe(startDateInput);
+  const end = parseDateSafe(endDateInput);
+
+  start.setHours(0, 0, 0, 0);
+  end.setHours(23, 59, 59, 999);
+
+  const diffDays =
+    Math.floor(
+      (end.getTime() - start.getTime()) /
+        (1000 * 60 * 60 * 24)
+    ) + 1;
+
+  if (diffDays <= 31) {
+    const currentDate = new Date(start);
+    currentDate.setDate(start.getDate() + index);
+
+    const hoje =
+      currentDate.toDateString() ===
+      now.toDateString();
+
+    label = hoje
+      ? `Hoje (${currentDate.toLocaleDateString("pt-BR")})`
+      : currentDate.toLocaleDateString("pt-BR");
+  } else {
+    label = safeChartLabels[index] || label;
+  }
+}
 
     return {
       label,
@@ -828,6 +860,17 @@ if (
   unidadeSingular = "mês";
   unidadePlural = "meses";
 }
+
+let tituloImpacto = "Dias que Mais Impactaram o Período";
+
+if (unidadeSingular === "mês") {
+  tituloImpacto = "Meses que Mais Impactaram o Período";
+}
+
+if (unidadeSingular === "ano") {
+  tituloImpacto = "Anos que Mais Impactaram o Período";
+}
+
 let nivelMaturidade = 0;
 
 if (pontosFinanceiros === 0) {
@@ -1516,7 +1559,7 @@ const labelX = Math.min(
 
 <View style={styles.rankingCard}>
   <Text style={styles.rankingTitle}>
-  🔍 Dias que Mais Impactaram o Período
+  🔍 {tituloImpacto}
 </Text>
 
   {rankingFinanceiro.length === 0 ? (
