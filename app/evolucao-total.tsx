@@ -1805,7 +1805,8 @@ const labelX = Math.min(
     • {textoMovimentoRecente}
   </Text>
 )}
-  )}
+</>
+)}
 </View>
 
 </ScrollView>
