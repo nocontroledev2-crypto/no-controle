@@ -1037,6 +1037,9 @@ const textoTop3Impacto = escolherTexto(
 const deveMostrarTop3Impacto =
   !(unidadeSingular !== "dia" && pontosFinanceiros <= 3);
 
+  const deveMostrarMaiorImpacto =
+  !(unidadeSingular !== "dia" && pontosFinanceiros <= 3);
+
 const textoPoucosPontosMensais = escolherTexto(
   [
     `O período analisado possui movimentação em ${pontosFinanceiros} ${unidadePlural}, com maior impacto em ${maiorDia?.label}.`,
@@ -1673,11 +1676,11 @@ const labelX = Math.min(
 
   {nivelMaturidade >= 3 && (
     <>
-      {maiorDia && (
-        <Text style={styles.insightItem}>
-          • {textoMaiorImpacto}
-        </Text>
-      )}
+      {maiorDia && deveMostrarMaiorImpacto && (
+  <Text style={styles.insightItem}>
+    • {textoMaiorImpacto}
+  </Text>
+)}
 
       {deveMostrarTop3Impacto ? (
   <>
