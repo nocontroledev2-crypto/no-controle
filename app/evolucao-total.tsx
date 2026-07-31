@@ -887,6 +887,93 @@ if (pontosFinanceiros === 0) {
   nivelMaturidade = 3;
 }
 
+const despesasPeriodoTurbo = expenses.filter((item: any) => {
+  const d = parseDateSafe(item.data);
+  d.setHours(0, 0, 0, 0);
+
+  if (period === "today") {
+    return d >= startLast7Days && d <= endToday;
+  }
+
+  if (period === "week" || period === "weekPrev") {
+    return d >= startWeek && d <= endWeek;
+  }
+
+  if (period === "month") {
+    return (
+      d.getMonth() === now.getMonth() &&
+      d.getFullYear() === now.getFullYear()
+    );
+  }
+
+  if (period === "monthPrev") {
+    return (
+      d.getMonth() === previousMonthDate.getMonth() &&
+      d.getFullYear() === previousMonthDate.getFullYear()
+    );
+  }
+
+  if (period === "year") {
+    return d.getFullYear() === now.getFullYear();
+  }
+
+  if (period === "lastYear") {
+    return d.getFullYear() === now.getFullYear() - 1;
+  }
+
+  if (period === "all") {
+    return true;
+  }
+
+  if (
+    period === "custom" &&
+    startDateInput &&
+    endDateInput
+  ) {
+    const start = parseDateSafe(startDateInput);
+    const end = parseDateSafe(endDateInput);
+
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+
+    return d >= start && d <= end;
+  }
+
+  return false;
+});
+
+const categoriasPeriodo = Object.entries(
+  despesasPeriodoTurbo.reduce(
+    (acc: Record<string, number>, item: any) => {
+      const categoria = item.categoria || "Outros";
+
+      acc[categoria] =
+        (acc[categoria] || 0) + Number(item.valor || 0);
+
+      return acc;
+    },
+    {}
+  )
+)
+  .map(([categoria, total]) => ({
+    categoria,
+    total: Number(total),
+  }))
+  .sort((a, b) => b.total - a.total);
+
+const categoriaDominante = categoriasPeriodo[0];
+
+const percentualCategoriaDominante =
+  categoriaDominante && totalGrafico > 0
+    ? (categoriaDominante.total / totalGrafico) * 100
+    : 0;
+
+const deveMostrarCategoriaDominante =
+  nivelMaturidade >= 3 &&
+  !!categoriaDominante &&
+  categoriaDominante.categoria !== "Outros" &&
+  percentualCategoriaDominante >= 35;
+
 let diasConsiderados = safeChartValues.length;
 
 if (period === "month") {
@@ -1011,7 +1098,7 @@ const textoMaiorImpacto = maiorDia
         `${maiorDia.label} concentrou ${percentualMaiorDia.toFixed(
           1
         )}% de todo o valor gasto neste período.`,
-        `O maior impacto financeiro do período ocorreu em ${maiorDia.label}, representando ${percentualMaiorDia.toFixed(
+        `O maior impacto financeiro do período ocorreu no ${maiorDia.label}, representando ${percentualMaiorDia.toFixed(
           1
         )}% do total.`,
       ],
@@ -1214,6 +1301,28 @@ const textoMovimentoRecente = escolherTexto(
   `${chaveInsights}-movimento-recente`
 );
 
+const textoCategoriaDominante =
+  categoriaDominante
+    ? escolherTexto(
+        percentualCategoriaDominante >= 50
+          ? [
+              `${categoriaDominante.categoria} representa mais da metade dos gastos deste período. Esse é um ponto importante para observar com atenção.`,
+              `Mais de 50% dos gastos do período ficaram em ${categoriaDominante.categoria}. Pode ser um bom lugar para começar a procurar oportunidades de economia.`,
+              `${categoriaDominante.categoria} concentrou a maior parte do dinheiro gasto neste período.`,
+            ]
+          : [
+              `${categoriaDominante.categoria} foi a categoria de maior peso no período, representando ${percentualCategoriaDominante.toFixed(
+                0
+              )}% dos gastos.`,
+              `A categoria ${categoriaDominante.categoria} teve o maior impacto no período, com ${percentualCategoriaDominante.toFixed(
+                0
+              )}% do total gasto.`,
+              `${categoriaDominante.categoria} apareceu como principal destino do dinheiro neste período.`,
+            ],
+        `${chaveInsights}-categoria-dominante`
+      )
+    : "";
+
 const indiceHojeNoGrafico = (() => {
   if (period === "today") {
     return safeChartValues.length - 1;
@@ -1296,7 +1405,7 @@ const textoHojeVsMedia = escolherTexto(
         `O gasto de hoje ficou ${percentualHojeVsMedia.toFixed(
           0
         )}% acima da média dos dias em que houve movimentação.`,
-        `Hoje apresentou um gasto acima da média dos dias movimentados do período, com diferença de ${percentualHojeVsMedia.toFixed(
+        `Hoje está apresentando um gasto acima da média dos dias movimentados do período, com diferença de ${percentualHojeVsMedia.toFixed(
           0
         )}%.`,
       ]
@@ -1803,6 +1912,12 @@ const labelX = Math.min(
 {deveMostrarMovimentoRecente && (
   <Text style={styles.insightItem}>
     • {textoMovimentoRecente}
+  </Text>
+)}
+
+{deveMostrarCategoriaDominante && (
+  <Text style={styles.insightItem}>
+    • {textoCategoriaDominante}
   </Text>
 )}
 </>
