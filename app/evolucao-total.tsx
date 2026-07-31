@@ -1034,6 +1034,18 @@ const textoTop3Impacto = escolherTexto(
   `${chaveInsights}-top3`
 );
 
+const deveMostrarTop3Impacto =
+  !(unidadeSingular !== "dia" && pontosFinanceiros <= 3);
+
+const textoPoucosPontosMensais = escolherTexto(
+  [
+    `O período analisado possui movimentação em ${pontosFinanceiros} ${unidadePlural}, com maior impacto em ${maiorDia?.label}.`,
+    `Entre os ${unidadePlural} analisados, ${maiorDia?.label} foi o principal ponto de impacto financeiro.`,
+    `${maiorDia?.label} se destacou como o ${unidadeSingular} de maior peso dentro deste período.`,
+  ],
+  `${chaveInsights}-poucos-pontos-mensais`
+);
+
 const textoConcentracaoAlta = escolherTexto(
   [
     "Grande parte dos gastos está concentrada em poucos momentos, indicando pontos específicos de maior impacto financeiro.",
@@ -1625,15 +1637,23 @@ const labelX = Math.min(
         </Text>
       )}
 
-      <Text style={styles.insightItem}>
-        • {textoTop3Impacto}
-      </Text>
+      {deveMostrarTop3Impacto ? (
+  <>
+    <Text style={styles.insightItem}>
+      • {textoTop3Impacto}
+    </Text>
 
-      <Text style={styles.insightItem}>
-  • {percentualTop3 >= 70
-    ? textoConcentracaoAlta
-    : textoConcentracaoBaixa}
-</Text>
+    <Text style={styles.insightItem}>
+      • {percentualTop3 >= 70
+        ? textoConcentracaoAlta
+        : textoConcentracaoBaixa}
+    </Text>
+  </>
+) : (
+  <Text style={styles.insightItem}>
+    • {textoPoucosPontosMensais}
+  </Text>
+)}
 
 {deveMostrarHojeVsMedia && (
   <Text style={styles.insightItem}>
