@@ -1124,6 +1124,96 @@ const textoTendenciaPeriodo = escolherTexto(
   `${chaveInsights}-tendencia-periodo`
 );
 
+const pontosComMovimentacao = safeChartValues
+  .map((value, index) => ({
+    value: Number(value),
+    index,
+  }))
+  .filter((item) => item.value > 0);
+
+const ultimoPontoComMovimentacao =
+  pontosComMovimentacao[pontosComMovimentacao.length - 1];
+
+const penultimoPontoComMovimentacao =
+  pontosComMovimentacao[pontosComMovimentacao.length - 2];
+
+const variacaoMovimentoRecente =
+  penultimoPontoComMovimentacao &&
+  penultimoPontoComMovimentacao.value > 0
+    ? ((ultimoPontoComMovimentacao.value -
+        penultimoPontoComMovimentacao.value) /
+        penultimoPontoComMovimentacao.value) *
+      100
+    : 0;
+
+const deveMostrarMovimentoRecente =
+  nivelMaturidade >= 3 &&
+  pontosComMovimentacao.length >= 2 &&
+  !!ultimoPontoComMovimentacao &&
+  !!penultimoPontoComMovimentacao;
+
+let tipoMovimentoRecente:
+  | "subiu-forte"
+  | "subiu-moderado"
+  | "caiu-forte"
+  | "caiu-moderado"
+  | "estavel" = "estavel";
+
+if (variacaoMovimentoRecente >= 40) {
+  tipoMovimentoRecente = "subiu-forte";
+} else if (variacaoMovimentoRecente >= 15) {
+  tipoMovimentoRecente = "subiu-moderado";
+} else if (variacaoMovimentoRecente <= -40) {
+  tipoMovimentoRecente = "caiu-forte";
+} else if (variacaoMovimentoRecente <= -15) {
+  tipoMovimentoRecente = "caiu-moderado";
+}
+
+const textoMovimentoRecente = escolherTexto(
+  tipoMovimentoRecente === "subiu-forte"
+    ? [
+        `O gasto mais recente ficou ${variacaoMovimentoRecente.toFixed(
+          0
+        )}% maior que o ponto anterior. Vale observar se esse aumento foi planejado.`,
+        `O ponto mais recente teve um aumento forte em relação ao anterior, com alta de ${variacaoMovimentoRecente.toFixed(
+          0
+        )}%.`,
+        `O gasto mais recente subiu bastante em comparação com o registro anterior do período.`,
+      ]
+    : tipoMovimentoRecente === "subiu-moderado"
+    ? [
+        `O gasto mais recente ficou ${variacaoMovimentoRecente.toFixed(
+          0
+        )}% acima do ponto anterior.`,
+        "O ponto mais recente apresentou aumento moderado em relação ao anterior.",
+        "Os gastos subiram no ponto mais recente, mas sem uma mudança tão brusca.",
+      ]
+    : tipoMovimentoRecente === "caiu-forte"
+    ? [
+        `O gasto mais recente caiu ${Math.abs(
+          variacaoMovimentoRecente
+        ).toFixed(
+          0
+        )}% em relação ao ponto anterior. Se essa redução foi intencional, pode ser um bom sinal.`,
+        "O ponto mais recente teve uma queda forte em relação ao anterior.",
+        "O gasto mais recente ficou bem menor que o ponto anterior do período.",
+      ]
+    : tipoMovimentoRecente === "caiu-moderado"
+    ? [
+        `O gasto mais recente ficou ${Math.abs(
+          variacaoMovimentoRecente
+        ).toFixed(0)}% abaixo do ponto anterior.`,
+        "O ponto mais recente apresentou uma redução moderada em relação ao anterior.",
+        "Os gastos diminuíram no ponto mais recente do período.",
+      ]
+    : [
+        "O gasto mais recente ficou próximo do ponto anterior, indicando certa estabilidade.",
+        "Não houve grande diferença entre o ponto mais recente e o anterior.",
+        "O comportamento mais recente ficou relativamente estável em relação ao ponto anterior.",
+      ],
+  `${chaveInsights}-movimento-recente`
+);
+
 const indiceHojeNoGrafico = (() => {
   if (period === "today") {
     return safeChartValues.length - 1;
@@ -1709,7 +1799,12 @@ const labelX = Math.min(
 <Text style={styles.insightItem}>
   • {textoTendenciaPeriodo}
 </Text>
-    </>
+
+{deveMostrarMovimentoRecente && (
+  <Text style={styles.insightItem}>
+    • {textoMovimentoRecente}
+  </Text>
+)}
   )}
 </View>
 
