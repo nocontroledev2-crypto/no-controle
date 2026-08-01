@@ -1794,16 +1794,6 @@ const deveMostrarHojeVsMedia =
   mediaDiasComMovimentacao > 0 &&
   indiceHojeNoGrafico >= 0;
 
-const deveMostrarHojeVsMediaSeguro =
-  deveMostrarHojeVsMedia &&
-  !deveMostrarAvisoLancamentosFuturos;
-
-const deveMostrarTendenciaPeriodoSeguro =
-  !deveMostrarAvisoLancamentosFuturos;
-
-const deveMostrarMovimentoRecenteSeguro =
-  deveMostrarMovimentoRecente &&
-  !deveMostrarAvisoLancamentosFuturos;
 
 const textoHojeVsMedia = escolherTexto(
   percentualHojeVsMedia >= 20
@@ -2313,19 +2303,19 @@ const labelX = Math.min(
   </Text>
 )}
 
-{deveMostrarHojeVsMediaSeguro && (
+{deveMostrarHojeVsMedia && !deveMostrarAvisoLancamentosFuturos && (
   <Text style={styles.insightItem}>
     • {textoHojeVsMedia}
   </Text>
 )}
 
-{deveMostrarTendenciaPeriodoSeguro && (
+{!deveMostrarAvisoLancamentosFuturos && (
   <Text style={styles.insightItem}>
     • {textoTendenciaPeriodo}
   </Text>
 )}
 
-{deveMostrarMovimentoRecenteSeguro && (
+{deveMostrarMovimentoRecente && !deveMostrarAvisoLancamentosFuturos && (
   <Text style={styles.insightItem}>
     • {textoMovimentoRecente}
   </Text>
