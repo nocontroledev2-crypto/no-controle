@@ -1472,6 +1472,173 @@ const textoSubcategoriaDominante =
       )
     : "";
 
+    function gerarOrientacaoPraticaCategoria(
+  categoria?: string,
+  subcategoria?: string
+) {
+  if (!categoria || !subcategoria) {
+    return "";
+  }
+
+  if (
+    categoria === "Alimentação" &&
+    subcategoria === "Supermercado"
+  ) {
+    return escolherTexto(
+      [
+        "Uma boa primeira ação é observar se as compras estão sendo feitas com lista e se alguns itens podem ser trocados por opções mais econômicas.",
+        "Vale olhar com atenção as compras de supermercado. Pequenas trocas em itens frequentes podem gerar economia sem mudar tudo de uma vez.",
+        "Se a ideia for economizar, o supermercado pode ser um bom começo: lista de compras e comparação de preços ajudam bastante.",
+      ],
+      `${chaveInsights}-orientacao-supermercado`
+    );
+  }
+
+  if (
+    categoria === "Alimentação" &&
+    (subcategoria === "Restaurante" ||
+      subcategoria === "Delivery" ||
+      subcategoria === "Lanche")
+  ) {
+    return escolherTexto(
+      [
+        "Vale observar a frequência desses gastos. Às vezes, reduzir poucas compras fora de casa já melhora o resultado do mês.",
+        "Esse detalhe pode esconder gastos pequenos que se repetem. Observar a frequência pode ajudar a encontrar economia.",
+        "Se esse tipo de gasto aparece muitas vezes, pode ser um bom ponto para ajustar sem precisar cortar tudo.",
+      ],
+      `${chaveInsights}-orientacao-alimentacao-fora`
+    );
+  }
+
+  if (
+    categoria === "Transporte" &&
+    (subcategoria === "Gasolina" ||
+      subcategoria === "Etanol" ||
+      subcategoria === "Diesel")
+  ) {
+    return escolherTexto(
+      [
+        "Vale observar se os deslocamentos estão concentrando muito dinheiro. Planejar trajetos pode ajudar a reduzir gastos com combustível.",
+        "Combustível costuma pesar quando os deslocamentos aumentam. Olhar rotas e frequência pode mostrar oportunidades de economia.",
+        "Se o combustível está pesando, pode valer revisar deslocamentos repetidos e pensar em alternativas quando possível.",
+      ],
+      `${chaveInsights}-orientacao-combustivel`
+    );
+  }
+
+  if (
+    categoria === "Transporte" &&
+    (subcategoria === "Uber" ||
+      subcategoria === "99" ||
+      subcategoria === "Táxi")
+  ) {
+    return escolherTexto(
+      [
+        "Vale observar se as corridas estão acontecendo por necessidade ou por hábito. Algumas trocas podem reduzir o gasto sem grande esforço.",
+        "Corridas por aplicativo podem parecer pequenas separadas, mas somadas podem pesar. Vale acompanhar a frequência.",
+        "Se esse gasto aparece muito, pode ser um bom ponto para planejar melhor alguns deslocamentos.",
+      ],
+      `${chaveInsights}-orientacao-aplicativo-transporte`
+    );
+  }
+
+  if (
+    categoria === "Contas da Casa" &&
+    subcategoria === "Energia Elétrica"
+  ) {
+    return escolherTexto(
+      [
+        "Energia elétrica é um bom ponto para observar hábitos da casa. Pequenas mudanças no uso diário podem ajudar no resultado.",
+        "Vale acompanhar se a conta de energia está subindo. Isso pode indicar mudança de consumo ou algum aparelho pesando mais.",
+        "Se energia está entre os maiores gastos, observar horários, equipamentos e uso diário pode trazer boas pistas.",
+      ],
+      `${chaveInsights}-orientacao-energia`
+    );
+  }
+
+  if (
+    categoria === "Contas da Casa" &&
+    (subcategoria === "Internet" ||
+      subcategoria === "Celular")
+  ) {
+    return escolherTexto(
+      [
+        "Vale revisar se o plano contratado ainda faz sentido para o uso atual. Às vezes existe economia sem perder o serviço.",
+        "Planos de internet e celular mudam bastante. Comparar opções de tempos em tempos pode evitar pagar mais do que precisa.",
+        "Se esse gasto pesa, pode valer conferir se existe plano mais adequado ao consumo real.",
+      ],
+      `${chaveInsights}-orientacao-planos`
+    );
+  }
+
+  if (
+    categoria === "Educação" &&
+    (subcategoria === "Faculdade" ||
+      subcategoria === "Cursos" ||
+      subcategoria === "Idiomas")
+  ) {
+    return escolherTexto(
+      [
+        "Educação pode ser investimento importante. O ideal é acompanhar esse gasto para garantir que ele cabe no planejamento.",
+        "Esse tipo de gasto pode trazer retorno no futuro, mas precisa caber no orçamento para não virar aperto no presente.",
+        "Vale separar esse gasto no planejamento, porque educação costuma ser recorrente e precisa de previsibilidade.",
+      ],
+      `${chaveInsights}-orientacao-educacao`
+    );
+  }
+
+  if (
+    categoria === "Saúde" &&
+    (subcategoria === "Farmácia" ||
+      subcategoria === "Medicamentos")
+  ) {
+    return escolherTexto(
+      [
+        "Gastos com saúde merecem cuidado. Vale acompanhar a recorrência, sem cortar cuidados importantes.",
+        "Se farmácia aparece com frequência, observar os itens recorrentes pode ajudar no planejamento, sempre mantendo os cuidados necessários.",
+        "Esse gasto pode ser essencial. O ponto é enxergar a frequência para se planejar melhor.",
+      ],
+      `${chaveInsights}-orientacao-saude`
+    );
+  }
+
+  if (
+    categoria === "Moradia" &&
+    (subcategoria === "Aluguel" ||
+      subcategoria === "Condomínio" ||
+      subcategoria === "Financiamento Imobiliário")
+  ) {
+    return escolherTexto(
+      [
+        "Moradia costuma ser gasto fixo e pesado. Acompanhar esse valor ajuda a entender quanto sobra para as outras áreas.",
+        "Quando moradia pesa muito, o planejamento precisa considerar esse valor como prioridade fixa do mês.",
+        "Esse tipo de gasto geralmente não muda rápido, mas precisa estar bem visível no planejamento.",
+      ],
+      `${chaveInsights}-orientacao-moradia`
+    );
+  }
+
+  return escolherTexto(
+    [
+      `Vale olhar com atenção os maiores lançamentos em ${subcategoria}. Esse pode ser um bom ponto para entender melhor para onde o dinheiro está indo.`,
+      `Observar os detalhes de ${subcategoria} pode ajudar a encontrar padrões e possíveis ajustes.`,
+      `Esse detalhe merece atenção porque foi o que mais pesou dentro de ${categoria}.`,
+    ],
+    `${chaveInsights}-orientacao-generica`
+  );
+}
+
+const textoOrientacaoPraticaCategoria =
+  deveMostrarSubcategoriaDominante
+    ? gerarOrientacaoPraticaCategoria(
+        categoriaDominante?.categoria,
+        subcategoriaDominante?.subcategoria
+      )
+    : "";
+
+const deveMostrarOrientacaoPraticaCategoria =
+  !!textoOrientacaoPraticaCategoria;
+
 const textoCategoriaDominante =
   categoriaDominante
     ? escolherTexto(
@@ -2097,6 +2264,12 @@ const labelX = Math.min(
 {deveMostrarSubcategoriaDominante && (
   <Text style={styles.insightItem}>
     • {textoSubcategoriaDominante}
+  </Text>
+)}
+
+{deveMostrarOrientacaoPraticaCategoria && (
+  <Text style={styles.insightItem}>
+    • {textoOrientacaoPraticaCategoria}
   </Text>
 )}
 
