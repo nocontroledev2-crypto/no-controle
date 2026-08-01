@@ -693,6 +693,17 @@ if (period === "month") {
     ? `Hoje (${currentDate.toLocaleDateString("pt-BR")})`
     : currentDate.toLocaleDateString("pt-BR");
 }
+
+if (period === "monthPrev") {
+  const currentDate = new Date(
+    previousMonthDate.getFullYear(),
+    previousMonthDate.getMonth(),
+    index + 1
+  );
+
+  label = currentDate.toLocaleDateString("pt-BR");
+}
+
 if (
   period === "year" ||
   period === "lastYear"
@@ -1044,6 +1055,46 @@ const chaveInsights = `${period}-${safeChartValues.join("|")}-${Math.round(
   totalGrafico
 )}-${diasComGasto}`;
 
+const contextoPeriodoInsight = (() => {
+  if (period === "today") {
+    return "nos últimos 7 dias";
+  }
+
+  if (period === "week") {
+    return "nesta semana";
+  }
+
+  if (period === "weekPrev") {
+    return "na semana passada";
+  }
+
+  if (period === "month") {
+    return "neste mês";
+  }
+
+  if (period === "monthPrev") {
+    return "no mês passado";
+  }
+
+  if (period === "year") {
+    return "neste ano";
+  }
+
+  if (period === "lastYear") {
+    return "no ano passado";
+  }
+
+  if (period === "custom") {
+    return "no período personalizado";
+  }
+
+  if (period === "all") {
+    return "desde o início";
+  }
+
+  return "neste período";
+})();
+
 const textoSemMovimentacao = escolherTexto(
   [
     "Nenhuma movimentação financeira foi identificada neste período.",
@@ -1138,18 +1189,20 @@ const textoPoucosPontosMensais = escolherTexto(
 
 const textoConcentracaoAlta = escolherTexto(
   [
-    "Grande parte dos gastos está concentrada em poucos momentos, indicando pontos específicos de maior impacto financeiro.",
-    "Poucos momentos concentraram boa parte do valor gasto neste período.",
-    "Os maiores gastos ficaram concentrados em um pequeno grupo de movimentações do período.",
+    `Grande parte dos gastos ${contextoPeriodoInsight} ficou concentrada em poucos momentos, indicando pontos específicos de maior impacto financeiro.`,
+    `Poucos momentos concentraram boa parte do valor gasto ${contextoPeriodoInsight}.`,
+    `Os maiores gastos ${contextoPeriodoInsight} ficaram concentrados em um pequeno grupo de movimentações.`,
+    `Uma parte importante do dinheiro gasto ${contextoPeriodoInsight} apareceu em poucos pontos. Vale observar o que aconteceu nesses momentos.`,
   ],
   `${chaveInsights}-concentracao-alta`
 );
 
 const textoConcentracaoBaixa = escolherTexto(
   [
-    "Os gastos estão distribuídos ao longo do período, sem forte concentração em poucos momentos.",
-    "Não houve uma concentração forte dos gastos em poucos pontos do período.",
-    "Os valores aparecem mais espalhados ao longo do período analisado.",
+    `Os gastos ${contextoPeriodoInsight} ficaram mais distribuídos, sem forte concentração em poucos momentos.`,
+    `Não houve uma concentração forte dos gastos ${contextoPeriodoInsight}.`,
+    `Os valores aparecem mais espalhados ${contextoPeriodoInsight}.`,
+    `Os gastos ficaram mais divididos ao longo do período, sem um único ponto dominando muito o total.`,
   ],
   `${chaveInsights}-concentracao-baixa`
 );
@@ -1188,12 +1241,12 @@ const textoTendenciaPeriodo = escolherTexto(
     : tipoTendenciaPeriodo === "aumento-moderado"
     ? [
         "Houve aumento nos gastos na parte final do período, mas sem uma mudança muito brusca.",
-        "Os gastos ficaram um pouco mais altos na parte final do período. Vale acompanhar se isso começa a se repetir.",
+        `Os gastos ficaram um pouco mais altos na parte final ${contextoPeriodoInsight}. Vale acompanhar se isso começa a se repetir.`,
         "A parte final do período teve mais gastos que a parte inicial, indicando uma leve alta no comportamento financeiro.",
       ]
     : tipoTendenciaPeriodo === "queda-forte"
     ? [
-        "Os gastos diminuíram bastante na parte final do período. Se essa redução foi intencional, pode ser um bom sinal de controle.",
+        `Os gastos diminuíram bastante na parte final ${contextoPeriodoInsight}. Se essa redução foi intencional, pode ser um bom sinal de controle.`,
         "A parte final do período teve bem menos gastos que a parte inicial. Vale observar se isso representa economia ou apenas menos registros.",
         "Houve uma queda importante nos gastos na parte final do período, reduzindo o impacto financeiro mais recente.",
       ]
@@ -1204,7 +1257,7 @@ const textoTendenciaPeriodo = escolherTexto(
         "Os valores ficaram menores na parte final do período. Isso pode ajudar no planejamento, se a redução foi intencional.",
       ]
     : [
-        "Os gastos ficaram relativamente equilibrados entre a primeira e a segunda metade do período.",
+        `Os gastos ficaram relativamente equilibrados entre a primeira e a segunda metade ${contextoPeriodoInsight}.`,
         "Não houve grande diferença entre o começo e o fim do período analisado.",
         "Os valores ficaram próximos entre as duas partes do período, o que pode facilitar o planejamento financeiro.",
       ],
@@ -1313,18 +1366,20 @@ const textoCategoriaDominante =
     ? escolherTexto(
         percentualCategoriaDominante >= 50
           ? [
-              `${categoriaDominante.categoria} representa mais da metade dos gastos deste período. Esse é um ponto importante para observar com atenção.`,
-              `Mais de 50% dos gastos do período ficaram em ${categoriaDominante.categoria}. Pode ser um bom lugar para começar a procurar oportunidades de economia.`,
-              `${categoriaDominante.categoria} concentrou a maior parte do dinheiro gasto neste período.`,
+              `${categoriaDominante.categoria} representa mais da metade dos gastos ${contextoPeriodoInsight}. Esse é um ponto importante para observar com atenção.`,
+              `Mais de 50% dos gastos ${contextoPeriodoInsight} ficaram em ${categoriaDominante.categoria}. Pode ser um bom lugar para procurar oportunidades de economia.`,
+              `${categoriaDominante.categoria} concentrou a maior parte do dinheiro gasto ${contextoPeriodoInsight}.`,
+              `${categoriaDominante.categoria} teve um peso muito forte ${contextoPeriodoInsight}. Se a ideia for economizar, esse pode ser um dos primeiros lugares para olhar.`,
             ]
           : [
-              `${categoriaDominante.categoria} foi a categoria de maior peso no período, representando ${percentualCategoriaDominante.toFixed(
+              `${categoriaDominante.categoria} foi a categoria de maior peso ${contextoPeriodoInsight}, representando ${percentualCategoriaDominante.toFixed(
                 0
               )}% dos gastos.`,
-              `A categoria ${categoriaDominante.categoria} teve o maior impacto no período, com ${percentualCategoriaDominante.toFixed(
+              `A categoria ${categoriaDominante.categoria} teve o maior impacto ${contextoPeriodoInsight}, com ${percentualCategoriaDominante.toFixed(
                 0
               )}% do total gasto.`,
-              `${categoriaDominante.categoria} apareceu como principal destino do dinheiro neste período.`,
+              `${categoriaDominante.categoria} apareceu como principal destino do dinheiro ${contextoPeriodoInsight}.`,
+              `Entre as categorias, ${categoriaDominante.categoria} foi a que mais pesou ${contextoPeriodoInsight}.`,
             ],
         `${chaveInsights}-categoria-dominante`
       )
