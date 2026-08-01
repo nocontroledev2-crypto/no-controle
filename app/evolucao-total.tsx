@@ -1095,6 +1095,46 @@ const contextoPeriodoInsight = (() => {
   return "neste período";
 })();
 
+const contextoPeriodoComDe = (() => {
+  if (period === "today") {
+    return "dos últimos 7 dias";
+  }
+
+  if (period === "week") {
+    return "desta semana";
+  }
+
+  if (period === "weekPrev") {
+    return "da semana passada";
+  }
+
+  if (period === "month") {
+    return "deste mês";
+  }
+
+  if (period === "monthPrev") {
+    return "do mês passado";
+  }
+
+  if (period === "year") {
+    return "deste ano";
+  }
+
+  if (period === "lastYear") {
+    return "do ano passado";
+  }
+
+  if (period === "custom") {
+    return "do período personalizado";
+  }
+
+  if (period === "all") {
+    return "desde o início";
+  }
+
+  return "deste período";
+})();
+
 const textoSemMovimentacao = escolherTexto(
   [
     "Nenhuma movimentação financeira foi identificada neste período.",
@@ -1235,20 +1275,20 @@ const textoTendenciaPeriodo = escolherTexto(
   tipoTendenciaPeriodo === "aumento-forte"
     ? [
         "Os gastos ficaram mais fortes na parte final do período. Vale observar se esse aumento foi planejado ou se aconteceu sem perceber.",
-        "A parte final do período concentrou mais gastos. Esse é um bom ponto para revisar se houve contas concentradas, compras extras ou gastos não planejados.",
-        "Os gastos cresceram bastante na parte final do período, indicando um aumento importante no impacto financeiro mais recente.",
+        `A parte final ${contextoPeriodoComDe} concentrou mais gastos. Esse é um bom ponto para revisar se houve contas concentradas, compras extras ou gastos não planejados.`,
+        `Os gastos cresceram bastante na parte final ${contextoPeriodoComDe}, indicando um aumento importante no impacto financeiro mais recente.`,
       ]
     : tipoTendenciaPeriodo === "aumento-moderado"
     ? [
         "Houve aumento nos gastos na parte final do período, mas sem uma mudança muito brusca.",
-        `Os gastos ficaram um pouco mais altos na parte final ${contextoPeriodoInsight}. Vale acompanhar se isso começa a se repetir.`,
+        `Os gastos ficaram um pouco mais altos na parte final ${contextoPeriodoComDe}. Vale acompanhar se isso começa a se repetir.`,
         "A parte final do período teve mais gastos que a parte inicial, indicando uma leve alta no comportamento financeiro.",
       ]
     : tipoTendenciaPeriodo === "queda-forte"
     ? [
-        `Os gastos diminuíram bastante na parte final ${contextoPeriodoInsight}. Se essa redução foi intencional, pode ser um bom sinal de controle.`,
-        "A parte final do período teve bem menos gastos que a parte inicial. Vale observar se isso representa economia ou apenas menos registros.",
-        "Houve uma queda importante nos gastos na parte final do período, reduzindo o impacto financeiro mais recente.",
+        `Os gastos diminuíram bastante na parte final ${contextoPeriodoComDe}. Se essa redução foi intencional, pode ser um bom sinal de controle.`,
+        `A parte final ${contextoPeriodoComDe} teve bem menos gastos que a parte inicial. Vale observar se isso representa economia ou apenas menos registros.`,
+        `Houve uma queda importante nos gastos na parte final ${contextoPeriodoComDe}, reduzindo o impacto financeiro mais recente.`,
       ]
     : tipoTendenciaPeriodo === "queda-moderada"
     ? [
@@ -1257,7 +1297,7 @@ const textoTendenciaPeriodo = escolherTexto(
         "Os valores ficaram menores na parte final do período. Isso pode ajudar no planejamento, se a redução foi intencional.",
       ]
     : [
-        `Os gastos ficaram relativamente equilibrados entre a primeira e a segunda metade ${contextoPeriodoInsight}.`,
+        `Os gastos ficaram relativamente equilibrados entre a primeira e a segunda metade ${contextoPeriodoComDe}.`,
         "Não houve grande diferença entre o começo e o fim do período analisado.",
         "Os valores ficaram próximos entre as duas partes do período, o que pode facilitar o planejamento financeiro.",
       ],
