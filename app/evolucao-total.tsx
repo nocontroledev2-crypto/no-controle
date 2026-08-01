@@ -978,17 +978,7 @@ const percentualLancamentosFuturos =
 const deveMostrarAvisoLancamentosFuturos =
   totalLancamentosFuturos > 0;
 
-  const deveMostrarHojeVsMediaSeguro =
-  deveMostrarHojeVsMedia &&
-  !deveMostrarAvisoLancamentosFuturos;
-
-const deveMostrarTendenciaPeriodoSeguro =
-  !deveMostrarAvisoLancamentosFuturos;
-
-const deveMostrarMovimentoRecenteSeguro =
-  deveMostrarMovimentoRecente &&
-  !deveMostrarAvisoLancamentosFuturos;
-
+  
 const categoriasPeriodo = Object.entries(
   despesasPeriodoTurbo.reduce(
     (acc: Record<string, number>, item: any) => {
@@ -1803,6 +1793,17 @@ const deveMostrarHojeVsMedia =
   valorHojeNoGrafico > 0 &&
   mediaDiasComMovimentacao > 0 &&
   indiceHojeNoGrafico >= 0;
+
+const deveMostrarHojeVsMediaSeguro =
+  deveMostrarHojeVsMedia &&
+  !deveMostrarAvisoLancamentosFuturos;
+
+const deveMostrarTendenciaPeriodoSeguro =
+  !deveMostrarAvisoLancamentosFuturos;
+
+const deveMostrarMovimentoRecenteSeguro =
+  deveMostrarMovimentoRecente &&
+  !deveMostrarAvisoLancamentosFuturos;
 
 const textoHojeVsMedia = escolherTexto(
   percentualHojeVsMedia >= 20
