@@ -247,14 +247,14 @@ const limiteSeguro = receitaConsiderada - metaConsiderada - totalMesAtual;
       return {
         titulo: "Informe sua renda mensal",
         detalhe:
-          "Com a renda mensal, o No Controle consegue mostrar sua situação do mês com mais clareza.",
+          "Com a renda mensal, o Enxergaí consegue mostrar sua situação do mês com mais clareza.",
         tipo: "neutro",
       };
     }
 
     if (limiteSeguro >= 0) {
   return {
-    titulo: "Você está no controle",
+    titulo: "Você está Enxergaí",
     detalhe: temMetaEconomia
       ? "Depois dos gastos já registrados até o momento e da sua meta, ainda existe uma margem segura para este mês."
       : "Depois dos gastos já registrados até o momento, ainda existe uma margem dentro da sua renda. Definir uma meta de economia pode deixar seu planejamento mais forte.",
@@ -622,7 +622,7 @@ const limiteSeguro = receitaConsiderada - metaConsiderada - totalMesAtual;
             <Text style={styles.noteTitle}>✅ Histórico suficiente</Text>
 
             <Text style={styles.noteText}>
-              O No Controle já possui base mínima para liberar projeções mais inteligentes nas próximas versões.
+              O Enxergaí já possui base mínima para liberar projeções mais inteligentes nas próximas versões.
             </Text>
           </View>
         )}
@@ -631,7 +631,7 @@ const limiteSeguro = receitaConsiderada - metaConsiderada - totalMesAtual;
           <Text style={styles.noteTitle}>📌 Versão MVP</Text>
           <Text style={styles.noteText}>
             Esta versão foca em clareza: mostrar sua situação, quanto ainda pode gastar
-            e onde agir primeiro. Futuramente, o No Controle poderá simular cenários,
+            e onde agir primeiro. Futuramente, o Enxergaí poderá simular cenários,
             metas por categoria e estratégias avançadas.
           </Text>
         </View>

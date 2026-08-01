@@ -754,7 +754,7 @@ ${linhas.join("\n")}
 
 --------------------------------
 
-Gerado pelo No Controle`;
+Gerado pelo Enxergaí`;
 }
 
 async function copiarRelatorio() {
@@ -788,7 +788,7 @@ async function copiarRelatorio() {
       navigator.share
     ) {
       await navigator.share({
-        title: "Relatório Financeiro - No Controle",
+        title: "Relatório Financeiro - Enxergaí",
         text: relatorio,
       });
 

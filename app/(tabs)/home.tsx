@@ -161,7 +161,7 @@ export default function Home() {
   >
 
       <View style={styles.headerRow}>
-  <Text style={styles.title}>No Controle</Text>
+  <Text style={styles.title}>Enxergaí</Text>
 
   <TouchableOpacity
     onPress={() => setOcultarValores(!ocultarValores)}

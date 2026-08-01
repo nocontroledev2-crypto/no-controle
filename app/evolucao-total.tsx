@@ -1165,16 +1165,16 @@ const textoSemMovimentacao = escolherTexto(
   [
     "Nenhuma movimentação financeira foi identificada neste período.",
     "Ainda não há gastos registrados no período selecionado.",
-    "O No Controle não encontrou movimentações financeiras para este período.",
+    "O Enxergaí não encontrou movimentações financeiras para este período.",
   ],
   `${chaveInsights}-sem-movimentacao`
 );
 
 const textoDesbloquearAnalises = escolherTexto(
   [
-    "Registre seus gastos para desbloquear análises inteligentes do No Controle.",
-    "Assim que houver registros, o No Controle começará a transformar seus dados em entendimento.",
-    "Com novos registros, o No Controle poderá gerar análises mais úteis para você.",
+    "Registre seus gastos para desbloquear análises inteligentes do Enxergaí.",
+    "Assim que houver registros, o Enxergaí começará a transformar seus dados em entendimento.",
+    "Com novos registros, o Enxergaí poderá gerar análises mais úteis para você.",
   ],
   `${chaveInsights}-desbloquear`
 );
@@ -1190,9 +1190,9 @@ const textoPrimeiraMovimentacao = escolherTexto(
 
 const textoContinuarRegistrando = escolherTexto(
   [
-    "Continue registrando seus gastos para que o No Controle possa identificar padrões e gerar análises mais completas.",
-    "Com mais registros, o No Controle conseguirá enxergar melhor seu comportamento financeiro.",
-    "Quanto mais informações forem registradas, mais precisas serão as análises do No Controle.",
+    "Continue registrando seus gastos para que o Enxergaí possa identificar padrões e gerar análises mais completas.",
+    "Com mais registros, o Enxergaí conseguirá enxergar melhor seu comportamento financeiro.",
+    "Quanto mais informações forem registradas, mais precisas serão as análises do Enxergaí.",
   ],
   `${chaveInsights}-continuar`
 );
@@ -1201,7 +1201,7 @@ const textoDadosInsuficientes = escolherTexto(
   [
     "Ainda não existem dados suficientes para gerar análises financeiras confiáveis.",
     "O período ainda possui poucos dados para conclusões financeiras mais completas.",
-    "O No Controle ainda precisa de mais movimentações neste período para gerar uma análise confiável.",
+    "O Enxergaí ainda precisa de mais movimentações neste período para gerar uma análise confiável.",
   ],
   `${chaveInsights}-insuficiente`
 );

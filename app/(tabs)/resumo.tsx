@@ -387,7 +387,7 @@ if (usuarioLogado === false) {
   return (
     <View style={[styles.container, isMobile && styles.containerMobile]}>
       <View style={styles.headerRow}>
-  <Text style={styles.title}>NO CONTROLE</Text>
+  <Text style={styles.title}>Enxergaí</Text>
 
   <TouchableOpacity
     onPress={() => setOcultarValores(!ocultarValores)}
@@ -406,7 +406,7 @@ if (usuarioLogado === false) {
   <View style={[styles.container, isMobile && styles.containerMobile]}>
 
       <View style={styles.headerRow}>
-  <Text style={styles.title}>NO CONTROLE</Text>
+  <Text style={styles.title}>Enxergaí</Text>
 
   <TouchableOpacity
     onPress={() => setOcultarValores(!ocultarValores)}

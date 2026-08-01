@@ -233,7 +233,7 @@ useFocusEffect(
     const texto = textoInteligente.trim();
 
     if (!texto) {
-      alert("Digite uma despesa para o No Controle entender.");
+      alert("Digite uma despesa para o Enxergaí entender.");
       return;
     }
 

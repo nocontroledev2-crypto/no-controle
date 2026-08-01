@@ -277,7 +277,7 @@ if (
     const nomePerfil =
       nome.trim() ||
       data.user.user_metadata?.nome ||
-      "Usuário No Controle";
+      "Usuário Enxergaí";
 
     // Atualiza a tela imediatamente após login
     setUsuarioLogado(data.user);
@@ -381,7 +381,7 @@ async function salvarNomeConta() {
 </View>
 
         <View style={styles.heroCard}>
-          <Text style={styles.heroTitle}>👤 Sua jornada no No Controle</Text>
+          <Text style={styles.heroTitle}>👤 Sua jornada no Enxergaí</Text>
 
           <Text style={styles.heroText}>
             Este é o espaço para proteger sua jornada financeira, acompanhar seus dados
@@ -442,7 +442,7 @@ async function salvarNomeConta() {
 ) : (
   <>
     <Text style={styles.accountValue}>
-      {nome || "Usuário No Controle"}
+      {nome || "Usuário Enxergaí"}
     </Text>
 
     <TouchableOpacity
@@ -588,7 +588,7 @@ async function salvarNomeConta() {
 
           <Text style={styles.infoText}>
   {usuarioLogado
-    ? "Estes são os registros sincronizados na sua conta No Controle."
+    ? "Estes são os registros sincronizados na sua conta Enxergaí."
     : "Entre ou crie sua conta para visualizar seus registros sincronizados."}
 </Text>
         </View>
@@ -610,7 +610,7 @@ async function salvarNomeConta() {
         </View>
                 
         <View style={styles.brandCard}>
-          <Text style={styles.brandTitle}>💚 O que o No Controle defende</Text>
+          <Text style={styles.brandTitle}>💚 O que o Enxergaí defende</Text>
 
           <Text style={styles.brandText}>
             Menos esforço para entender seu dinheiro. Mais clareza para tomar decisões.
