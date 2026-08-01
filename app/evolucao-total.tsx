@@ -1620,9 +1620,11 @@ if (
 
   return escolherTexto(
     [
-      `Vale olhar com atenção os maiores lançamentos em ${subcategoria}. Esse pode ser um bom ponto para entender melhor para onde o dinheiro está indo.`,
-      `Observar os detalhes de ${subcategoria} pode ajudar a encontrar padrões e possíveis ajustes.`,
-      `Esse detalhe merece atenção porque foi o que mais pesou dentro de ${categoria}.`,
+      `Como ${subcategoria} foi o ponto que mais pesou dentro de ${categoria}, vale olhar os maiores lançamentos desse detalhe e procurar padrões: valor alto, repetição ou compras não planejadas.`,
+      `${subcategoria} apareceu como principal detalhe dentro de ${categoria}. Observar frequência e valores maiores pode ajudar a entender melhor para onde o dinheiro está indo.`,
+      `Vale olhar com atenção os registros de ${subcategoria}. Às vezes, a economia começa quando percebemos quais gastos se repetem mais vezes.`,
+      `Esse detalhe teve peso importante dentro de ${categoria}. Um bom começo é observar se os maiores valores foram planejados ou se aconteceram sem perceber.`,
+      `Ao enxergar melhor ${subcategoria}, fica mais fácil identificar se o gasto foi pontual, recorrente ou algo que merece ajuste no planejamento.`,
     ],
     `${chaveInsights}-orientacao-generica`
   );
