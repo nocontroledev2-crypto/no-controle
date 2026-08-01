@@ -1256,47 +1256,42 @@ if (variacaoMovimentoRecente >= 40) {
   tipoMovimentoRecente = "caiu-moderado";
 }
 
+const alvoComparacaoMovimento =
+  unidadeSingular === "mês"
+    ? "os dois últimos meses com gasto neste período"
+    : unidadeSingular === "ano"
+    ? "os dois últimos anos com gasto neste período"
+    : "os dois últimos dias com gasto neste período";
+
 const textoMovimentoRecente = escolherTexto(
   tipoMovimentoRecente === "subiu-forte"
     ? [
-        `O gasto mais recente ficou ${variacaoMovimentoRecente.toFixed(
-          0
-        )}% maior que o ponto anterior. Vale observar se esse aumento foi planejado.`,
-        `O ponto mais recente teve um aumento forte em relação ao anterior, com alta de ${variacaoMovimentoRecente.toFixed(
-          0
-        )}%.`,
-        `O gasto mais recente subiu bastante em comparação com o registro anterior do período.`,
+        `Comparando ${alvoComparacaoMovimento}, o último valor ficou bem maior que o anterior. Vale observar se esse aumento foi planejado.`,
+        `Nos ${alvoComparacaoMovimento}, houve um aumento forte no valor mais recente.`,
+        `O valor mais recente ficou bem acima do anterior dentro do período analisado.`,
       ]
     : tipoMovimentoRecente === "subiu-moderado"
     ? [
-        `O gasto mais recente ficou ${variacaoMovimentoRecente.toFixed(
-          0
-        )}% acima do ponto anterior.`,
-        "O ponto mais recente apresentou aumento moderado em relação ao anterior.",
-        "Os gastos subiram no ponto mais recente, mas sem uma mudança tão brusca.",
+        `Comparando ${alvoComparacaoMovimento}, o último valor ficou um pouco maior que o anterior.`,
+        `O valor mais recente apresentou uma alta moderada dentro do período analisado.`,
+        `Houve aumento no ponto mais recente, mas sem uma mudança muito brusca.`,
       ]
     : tipoMovimentoRecente === "caiu-forte"
     ? [
-        `O gasto mais recente caiu ${Math.abs(
-          variacaoMovimentoRecente
-        ).toFixed(
-          0
-        )}% em relação ao ponto anterior. Se essa redução foi intencional, pode ser um bom sinal.`,
-        "O ponto mais recente teve uma queda forte em relação ao anterior.",
-        "O gasto mais recente ficou bem menor que o ponto anterior do período.",
+        `Comparando ${alvoComparacaoMovimento}, o último valor ficou bem menor que o anterior. Se essa redução foi intencional, pode ser um bom sinal.`,
+        `Nos ${alvoComparacaoMovimento}, houve uma queda forte no valor mais recente.`,
+        `O valor mais recente caiu bastante em relação ao ponto anterior dentro do período analisado.`,
       ]
     : tipoMovimentoRecente === "caiu-moderado"
     ? [
-        `O gasto mais recente ficou ${Math.abs(
-          variacaoMovimentoRecente
-        ).toFixed(0)}% abaixo do ponto anterior.`,
-        "O ponto mais recente apresentou uma redução moderada em relação ao anterior.",
-        "Os gastos diminuíram no ponto mais recente do período.",
+        `Comparando ${alvoComparacaoMovimento}, o último valor ficou menor que o anterior.`,
+        `O valor mais recente apresentou uma queda moderada dentro do período analisado.`,
+        `Houve redução no ponto mais recente do período.`,
       ]
     : [
-        "O gasto mais recente ficou próximo do ponto anterior, indicando certa estabilidade.",
-        "Não houve grande diferença entre o ponto mais recente e o anterior.",
-        "O comportamento mais recente ficou relativamente estável em relação ao ponto anterior.",
+        `Comparando ${alvoComparacaoMovimento}, os valores ficaram próximos entre si.`,
+        `O valor mais recente ficou parecido com o anterior dentro do período analisado.`,
+        `Não houve grande diferença entre os dois últimos pontos com gasto neste período.`,
       ],
   `${chaveInsights}-movimento-recente`
 );
