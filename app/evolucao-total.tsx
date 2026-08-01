@@ -1401,6 +1401,77 @@ const textoMovimentoRecente = escolherTexto(
   `${chaveInsights}-movimento-recente`
 );
 
+const subcategoriasDaCategoriaDominante =
+  categoriaDominante
+    ? Object.entries(
+        despesasPeriodoTurbo
+          .filter(
+            (item: any) =>
+              (item.categoria || "Outros") ===
+              categoriaDominante.categoria
+          )
+          .reduce(
+            (
+              acc: Record<string, number>,
+              item: any
+            ) => {
+              const subcategoria =
+                item.subcategoria || "Sem detalhe";
+
+              acc[subcategoria] =
+                (acc[subcategoria] || 0) +
+                Number(item.valor || 0);
+
+              return acc;
+            },
+            {}
+          )
+      )
+        .map(([subcategoria, total]) => ({
+          subcategoria,
+          total: Number(total),
+        }))
+        .sort((a, b) => b.total - a.total)
+    : [];
+
+const subcategoriaDominante =
+  subcategoriasDaCategoriaDominante[0];
+
+const percentualSubcategoriaDominante =
+  categoriaDominante &&
+  subcategoriaDominante &&
+  categoriaDominante.total > 0
+    ? (subcategoriaDominante.total /
+        categoriaDominante.total) *
+      100
+    : 0;
+
+const deveMostrarSubcategoriaDominante =
+  deveMostrarCategoriaDominante &&
+  !!subcategoriaDominante &&
+  subcategoriaDominante.subcategoria !== "Sem detalhe" &&
+  percentualSubcategoriaDominante >= 40;
+
+const textoSubcategoriaDominante =
+  subcategoriaDominante
+    ? escolherTexto(
+        percentualSubcategoriaDominante >= 70
+          ? [
+              `Dentro de ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} concentrou a maior parte dos gastos.`,
+              `${subcategoriaDominante.subcategoria} foi o principal detalhe dentro de ${categoriaDominante?.categoria}, representando ${percentualSubcategoriaDominante.toFixed(
+                0
+              )}% dessa categoria.`,
+              `Ao olhar melhor para ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} aparece como o ponto de maior peso.`,
+            ]
+          : [
+              `Dentro de ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} foi o detalhe que mais pesou.`,
+              `${subcategoriaDominante.subcategoria} teve o maior impacto dentro da categoria ${categoriaDominante?.categoria}.`,
+              `Ao detalhar ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} aparece como o principal ponto de atenção.`,
+            ],
+        `${chaveInsights}-subcategoria-dominante`
+      )
+    : "";
+
 const textoCategoriaDominante =
   categoriaDominante
     ? escolherTexto(
@@ -2022,6 +2093,13 @@ const labelX = Math.min(
     • {textoCategoriaDominante}
   </Text>
 )}
+
+{deveMostrarSubcategoriaDominante && (
+  <Text style={styles.insightItem}>
+    • {textoSubcategoriaDominante}
+  </Text>
+)}
+
 </>
 )}
 </View>
