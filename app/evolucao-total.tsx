@@ -1457,15 +1457,15 @@ const textoSubcategoriaDominante =
     ? escolherTexto(
         percentualSubcategoriaDominante >= 70
           ? [
-              `Dentro de ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} concentrou a maior parte dos gastos. Se a ideia for economizar, pode ser um bom lugar para começar.`,
+              `Dentro de ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} concentrou a maior parte dos gastos.`,
               `${subcategoriaDominante.subcategoria} foi o principal ponto dentro de ${categoriaDominante?.categoria}, representando ${percentualSubcategoriaDominante.toFixed(
                 0
               )}% dessa categoria.`,
-              `Ao olhar melhor para ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} aparece como o ponto de maior peso. Vale observar se existe alguma oportunidade de ajuste ali.`,
+              `Ao olhar melhor para ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} aparece como o ponto de maior peso.`,
             ]
           : [
               `Dentro de ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} foi o detalhe que mais pesou.`,
-              `${subcategoriaDominante.subcategoria} teve o maior impacto dentro de ${categoriaDominante?.categoria}. Esse pode ser um bom ponto para observar com mais atenção.`,
+              `${subcategoriaDominante.subcategoria} teve o maior impacto dentro de ${categoriaDominante?.categoria}.`,
               `Ao detalhar ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} aparece como o principal ponto de atenção.`,
             ],
         `${chaveInsights}-subcategoria-dominante`
@@ -1480,19 +1480,19 @@ const textoSubcategoriaDominante =
     return "";
   }
 
-  if (
-    categoria === "Alimentação" &&
-    subcategoria === "Supermercado"
-  ) {
-    return escolherTexto(
-      [
-        "Uma boa primeira ação é observar se as compras estão sendo feitas com lista e se alguns itens podem ser trocados por opções mais econômicas.",
-        "Vale olhar com atenção as compras de supermercado. Pequenas trocas em itens frequentes podem gerar economia sem mudar tudo de uma vez.",
-        "Se a ideia for economizar, o supermercado pode ser um bom começo: lista de compras e comparação de preços ajudam bastante.",
-      ],
-      `${chaveInsights}-orientacao-supermercado`
-    );
-  }
+if (
+  categoria === "Alimentação" &&
+  subcategoria === "Supermercado"
+) {
+  return escolherTexto(
+    [
+      "Para começar de forma simples, observe se as compras estão sendo feitas com lista e se alguns itens podem ser trocados por opções mais econômicas.",
+      "Pequenas trocas em itens comprados com frequência podem gerar economia sem mudar tudo de uma vez.",
+      "Lista de compras, comparação de preços e atenção aos itens repetidos podem ajudar a enxergar oportunidades no supermercado.",
+    ],
+    `${chaveInsights}-orientacao-supermercado`
+  );
+}
 
   if (
     categoria === "Alimentação" &&
