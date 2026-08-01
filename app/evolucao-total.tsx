@@ -1268,35 +1268,42 @@ const alvoComparacaoMovimento =
     ? "os dois últimos anos com gasto neste período"
     : "os dois últimos dias com gasto neste período";
 
+const alvoComparacaoMovimentoComEntre =
+  unidadeSingular === "mês"
+    ? "entre os dois últimos meses com gasto neste período"
+    : unidadeSingular === "ano"
+    ? "entre os dois últimos anos com gasto neste período"
+    : "entre os dois últimos dias com gasto neste período";
+
 const textoMovimentoRecente = escolherTexto(
   tipoMovimentoRecente === "subiu-forte"
     ? [
         `Comparando ${alvoComparacaoMovimento}, o último valor ficou bem maior que o anterior. Vale observar se esse aumento foi planejado.`,
-        `Nos ${alvoComparacaoMovimento}, houve um aumento forte no valor mais recente.`,
+        `Houve um aumento forte ${alvoComparacaoMovimentoComEntre}.`,
         `O valor mais recente ficou bem acima do anterior dentro do período analisado.`,
       ]
     : tipoMovimentoRecente === "subiu-moderado"
     ? [
         `Comparando ${alvoComparacaoMovimento}, o último valor ficou um pouco maior que o anterior.`,
-        `O valor mais recente apresentou uma alta moderada dentro do período analisado.`,
-        `Houve aumento no ponto mais recente, mas sem uma mudança muito brusca.`,
+        `Houve uma alta moderada ${alvoComparacaoMovimentoComEntre}.`,
+        `O valor mais recente aumentou em relação ao ponto anterior, mas sem uma mudança muito brusca.`,
       ]
     : tipoMovimentoRecente === "caiu-forte"
     ? [
         `Comparando ${alvoComparacaoMovimento}, o último valor ficou bem menor que o anterior. Se essa redução foi intencional, pode ser um bom sinal.`,
-        `Nos ${alvoComparacaoMovimento}, houve uma queda forte no valor mais recente.`,
+        `Houve uma queda forte ${alvoComparacaoMovimentoComEntre}.`,
         `O valor mais recente caiu bastante em relação ao ponto anterior dentro do período analisado.`,
       ]
     : tipoMovimentoRecente === "caiu-moderado"
     ? [
         `Comparando ${alvoComparacaoMovimento}, o último valor ficou menor que o anterior.`,
-        `O valor mais recente apresentou uma queda moderada dentro do período analisado.`,
-        `Houve redução no ponto mais recente do período.`,
+        `Houve uma redução moderada ${alvoComparacaoMovimentoComEntre}.`,
+        `O valor mais recente diminuiu em relação ao ponto anterior do período.`,
       ]
     : [
         `Comparando ${alvoComparacaoMovimento}, os valores ficaram próximos entre si.`,
+        `Não houve grande diferença ${alvoComparacaoMovimentoComEntre}.`,
         `O valor mais recente ficou parecido com o anterior dentro do período analisado.`,
-        `Não houve grande diferença entre os dois últimos pontos com gasto neste período.`,
       ],
   `${chaveInsights}-movimento-recente`
 );
