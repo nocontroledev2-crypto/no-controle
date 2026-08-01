@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "No Controle",
-    "slug": "no-controle",
+    "name": "Enxergaí",
+    "slug": "enxergai",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "nocontrole",
+    "scheme": "enxergai",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
