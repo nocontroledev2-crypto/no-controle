@@ -1371,32 +1371,32 @@ const alvoComparacaoMovimentoComEntre =
 const textoMovimentoRecente = escolherTexto(
   tipoMovimentoRecente === "subiu-forte"
     ? [
-        `Comparando ${alvoComparacaoMovimento}, o último valor ficou bem maior que o anterior. Vale observar se esse aumento foi planejado.`,
-        `Houve um aumento forte ${alvoComparacaoMovimentoComEntre}.`,
-        `O valor mais recente ficou bem acima do anterior dentro do período analisado.`,
+        `Entre os dois últimos ${unidadePlural} com gasto, o valor mais recente foi bem maior. Vale observar o que aconteceu nesse ${unidadeSingular}.`,
+        `O último ${unidadeSingular} com gasto ficou bem acima do anterior. Esse é um ponto que merece atenção.`,
+        `Houve uma alta forte entre os dois últimos ${unidadePlural} com gasto. Vale conferir se foi algo planejado ou um gasto que passou despercebido.`,
       ]
     : tipoMovimentoRecente === "subiu-moderado"
     ? [
-        `Comparando ${alvoComparacaoMovimento}, o último valor ficou um pouco maior que o anterior.`,
-        `Houve uma alta moderada ${alvoComparacaoMovimentoComEntre}.`,
-        `O valor mais recente aumentou em relação ao ponto anterior, mas sem uma mudança muito brusca.`,
+        `Entre os dois últimos ${unidadePlural} com gasto, o valor mais recente ficou um pouco maior.`,
+        `O último ${unidadeSingular} com gasto ficou acima do anterior, mas sem uma mudança muito brusca.`,
+        `Houve uma alta moderada entre os dois últimos ${unidadePlural} com movimentação.`,
       ]
     : tipoMovimentoRecente === "caiu-forte"
     ? [
-        `Comparando ${alvoComparacaoMovimento}, o último valor ficou bem menor que o anterior. Se essa redução foi intencional, pode ser um bom sinal.`,
-        `Houve uma queda forte ${alvoComparacaoMovimentoComEntre}.`,
-        `O valor mais recente caiu bastante em relação ao ponto anterior dentro do período analisado.`,
+        `Entre os dois últimos ${unidadePlural} com gasto, o valor mais recente foi bem menor. Se essa redução foi intencional, pode ser um bom sinal.`,
+        `O último ${unidadeSingular} com gasto ficou bem abaixo do anterior. Vale observar se isso representa economia ou apenas menos registros.`,
+        `Houve uma queda forte entre os dois últimos ${unidadePlural} com gasto.`,
       ]
     : tipoMovimentoRecente === "caiu-moderado"
     ? [
-        `Comparando ${alvoComparacaoMovimento}, o último valor ficou menor que o anterior.`,
-        `Houve uma redução moderada ${alvoComparacaoMovimentoComEntre}.`,
-        `O valor mais recente diminuiu em relação ao ponto anterior do período.`,
+        `Entre os dois últimos ${unidadePlural} com gasto, o valor mais recente ficou menor.`,
+        `O último ${unidadeSingular} com gasto ficou abaixo do anterior, indicando uma redução moderada.`,
+        `Houve uma redução moderada entre os dois últimos ${unidadePlural} com movimentação.`,
       ]
     : [
-        `Comparando ${alvoComparacaoMovimento}, os valores ficaram próximos entre si.`,
-        `Não houve grande diferença ${alvoComparacaoMovimentoComEntre}.`,
-        `O valor mais recente ficou parecido com o anterior dentro do período analisado.`,
+        `Entre os dois últimos ${unidadePlural} com gasto, os valores ficaram próximos.`,
+        `O último ${unidadeSingular} com gasto ficou parecido com o anterior.`,
+        `Não houve grande diferença entre os dois últimos ${unidadePlural} com movimentação.`,
       ],
   `${chaveInsights}-movimento-recente`
 );
