@@ -953,6 +953,32 @@ const despesasPeriodoTurbo = expenses.filter((item: any) => {
   return false;
 });
 
+const hojeBaseTurbo = new Date(now);
+hojeBaseTurbo.setHours(0, 0, 0, 0);
+
+const lancamentosFuturosPeriodo = despesasPeriodoTurbo.filter(
+  (item: any) => {
+    const d = parseDateSafe(item.data);
+    d.setHours(0, 0, 0, 0);
+
+    return d > hojeBaseTurbo;
+  }
+);
+
+const totalLancamentosFuturos = lancamentosFuturosPeriodo.reduce(
+  (sum, item: any) => sum + Number(item.valor || 0),
+  0
+);
+
+const percentualLancamentosFuturos =
+  totalGrafico > 0
+    ? (totalLancamentosFuturos / totalGrafico) * 100
+    : 0;
+
+const deveMostrarAvisoLancamentosFuturos =
+  totalLancamentosFuturos > 0;
+
+
 const categoriasPeriodo = Object.entries(
   despesasPeriodoTurbo.reduce(
     (acc: Record<string, number>, item: any) => {
@@ -1641,6 +1667,35 @@ const textoOrientacaoPraticaCategoria =
 const deveMostrarOrientacaoPraticaCategoria =
   !!textoOrientacaoPraticaCategoria;
 
+const textoAvisoLancamentosFuturos = escolherTexto(
+  percentualLancamentosFuturos >= 40
+    ? [
+        `Este período inclui ${formatMoney(
+          totalLancamentosFuturos
+        )} em lançamentos futuros, representando ${percentualLancamentosFuturos.toFixed(
+          0
+        )}% do total. Esses valores ajudam a enxergar compromissos próximos, mas ainda não são gastos já realizados.`,
+        `Uma parte importante do total vem de lançamentos futuros: ${formatMoney(
+          totalLancamentosFuturos
+        )}. Vale separar mentalmente o que já aconteceu do que ainda está previsto.`,
+        `Há ${formatMoney(
+          totalLancamentosFuturos
+        )} em registros futuros neste período. Isso ajuda no planejamento, mas precisa ser lido como compromisso previsto.`,
+      ]
+    : [
+        `Este período inclui ${formatMoney(
+          totalLancamentosFuturos
+        )} em lançamentos futuros. Eles ajudam a antecipar compromissos, mas ainda não representam gastos já realizados.`,
+        `Há alguns registros futuros neste período, somando ${formatMoney(
+          totalLancamentosFuturos
+        )}. Isso pode ajudar no planejamento dos próximos dias.`,
+        `O período mistura gastos já registrados com lançamentos futuros. A parte futura soma ${formatMoney(
+          totalLancamentosFuturos
+        )}.`,
+      ],
+  `${chaveInsights}-lancamentos-futuros`
+);
+
 const textoCategoriaDominante =
   categoriaDominante
     ? escolherTexto(
@@ -1665,6 +1720,7 @@ const textoCategoriaDominante =
       )
     : "";
 
+    
 const indiceHojeNoGrafico = (() => {
   if (period === "today") {
     return safeChartValues.length - 1;
@@ -2217,6 +2273,11 @@ const labelX = Math.min(
 
   {nivelMaturidade >= 3 && (
     <>
+    {deveMostrarAvisoLancamentosFuturos && (
+  <Text style={styles.insightItem}>
+    • {textoAvisoLancamentosFuturos}
+  </Text>
+)}
       {maiorDia && deveMostrarMaiorImpacto && (
   <Text style={styles.insightItem}>
     • {textoMaiorImpacto}
