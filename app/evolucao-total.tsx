@@ -1457,15 +1457,15 @@ const textoSubcategoriaDominante =
     ? escolherTexto(
         percentualSubcategoriaDominante >= 70
           ? [
-              `Dentro de ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} concentrou a maior parte dos gastos.`,
-              `${subcategoriaDominante.subcategoria} foi o principal detalhe dentro de ${categoriaDominante?.categoria}, representando ${percentualSubcategoriaDominante.toFixed(
+              `Dentro de ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} concentrou a maior parte dos gastos. Se a ideia for economizar, pode ser um bom lugar para começar.`,
+              `${subcategoriaDominante.subcategoria} foi o principal ponto dentro de ${categoriaDominante?.categoria}, representando ${percentualSubcategoriaDominante.toFixed(
                 0
               )}% dessa categoria.`,
-              `Ao olhar melhor para ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} aparece como o ponto de maior peso.`,
+              `Ao olhar melhor para ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} aparece como o ponto de maior peso. Vale observar se existe alguma oportunidade de ajuste ali.`,
             ]
           : [
               `Dentro de ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} foi o detalhe que mais pesou.`,
-              `${subcategoriaDominante.subcategoria} teve o maior impacto dentro da categoria ${categoriaDominante?.categoria}.`,
+              `${subcategoriaDominante.subcategoria} teve o maior impacto dentro de ${categoriaDominante?.categoria}. Esse pode ser um bom ponto para observar com mais atenção.`,
               `Ao detalhar ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} aparece como o principal ponto de atenção.`,
             ],
         `${chaveInsights}-subcategoria-dominante`
