@@ -1233,11 +1233,16 @@ const variacaoMovimentoRecente =
       100
     : 0;
 
+const movimentoRecenteRepeteTendencia =
+  tipoTendenciaPeriodo === "aumento-forte" ||
+  tipoTendenciaPeriodo === "queda-forte";
+
 const deveMostrarMovimentoRecente =
   nivelMaturidade >= 3 &&
   pontosComMovimentacao.length >= 2 &&
   !!ultimoPontoComMovimentacao &&
-  !!penultimoPontoComMovimentacao;
+  !!penultimoPontoComMovimentacao &&
+  !movimentoRecenteRepeteTendencia;
 
 let tipoMovimentoRecente:
   | "subiu-forte"
