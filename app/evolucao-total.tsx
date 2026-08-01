@@ -978,6 +978,16 @@ const percentualLancamentosFuturos =
 const deveMostrarAvisoLancamentosFuturos =
   totalLancamentosFuturos > 0;
 
+  const deveMostrarHojeVsMediaSeguro =
+  deveMostrarHojeVsMedia &&
+  !deveMostrarAvisoLancamentosFuturos;
+
+const deveMostrarTendenciaPeriodoSeguro =
+  !deveMostrarAvisoLancamentosFuturos;
+
+const deveMostrarMovimentoRecenteSeguro =
+  deveMostrarMovimentoRecente &&
+  !deveMostrarAvisoLancamentosFuturos;
 
 const categoriasPeriodo = Object.entries(
   despesasPeriodoTurbo.reduce(
@@ -2302,17 +2312,19 @@ const labelX = Math.min(
   </Text>
 )}
 
-{deveMostrarHojeVsMedia && (
+{deveMostrarHojeVsMediaSeguro && (
   <Text style={styles.insightItem}>
     • {textoHojeVsMedia}
   </Text>
 )}
 
-<Text style={styles.insightItem}>
-  • {textoTendenciaPeriodo}
-</Text>
+{deveMostrarTendenciaPeriodoSeguro && (
+  <Text style={styles.insightItem}>
+    • {textoTendenciaPeriodo}
+  </Text>
+)}
 
-{deveMostrarMovimentoRecente && (
+{deveMostrarMovimentoRecenteSeguro && (
   <Text style={styles.insightItem}>
     • {textoMovimentoRecente}
   </Text>
