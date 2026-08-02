@@ -1256,8 +1256,8 @@ const textoPoucosPontosMensais = escolherTexto(
 const textoConcentracaoAlta = escolherTexto(
   [
     `Grande parte dos gastos ${contextoPeriodoInsight} ficou concentrada em poucos momentos, indicando pontos específicos de maior impacto financeiro.`,
-    `Poucos momentos concentraram boa parte do valor gasto ${contextoPeriodoInsight}.`,
-    `Os maiores gastos ${contextoPeriodoInsight} ficaram concentrados em um pequeno grupo de movimentações.`,
+    `Boa parte do dinheiro gasto ${contextoPeriodoInsight} apareceu em poucos momentos específicos.`,
+    `Uma pequena quantidade de movimentações respondeu pela maior parte dos gastos ${contextoPeriodoInsight}.`,
     `Uma parte importante do dinheiro gasto ${contextoPeriodoInsight} apareceu em poucos pontos. Vale observar o que aconteceu nesses momentos.`,
   ],
   `${chaveInsights}-concentracao-alta`
@@ -1483,11 +1483,11 @@ const textoSubcategoriaDominante =
     ? escolherTexto(
         percentualSubcategoriaDominante >= 70
           ? [
-              `Dentro de ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} concentrou a maior parte dos gastos.`,
-              `${subcategoriaDominante.subcategoria} foi o principal ponto dentro de ${categoriaDominante?.categoria}, representando ${percentualSubcategoriaDominante.toFixed(
+              `Dentro de ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} apareceu como principal destino dos valores registrados.`,
+              `${subcategoriaDominante.subcategoria} se destacou dentro de ${categoriaDominante?.categoria}, representando ${percentualSubcategoriaDominante.toFixed(
                 0
               )}% dessa categoria.`,
-              `Ao olhar melhor para ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} aparece como o ponto de maior peso.`,
+              `Ao detalhar ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} aparece como o destaque financeiro mais relevante.`,
             ]
           : [
               `Dentro de ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} foi o detalhe que mais pesou.`,
@@ -1703,7 +1703,7 @@ const textoCategoriaDominante =
           ? [
               `${categoriaDominante.categoria} representa mais da metade dos gastos ${contextoPeriodoInsight}. Esse é um ponto importante para observar com atenção.`,
               `Mais de 50% dos gastos ${contextoPeriodoInsight} ficaram em ${categoriaDominante.categoria}. Pode ser um bom lugar para procurar oportunidades de economia.`,
-              `${categoriaDominante.categoria} concentrou a maior parte do dinheiro gasto ${contextoPeriodoInsight}.`,
+              `${categoriaDominante.categoria} recebeu a maior parte do dinheiro gasto ${contextoPeriodoInsight}.`,
               `${categoriaDominante.categoria} teve um peso muito forte ${contextoPeriodoInsight}. Se a ideia for economizar, esse pode ser um dos primeiros lugares para olhar.`,
             ]
           : [
@@ -1713,8 +1713,8 @@ const textoCategoriaDominante =
               `A categoria ${categoriaDominante.categoria} teve o maior impacto ${contextoPeriodoInsight}, com ${percentualCategoriaDominante.toFixed(
                 0
               )}% do total gasto.`,
-              `${categoriaDominante.categoria} apareceu como principal destino do dinheiro ${contextoPeriodoInsight}.`,
-              `Entre as categorias, ${categoriaDominante.categoria} foi a que mais pesou ${contextoPeriodoInsight}.`,
+              `${categoriaDominante.categoria} foi o destino financeiro mais relevante ${contextoPeriodoInsight}.`,
+              `Entre todas as categorias, ${categoriaDominante.categoria} teve o maior impacto ${contextoPeriodoInsight}.`,
             ],
         `${chaveInsights}-categoria-dominante`
       )
