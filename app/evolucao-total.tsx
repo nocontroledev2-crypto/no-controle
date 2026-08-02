@@ -1841,21 +1841,21 @@ const temDistribuicaoSaudavel =
 const textoFeedbackPositivo = escolherTexto(
   temDistribuicaoSaudavel
     ? [
-        "Os gastos ficaram distribuídos entre várias categorias, sem uma única área dominando grande parte do total.",
-        "Nenhuma categoria concentrou mais da metade dos gastos. Isso pode indicar uma distribuição financeira mais equilibrada.",
-        "Os gastos ficaram mais espalhados entre diferentes categorias, o que ajuda a enxergar melhor para onde o dinheiro está indo.",
+  "Você distribuiu seus gastos entre várias categorias, sem uma única área dominando grande parte do total.",
+  "Nenhuma categoria concentrou mais da metade dos gastos. Isso sugere um comportamento financeiro mais equilibrado neste período.",
+  "Os gastos ficaram mais espalhados entre diferentes categorias, o que pode facilitar a visualização do seu dinheiro.",
       ]
     : temConcentracaoBaixa
     ? [
-        "Os gastos ficaram relativamente bem distribuídos ao longo do período, sem fortes concentrações em poucos momentos.",
-        "O dinheiro não ficou concentrado em poucos pontos específicos do período, indicando uma distribuição mais equilibrada.",
-        "Os gastos apareceram de forma mais espalhada ao longo do período analisado.",
+  "Os gastos ficaram relativamente bem distribuídos ao longo do período, sem fortes concentrações em poucos momentos.",
+  "O dinheiro foi utilizado de forma mais espalhada durante o período analisado, reduzindo dependência de poucos eventos.",
+  "Os gastos não ficaram concentrados em poucos pontos específicos. Isso pode indicar uma movimentação financeira mais equilibrada.",
       ]
     : percentualDiasSemGasto >= 40
     ? [
-        "Boa parte dos dias deste período não teve movimentação financeira registrada. Isso pode ajudar no controle dos gastos.",
-        "Existiram vários dias sem gastos registrados neste período, o que pode ser um sinal positivo dependendo do seu objetivo financeiro.",
-        "O período apresentou diversos dias sem movimentação financeira, reduzindo a frequência dos gastos.",
+  "Existiram vários dias sem gastos registrados neste período. Dependendo do seu objetivo financeiro, isso pode ser um sinal positivo.",
+  "Boa parte dos dias deste período não teve movimentação financeira registrada, reduzindo a frequência dos gastos.",
+  "Houve diversos dias sem registros de gastos. Se isso foi intencional, pode representar um avanço no controle financeiro.",
       ]
     : [
         "O período apresentou movimentação financeira consistente, ajudando o Enxergaí a entender melhor seus hábitos.",
