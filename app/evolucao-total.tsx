@@ -1033,6 +1033,11 @@ if (period === "weekPrev") {
 const diasSemGasto =
   diasConsiderados - diasComGasto;
 
+  const percentualDiasSemGasto =
+  diasConsiderados > 0
+    ? (diasSemGasto / diasConsiderados) * 100
+    : 0;
+
 const top3Total = rankingFinanceiro
   .slice(0, 3)
   .reduce(
@@ -1826,6 +1831,49 @@ const textoHojeVsMedia = escolherTexto(
   `${chaveInsights}-hoje-media`
 );
 
+const temConcentracaoBaixa =
+  percentualTop3 < 70;
+
+const temDistribuicaoSaudavel =
+  percentualCategoriaDominante > 0 &&
+  percentualCategoriaDominante < 50;
+
+const textoFeedbackPositivo = escolherTexto(
+  temDistribuicaoSaudavel
+    ? [
+        "Os gastos ficaram distribuídos entre várias categorias, sem uma única área dominando grande parte do total.",
+        "Nenhuma categoria concentrou mais da metade dos gastos. Isso pode indicar uma distribuição financeira mais equilibrada.",
+        "Os gastos ficaram mais espalhados entre diferentes categorias, o que ajuda a enxergar melhor para onde o dinheiro está indo.",
+      ]
+    : temConcentracaoBaixa
+    ? [
+        "Os gastos ficaram relativamente bem distribuídos ao longo do período, sem fortes concentrações em poucos momentos.",
+        "O dinheiro não ficou concentrado em poucos pontos específicos do período, indicando uma distribuição mais equilibrada.",
+        "Os gastos apareceram de forma mais espalhada ao longo do período analisado.",
+      ]
+    : percentualDiasSemGasto >= 40
+    ? [
+        "Boa parte dos dias deste período não teve movimentação financeira registrada. Isso pode ajudar no controle dos gastos.",
+        "Existiram vários dias sem gastos registrados neste período, o que pode ser um sinal positivo dependendo do seu objetivo financeiro.",
+        "O período apresentou diversos dias sem movimentação financeira, reduzindo a frequência dos gastos.",
+      ]
+    : [
+        "O período apresentou movimentação financeira consistente, ajudando o Enxergaí a entender melhor seus hábitos.",
+        "Os registros deste período criam uma base mais rica para acompanhar sua evolução financeira.",
+        "Quanto mais informações bem registradas, mais o Enxergaí consegue identificar padrões úteis para você.",
+      ],
+  `${chaveInsights}-feedback-positivo`
+);
+
+const deveMostrarFeedbackPositivo =
+  nivelMaturidade >= 3 &&
+  (
+    temConcentracaoBaixa ||
+    temDistribuicaoSaudavel ||
+    percentualDiasSemGasto >= 40
+  );
+
+
   function formatShortMoney(valor: number) {
   if (valor >= 1000) {
     return `R$ ${(valor / 1000).toFixed(1)}k`;
@@ -2336,6 +2384,12 @@ const labelX = Math.min(
 {deveMostrarOrientacaoPraticaCategoria && (
   <Text style={styles.insightItem}>
     • {textoOrientacaoPraticaCategoria}
+  </Text>
+)}
+
+{deveMostrarFeedbackPositivo && (
+  <Text style={styles.insightItem}>
+    ✅ {textoFeedbackPositivo}
   </Text>
 )}
 
