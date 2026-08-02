@@ -1841,26 +1841,26 @@ const temDistribuicaoSaudavel =
 const textoFeedbackPositivo = escolherTexto(
   temDistribuicaoSaudavel
     ? [
-  "Você distribuiu seus gastos entre várias categorias, sem uma única área dominando grande parte do total.",
-  "Nenhuma categoria concentrou mais da metade dos gastos. Isso sugere um comportamento financeiro mais equilibrado neste período.",
-  "Os gastos ficaram mais espalhados entre diferentes categorias, o que pode facilitar a visualização do seu dinheiro.",
+  "Você distribuiu seus gastos entre várias categorias, sem que uma única área dominasse grande parte do total.",
+  "Seu dinheiro ficou mais equilibrado entre diferentes categorias neste período, evitando grande dependência de uma única área.",
+  "Os gastos ficaram mais espalhados entre diferentes categorias, o que pode facilitar a visualização e o controle do seu dinheiro.",
       ]
     : temConcentracaoBaixa
     ? [
-  "Os gastos ficaram relativamente bem distribuídos ao longo do período, sem fortes concentrações em poucos momentos.",
-  "O dinheiro foi utilizado de forma mais espalhada durante o período analisado, reduzindo dependência de poucos eventos.",
-  "Os gastos não ficaram concentrados em poucos pontos específicos. Isso pode indicar uma movimentação financeira mais equilibrada.",
+  "Você evitou concentrar grande parte dos gastos em poucos momentos específicos do período.",
+  "O dinheiro foi utilizado de forma mais distribuída ao longo do período, reduzindo a dependência de poucos eventos.",
+  "Seus gastos ficaram mais espalhados ao longo do período analisado, sem fortes concentrações em poucos pontos.",
       ]
     : percentualDiasSemGasto >= 40
     ? [
-  "Existiram vários dias sem gastos registrados neste período. Dependendo do seu objetivo financeiro, isso pode ser um sinal positivo.",
+  "Você passou vários dias deste período sem registrar gastos. Dependendo do seu objetivo financeiro, isso pode representar um avanço importante.",
   "Boa parte dos dias deste período não teve movimentação financeira registrada, reduzindo a frequência dos gastos.",
-  "Houve diversos dias sem registros de gastos. Se isso foi intencional, pode representar um avanço no controle financeiro.",
+  "Houve diversos dias sem registros de gastos. Se isso foi intencional, pode representar um passo positivo no controle financeiro.",
       ]
     : [
-        "O período apresentou movimentação financeira consistente, ajudando o Enxergaí a entender melhor seus hábitos.",
-        "Os registros deste período criam uma base mais rica para acompanhar sua evolução financeira.",
-        "Quanto mais informações bem registradas, mais o Enxergaí consegue identificar padrões úteis para você.",
+  "Você está criando uma base cada vez mais rica de informações para entender seus hábitos financeiros.",
+  "Seus registros ajudam o Enxergaí a enxergar padrões mais úteis para apoiar suas decisões.",
+  "Quanto mais você registra, mais o Enxergaí consegue transformar movimentações em aprendizados sobre seu comportamento financeiro.",
       ],
   `${chaveInsights}-feedback-positivo`
 );
