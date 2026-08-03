@@ -1927,13 +1927,40 @@ const temDistribuicaoSaudavel =
 
 const textoFeedbackPositivo = escolherTexto(
   temDistribuicaoSaudavel
-    ? [
-  `Você distribuiu seus gastos entre várias categorias ${contextoPeriodoHumano}, sem que uma única área dominasse grande parte do total.`,
+    period === "year"
+  ? [
+      "Ao longo deste ano, nenhuma categoria dominou excessivamente seus gastos, indicando uma distribuição financeira mais equilibrada.",
 
-  `Seu dinheiro ficou mais equilibrado entre diferentes categorias ${contextoPeriodoHumano}, evitando grande dependência de uma única área.`,
+      "Observando este ano, seus gastos ficaram distribuídos entre diferentes categorias sem grande dependência de uma única área.",
 
-  `Os gastos ficaram mais espalhados entre diferentes categorias ${contextoPeriodoHumano}, o que pode facilitar a visualização e o controle do seu dinheiro.`,
-]
+      "Os registros deste ano mostram uma participação mais equilibrada entre categorias, o que facilita entender para onde o dinheiro está indo.",
+    ]
+
+  : period === "all"
+  ? [
+      "Observando todo o histórico disponível, seus gastos ficaram distribuídos entre diferentes categorias sem grande dependência de uma única área.",
+
+      "Ao analisar todo o período registrado no Enxergaí, não existe uma única categoria concentrando a maior parte do dinheiro.",
+
+      "O histórico completo mostra uma distribuição mais equilibrada dos gastos entre diferentes áreas da sua vida financeira.",
+    ]
+
+  : period === "custom"
+  ? [
+      "Dentro do período selecionado, seus gastos ficaram distribuídos entre diferentes categorias, evitando dependência excessiva de uma única área.",
+
+      "O intervalo analisado apresenta uma distribuição relativamente equilibrada entre categorias financeiras.",
+
+      "Durante o período escolhido, nenhuma categoria concentrou a maior parte dos gastos registrados.",
+    ]
+
+  : [
+      "Você distribuiu seus gastos entre várias categorias, sem que uma única área dominasse grande parte do total.",
+
+      "Seu dinheiro ficou mais equilibrado entre diferentes categorias, evitando grande dependência de uma única área.",
+
+      "Os gastos ficaram mais espalhados entre diferentes categorias, o que pode facilitar a visualização e o controle do seu dinheiro.",
+    ]
   : percentualDiasSemGasto >= 40
     ? [
   `Houve vários dias sem movimentação financeira registrada ${contextoPeriodoHumano}. Se esses dias realmente tiveram menos gastos, isso pode representar um avanço importante dependendo do seu objetivo financeiro.`,
