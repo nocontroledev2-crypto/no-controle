@@ -1927,7 +1927,7 @@ const temDistribuicaoSaudavel =
 
 const textoFeedbackPositivo = escolherTexto(
   temDistribuicaoSaudavel
-    period === "year"
+    : period === "year"
   ? [
       "Ao longo deste ano, nenhuma categoria dominou excessivamente seus gastos, indicando uma distribuição financeira mais equilibrada.",
 
