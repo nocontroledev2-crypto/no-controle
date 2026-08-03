@@ -1025,7 +1025,7 @@ const percentualCategoriaDominante =
     ? (categoriaDominante.total / totalGrafico) * 100
     : 0;
 
-    const categoriaDominantePeriodoAnterior = (() => {
+   const resumoCategoriaDominantePeriodoAnterior = (() => {
   let despesasAnterior: any[] = [];
 
   if (period === "month") {
@@ -1091,8 +1091,18 @@ const percentualCategoriaDominante =
     return null;
   }
 
-  return (dominante.total / totalAnterior) * 100;
+  return {
+    categoria: dominante.categoria,
+    total: dominante.total,
+    percentual: (dominante.total / totalAnterior) * 100,
+  };
 })();
+
+const categoriaDominantePeriodoAnterior =
+  resumoCategoriaDominantePeriodoAnterior?.percentual ?? null;
+
+const nomeCategoriaDominantePeriodoAnterior =
+  resumoCategoriaDominantePeriodoAnterior?.categoria ?? "";
 
 const houveMelhoraDistribuicao =
   categoriaDominantePeriodoAnterior !== null &&
@@ -1299,6 +1309,22 @@ const contextoPeriodoComDe = (() => {
   }
 
   return "deste período";
+})();
+
+const periodoAnteriorHumano = (() => {
+  if (period === "week") {
+    return "semana passada";
+  }
+
+  if (period === "month") {
+    return "mês passado";
+  }
+
+  if (period === "year") {
+    return "ano passado";
+  }
+
+  return "período anterior";
 })();
 
 const textoSemMovimentacao = escolherTexto(
@@ -2080,6 +2106,26 @@ const textoConquistaEntrePeriodos = escolherTexto(
   `${chaveInsights}-conquista-periodo`
 );
 
+const mudouCategoriaDominante =
+  nivelMaturidade >= 3 &&
+  !deveMostrarAvisoLancamentosFuturos &&
+  !!categoriaDominante?.categoria &&
+  !!nomeCategoriaDominantePeriodoAnterior &&
+  categoriaDominante.categoria !== nomeCategoriaDominantePeriodoAnterior &&
+  percentualCategoriaDominante >= 35 &&
+  (categoriaDominantePeriodoAnterior ?? 0) >= 35;
+
+  const textoMudancaCategoriaDominante = escolherTexto(
+  [
+    `A categoria que mais pesou mudou em relação à ${periodoAnteriorHumano}: antes era ${nomeCategoriaDominantePeriodoAnterior}, agora é ${categoriaDominante?.categoria}.`,
+
+    `O principal destino do dinheiro mudou quando comparado com a ${periodoAnteriorHumano}: ${nomeCategoriaDominantePeriodoAnterior} perdeu espaço e ${categoriaDominante?.categoria} assumiu o maior peso.`,
+
+    `Houve uma mudança importante no comportamento dos gastos: em vez de ${nomeCategoriaDominantePeriodoAnterior}, agora ${categoriaDominante?.categoria} aparece como a categoria de maior impacto.`,
+  ],
+  `${chaveInsights}-mudanca-categoria-dominante`
+);
+
 const textoReconhecimentoEvolucao = escolherTexto(
   [
     "Mudanças como essa podem facilitar a visualização dos seus hábitos financeiros e ajudar você a entender melhor para onde o dinheiro está indo.",
@@ -2630,6 +2676,12 @@ const labelX = Math.min(
 {deveMostrarReconhecimentoEvolucao && (
   <Text style={styles.insightItem}>
     💡 {textoReconhecimentoEvolucao}
+  </Text>
+)}
+
+{mudouCategoriaDominante && (
+  <Text style={styles.insightItem}>
+    🔄 {textoMudancaCategoriaDominante}
   </Text>
 )}
 
