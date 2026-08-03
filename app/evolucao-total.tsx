@@ -2054,7 +2054,7 @@ const textoFeedbackPositivo = escolherTexto(
 
   `Boa parte dos ${unidadeTempoPositiva} ${contextoPeriodoHumano} não apresentou movimentação financeira registrada.`,
 
-  ``O período apresentou diversos ${unidadeTempoPositiva} sem movimentação financeira registrada ${contextoPeriodoHumano}.`,
+  `O período apresentou diversos ${unidadeTempoPositiva} sem movimentação financeira registrada ${contextoPeriodoHumano}.`,
 ]
 
 : [
