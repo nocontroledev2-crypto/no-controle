@@ -124,6 +124,21 @@ export default function EvolucaoTotal() {
     "Dez",
   ];
 
+  const labelsMonthFull = [
+  "Janeiro",
+  "Fevereiro",
+  "Março",
+  "Abril",
+  "Maio",
+  "Junho",
+  "Julho",
+  "Agosto",
+  "Setembro",
+  "Outubro",
+  "Novembro",
+  "Dezembro",
+];
+
   /* ===============================
      HELPERS DO GRÁFICO
   =============================== */
@@ -806,6 +821,13 @@ if (
   }
 }
 
+if (
+  period === "all" &&
+  unidadeSingular === "mês"
+) {
+  label = safeChartLabels[index] || label;
+}
+
     return {
       label,
       value: Number(value),
@@ -1289,11 +1311,40 @@ const deveMostrarTop3Impacto =
   const deveMostrarMaiorImpacto =
   !(unidadeSingular !== "dia" && pontosFinanceiros <= 3);
 
+ const maiorDiaLabelCorrigido = (() => {
+  if (!maiorDia?.label) {
+    return "";
+  }
+
+  if (unidadeSingular === "mês") {
+    const abreviado = maiorDia.label.split("/")[0];
+
+    const mapaMeses: Record<string, string> = {
+      Jan: "Janeiro",
+      Fev: "Fevereiro",
+      Mar: "Março",
+      Abr: "Abril",
+      Mai: "Maio",
+      Jun: "Junho",
+      Jul: "Julho",
+      Ago: "Agosto",
+      Set: "Setembro",
+      Out: "Outubro",
+      Nov: "Novembro",
+      Dez: "Dezembro",
+    };
+
+    return mapaMeses[abreviado] || maiorDia.label;
+  }
+
+  return maiorDia.label;
+})();
+
 const textoPoucosPontosMensais = escolherTexto(
   [
-    `O período analisado possui movimentação em ${pontosFinanceiros} ${unidadePlural}, com maior impacto em ${maiorDia?.label}.`,
-    `Entre os ${unidadePlural} analisados, ${maiorDia?.label} foi o principal ponto de impacto financeiro.`,
-    `${maiorDia?.label} se destacou como o ${unidadeSingular} de maior peso dentro deste período.`,
+    `O período analisado possui movimentação em ${pontosFinanceiros} ${unidadePlural}, com maior impacto em ${maiorDiaLabelCorrigido}.`,
+    `Entre os ${unidadePlural} analisados, ${maiorDiaLabelCorrigido} foi o principal ponto de impacto financeiro.`,
+    `${maiorDiaLabelCorrigido} se destacou como o ${unidadeSingular} de maior peso dentro deste período.`,
   ],
   `${chaveInsights}-poucos-pontos-mensais`
 );
@@ -1897,18 +1948,11 @@ const textoFeedbackPositivo = escolherTexto(
 ]
     : percentualDiasSemGasto >= 40
     ? [
-  `Você passou vários dias sem registrar gastos ${contextoPeriodoHumano}. Dependendo do seu objetivo financeiro, isso pode representar um avanço importante.`,
+  `Houve vários dias sem movimentação financeira registrada ${contextoPeriodoHumano}. Se esses dias realmente tiveram menos gastos, isso pode representar um avanço importante dependendo do seu objetivo financeiro.`,
 
-  `Boa parte dos dias ${contextoPeriodoHumano} não teve movimentação financeira registrada, reduzindo a frequência dos gastos.`,
+  `Boa parte dos dias ${contextoPeriodoHumano} não apresentou movimentação financeira registrada. Se isso refletir menos consumo, pode ser um sinal positivo de controle.`,
 
-  `Houve diversos dias sem registros de gastos ${contextoPeriodoHumano}. Se isso foi intencional, pode representar um passo positivo no controle financeiro.`,
-]
-: [
-  "Você está criando uma base cada vez mais rica de informações para entender seus hábitos financeiros.",
-
-  "Seus registros ajudam o Enxergaí a enxergar padrões mais úteis para apoiar suas decisões.",
-
-  "Quanto mais você registra, mais o Enxergaí consegue transformar movimentações em aprendizados sobre seu comportamento financeiro.",
+  `O período apresentou diversos dias sem movimentação financeira registrada ${contextoPeriodoHumano}. Quando isso acontece por decisão consciente, pode contribuir para o equilíbrio financeiro.`,
 ],
 
   `${chaveInsights}-feedback-positivo`
@@ -1917,11 +1961,9 @@ const textoFeedbackPositivo = escolherTexto(
 const deveMostrarFeedbackPositivo =
   nivelMaturidade >= 3 &&
   (
-    temConcentracaoBaixa ||
     temDistribuicaoSaudavel ||
     percentualDiasSemGasto >= 40
   );
-
 
   function formatShortMoney(valor: number) {
   if (valor >= 1000) {
