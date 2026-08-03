@@ -1327,6 +1327,38 @@ const periodoAnteriorHumano = (() => {
   return "período anterior";
 })();
 
+const periodoAnteriorComPreposicao = (() => {
+  if (period === "week") {
+    return "à semana passada";
+  }
+
+  if (period === "month") {
+    return "ao mês passado";
+  }
+
+  if (period === "year") {
+    return "ao ano passado";
+  }
+
+  return "ao período anterior";
+})();
+
+const periodoAnteriorComparativo = (() => {
+  if (period === "week") {
+    return "a semana passada";
+  }
+
+  if (period === "month") {
+    return "o mês passado";
+  }
+
+  if (period === "year") {
+    return "o ano passado";
+  }
+
+  return "o período anterior";
+})();
+
 const textoSemMovimentacao = escolherTexto(
   [
     "Nenhuma movimentação financeira foi identificada neste período.",
@@ -2097,18 +2129,18 @@ const textoFeedbackPositivo = escolherTexto(
 
 const textoConquistaEntrePeriodos = escolherTexto(
   [
-    "A principal categoria perdeu peso em relação ao período anterior, indicando uma distribuição mais equilibrada dos gastos.",
+    `A principal categoria perdeu peso em relação ${periodoAnteriorComPreposicao}, indicando uma distribuição mais equilibrada dos gastos.`,
 
-    "Os gastos ficaram menos dependentes de uma única categoria quando comparados ao período anterior.",
+    `Os gastos ficaram menos dependentes de uma única categoria quando comparados com ${periodoAnteriorComparativo}.`,
 
-    "O dinheiro ficou mais distribuído entre diferentes áreas em relação ao período anterior.",
+    `O dinheiro ficou mais distribuído entre diferentes áreas em relação ${periodoAnteriorComPreposicao}.`,
   ],
   `${chaveInsights}-conquista-periodo`
 );
 
 const mudouCategoriaDominante =
   nivelMaturidade >= 3 &&
-  !deveMostrarAvisoLancamentosFuturos &&
+  percentualLancamentosFuturos < 40 &&
   !!categoriaDominante?.categoria &&
   !!nomeCategoriaDominantePeriodoAnterior &&
   categoriaDominante.categoria !== nomeCategoriaDominantePeriodoAnterior &&
@@ -2117,11 +2149,11 @@ const mudouCategoriaDominante =
 
   const textoMudancaCategoriaDominante = escolherTexto(
   [
-    `A categoria que mais pesou mudou em relação à ${periodoAnteriorHumano}: antes era ${nomeCategoriaDominantePeriodoAnterior}, agora é ${categoriaDominante?.categoria}.`,
+    `A categoria que mais pesou mudou em relação ${periodoAnteriorComPreposicao}: antes era ${nomeCategoriaDominantePeriodoAnterior}, agora é ${categoriaDominante?.categoria}.`,
 
-    `O principal destino do dinheiro mudou quando comparado com a ${periodoAnteriorHumano}: ${nomeCategoriaDominantePeriodoAnterior} perdeu espaço e ${categoriaDominante?.categoria} assumiu o maior peso.`,
+    `O principal destino do dinheiro mudou quando comparado com ${periodoAnteriorComparativo}: ${nomeCategoriaDominantePeriodoAnterior} perdeu espaço e ${categoriaDominante?.categoria} assumiu o maior peso.`,
 
-    `Houve uma mudança importante no comportamento dos gastos: em vez de ${nomeCategoriaDominantePeriodoAnterior}, agora ${categoriaDominante?.categoria} aparece como a categoria de maior impacto.`,
+    `Houve uma mudança importante no comportamento dos gastos: antes ${nomeCategoriaDominantePeriodoAnterior} tinha o maior impacto, agora ${categoriaDominante?.categoria} aparece como principal categoria.`,
   ],
   `${chaveInsights}-mudanca-categoria-dominante`
 );
