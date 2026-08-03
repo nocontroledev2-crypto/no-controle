@@ -2093,6 +2093,7 @@ const textoReconhecimentoEvolucao = escolherTexto(
 
 const deveMostrarFeedbackPositivo =
   nivelMaturidade >= 3 &&
+  !houveMelhoraDistribuicao &&
   (
     temDistribuicaoSaudavel ||
     percentualDiasSemGasto >= 40
