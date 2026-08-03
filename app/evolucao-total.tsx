@@ -1930,30 +1930,30 @@ const textoFeedbackPositivo = escolherTexto(
   ? (
       period === "year"
         ? [
-            "Ao longo deste ano, nenhuma categoria dominou excessivamente seus gastos, indicando uma distribuição financeira mais equilibrada.",
+  "Neste ano, seu dinheiro não ficou concentrado em uma única categoria. Os gastos ficaram mais divididos entre diferentes áreas da sua vida.",
 
-            "Observando este ano, seus gastos ficaram distribuídos entre diferentes categorias sem grande dependência de uma única área.",
+  "Ao longo deste ano, nenhuma categoria dominou seus gastos, o que ajuda a manter uma visão mais equilibrada do dinheiro.",
 
-            "Os registros deste ano mostram uma participação mais equilibrada entre categorias, o que facilita entender para onde o dinheiro está indo.",
-          ]
+  "Seus registros deste ano mostram que o dinheiro foi distribuído entre diferentes categorias, sem ficar preso a uma única área.",
+]
 
         : period === "all"
         ? [
-            "Observando todo o histórico disponível, seus gastos ficaram distribuídos entre diferentes categorias sem grande dependência de uma única área.",
+  "O histórico completo mostra que seu dinheiro não ficou concentrado em uma única categoria ao longo do tempo.",
 
-            "Ao analisar todo o período registrado no Enxergaí, não existe uma única categoria concentrando a maior parte do dinheiro.",
+  "Observando todos os registros do Enxergaí, nenhuma categoria dominou a maior parte dos seus gastos.",
 
-            "O histórico completo mostra uma distribuição mais equilibrada dos gastos entre diferentes áreas da sua vida financeira.",
-          ]
+  "Ao longo de todo o histórico disponível, seus gastos ficaram distribuídos entre diferentes áreas da sua vida financeira.",
+]
 
         : period === "custom"
-        ? [
-            "Dentro do período selecionado, seus gastos ficaram distribuídos entre diferentes categorias, evitando dependência excessiva de uma única área.",
+        ?  [
+           "Durante o período escolhido, seu dinheiro não ficou preso em uma única categoria. Os gastos ficaram mais divididos entre diferentes áreas.",
 
-            "O intervalo analisado apresenta uma distribuição relativamente equilibrada entre categorias financeiras.",
+             "No período analisado, nenhuma categoria dominou seus gastos. Isso ajuda a enxergar melhor para onde o dinheiro está indo.",
 
-            "Durante o período escolhido, nenhuma categoria concentrou a maior parte dos gastos registrados.",
-          ]
+             "Os gastos ficaram distribuídos entre diferentes categorias, sem que uma única área consumisse a maior parte do seu dinheiro.",
+            ]
 
         : [
             "Você distribuiu seus gastos entre várias categorias, sem que uma única área dominasse grande parte do total.",
