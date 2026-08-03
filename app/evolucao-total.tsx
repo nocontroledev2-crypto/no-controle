@@ -1472,6 +1472,38 @@ const periodoAnteriorComparativo = (() => {
   return "o período anterior";
 })();
 
+const periodoAnteriorComEm = (() => {
+  if (period === "week") {
+    return "na semana passada";
+  }
+
+  if (period === "month") {
+    return "no mês passado";
+  }
+
+  if (period === "year") {
+    return "no ano passado";
+  }
+
+  return "no período anterior";
+})();
+
+const periodoAtualComparativo = (() => {
+  if (period === "week") {
+    return "nesta semana";
+  }
+
+  if (period === "month") {
+    return "neste mês";
+  }
+
+  if (period === "year") {
+    return "neste ano";
+  }
+
+  return "agora";
+})();
+
 const textoSemMovimentacao = escolherTexto(
   [
     "Nenhuma movimentação financeira foi identificada neste período.",
@@ -2280,15 +2312,23 @@ const textoCategoriaGanhouEspaco =
   categoriaQueMaisGanhouEspaco
     ? escolherTexto(
         [
-          `${categoriaQueMaisGanhouEspaco.categoria} ganhou espaço em relação ${periodoAnteriorComPreposicao}: antes representava ${categoriaQueMaisGanhouEspaco.percentualAnterior.toFixed(
+          `${categoriaQueMaisGanhouEspaco.categoria} ganhou espaço: saiu de ${categoriaQueMaisGanhouEspaco.percentualAnterior.toFixed(
             0
-          )}% dos gastos, agora representa ${categoriaQueMaisGanhouEspaco.percentualAtual.toFixed(
+          )}% ${periodoAnteriorComEm} para ${categoriaQueMaisGanhouEspaco.percentualAtual.toFixed(
+            0
+          )}% ${periodoAtualComparativo}.`,
+
+          `${categoriaQueMaisGanhouEspaco.categoria} passou a pesar mais nos gastos. ${periodoAnteriorComEm}, representava ${categoriaQueMaisGanhouEspaco.percentualAnterior.toFixed(
+            0
+          )}%; ${periodoAtualComparativo}, chegou a ${categoriaQueMaisGanhouEspaco.percentualAtual.toFixed(
             0
           )}%.`,
 
-          `${categoriaQueMaisGanhouEspaco.categoria} passou a pesar mais quando comparado com ${periodoAnteriorComparativo}. Esse é um ponto importante para observar.`,
-
-          `O peso de ${categoriaQueMaisGanhouEspaco.categoria} aumentou em relação ${periodoAnteriorComPreposicao}, mostrando que essa área ganhou mais espaço nos gastos.`,
+          `O peso de ${categoriaQueMaisGanhouEspaco.categoria} aumentou em relação ${periodoAnteriorComPreposicao}: foi de ${categoriaQueMaisGanhouEspaco.percentualAnterior.toFixed(
+            0
+          )}% para ${categoriaQueMaisGanhouEspaco.percentualAtual.toFixed(
+            0
+          )}% ${periodoAtualComparativo}.`,
         ],
         `${chaveInsights}-categoria-ganhou-espaco`
       )
@@ -2298,15 +2338,23 @@ const textoCategoriaGanhouEspaco =
   categoriaQueMaisPerdeuEspaco
     ? escolherTexto(
         [
-          `${categoriaQueMaisPerdeuEspaco.categoria} perdeu espaço em relação ${periodoAnteriorComPreposicao}: antes representava ${categoriaQueMaisPerdeuEspaco.percentualAnterior.toFixed(
+          `${categoriaQueMaisPerdeuEspaco.categoria} perdeu espaço: era ${categoriaQueMaisPerdeuEspaco.percentualAnterior.toFixed(
             0
-          )}% dos gastos, agora representa ${categoriaQueMaisPerdeuEspaco.percentualAtual.toFixed(
+          )}% ${periodoAnteriorComEm} e ficou em ${categoriaQueMaisPerdeuEspaco.percentualAtual.toFixed(
+            0
+          )}% ${periodoAtualComparativo}.`,
+
+          `${categoriaQueMaisPerdeuEspaco.categoria} passou a representar uma parte menor dos gastos. ${periodoAnteriorComEm}, era ${categoriaQueMaisPerdeuEspaco.percentualAnterior.toFixed(
+            0
+          )}%; ${periodoAtualComparativo}, ficou em ${categoriaQueMaisPerdeuEspaco.percentualAtual.toFixed(
             0
           )}%.`,
 
-          `${categoriaQueMaisPerdeuEspaco.categoria} teve menos participação nos gastos quando comparado com ${periodoAnteriorComparativo}.`,
-
-          `O peso de ${categoriaQueMaisPerdeuEspaco.categoria} diminuiu em relação ${periodoAnteriorComPreposicao}, indicando que essa área ocupou menos espaço no período atual.`,
+          `O peso de ${categoriaQueMaisPerdeuEspaco.categoria} diminuiu em relação ${periodoAnteriorComPreposicao}: caiu de ${categoriaQueMaisPerdeuEspaco.percentualAnterior.toFixed(
+            0
+          )}% para ${categoriaQueMaisPerdeuEspaco.percentualAtual.toFixed(
+            0
+          )}% ${periodoAtualComparativo}.`,
         ],
         `${chaveInsights}-categoria-perdeu-espaco`
       )
