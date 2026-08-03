@@ -1126,6 +1126,46 @@ const contextoPeriodoInsight = (() => {
   return "neste período";
 })();
 
+const contextoPeriodoHumano = (() => {
+  if (period === "today") {
+    return "nos últimos 7 dias";
+  }
+
+  if (period === "week") {
+    return "nesta semana";
+  }
+
+  if (period === "weekPrev") {
+    return "na semana passada";
+  }
+
+  if (period === "month") {
+    return "neste mês";
+  }
+
+  if (period === "monthPrev") {
+    return "no mês passado";
+  }
+
+  if (period === "year") {
+    return "ao longo deste ano";
+  }
+
+  if (period === "lastYear") {
+    return "ao longo do ano passado";
+  }
+
+  if (period === "custom") {
+    return "dentro do período selecionado";
+  }
+
+  if (period === "all") {
+    return "em todo o histórico disponível";
+  }
+
+  return "neste período";
+})();
+
 const contextoPeriodoComDe = (() => {
   if (period === "today") {
     return "dos últimos 7 dias";
@@ -1841,27 +1881,28 @@ const temDistribuicaoSaudavel =
 const textoFeedbackPositivo = escolherTexto(
   temDistribuicaoSaudavel
     ? [
-  "Você distribuiu seus gastos entre várias categorias, sem que uma única área dominasse grande parte do total.",
-  "Seu dinheiro ficou mais equilibrado entre diferentes categorias neste período, evitando grande dependência de uma única área.",
-  "Os gastos ficaram mais espalhados entre diferentes categorias, o que pode facilitar a visualização e o controle do seu dinheiro.",
-      ]
+  `Você distribuiu seus gastos entre várias categorias ${contextoPeriodoHumano}, sem que uma única área dominasse grande parte do total.`,
+
+  `Seu dinheiro ficou mais equilibrado entre diferentes categorias ${contextoPeriodoHumano}, evitando grande dependência de uma única área.`,
+
+  `Os gastos ficaram mais espalhados entre diferentes categorias ${contextoPeriodoHumano}, o que pode facilitar a visualização e o controle do seu dinheiro.`,
+]
     : temConcentracaoBaixa
     ? [
-  "Você evitou concentrar grande parte dos gastos em poucos momentos específicos do período.",
-  "O dinheiro foi utilizado de forma mais distribuída ao longo do período, reduzindo a dependência de poucos eventos.",
-  "Seus gastos ficaram mais espalhados ao longo do período analisado, sem fortes concentrações em poucos pontos.",
-      ]
+  `Você evitou concentrar grande parte dos gastos em poucos momentos específicos ${contextoPeriodoHumano}.`,
+
+  `O dinheiro foi utilizado de forma mais distribuída ${contextoPeriodoHumano}, reduzindo a dependência de poucos eventos.`,
+
+  `Seus gastos ficaram mais espalhados ${contextoPeriodoHumano}, sem fortes concentrações em poucos pontos.`,
+]
     : percentualDiasSemGasto >= 40
     ? [
-  "Você passou vários dias deste período sem registrar gastos. Dependendo do seu objetivo financeiro, isso pode representar um avanço importante.",
-  "Boa parte dos dias deste período não teve movimentação financeira registrada, reduzindo a frequência dos gastos.",
-  "Houve diversos dias sem registros de gastos. Se isso foi intencional, pode representar um passo positivo no controle financeiro.",
-      ]
-    : [
-  "Você está criando uma base cada vez mais rica de informações para entender seus hábitos financeiros.",
-  "Seus registros ajudam o Enxergaí a enxergar padrões mais úteis para apoiar suas decisões.",
-  "Quanto mais você registra, mais o Enxergaí consegue transformar movimentações em aprendizados sobre seu comportamento financeiro.",
-      ],
+  `Você passou vários dias sem registrar gastos ${contextoPeriodoHumano}. Dependendo do seu objetivo financeiro, isso pode representar um avanço importante.`,
+
+  `Boa parte dos dias ${contextoPeriodoHumano} não teve movimentação financeira registrada, reduzindo a frequência dos gastos.`,
+
+  `Houve diversos dias sem registros de gastos ${contextoPeriodoHumano}. Se isso foi intencional, pode representar um passo positivo no controle financeiro.`,
+],
   `${chaveInsights}-feedback-positivo`
 );
 
