@@ -2149,14 +2149,28 @@ const mudouCategoriaDominante =
 
   const textoMudancaCategoriaDominante = escolherTexto(
   [
-    `A categoria que mais pesou mudou em relação ${periodoAnteriorComPreposicao}: antes era ${nomeCategoriaDominantePeriodoAnterior}, agora é ${categoriaDominante?.categoria}.`,
+    `A categoria que mais pesou mudou em relação ${periodoAnteriorComPreposicao}: antes o maior peso estava em ${nomeCategoriaDominantePeriodoAnterior}, agora está em ${categoriaDominante?.categoria}.`,
 
-    `O principal destino do dinheiro mudou quando comparado com ${periodoAnteriorComparativo}: ${nomeCategoriaDominantePeriodoAnterior} perdeu espaço e ${categoriaDominante?.categoria} assumiu o maior peso.`,
+    `O dinheiro mudou de direção quando comparado com ${periodoAnteriorComparativo}: ${nomeCategoriaDominantePeriodoAnterior} perdeu espaço e ${categoriaDominante?.categoria} passou a pesar mais.`,
 
-    `Houve uma mudança importante no comportamento dos gastos: antes ${nomeCategoriaDominantePeriodoAnterior} tinha o maior impacto, agora ${categoriaDominante?.categoria} aparece como principal categoria.`,
+    `Houve uma mudança no foco dos gastos: antes ${nomeCategoriaDominantePeriodoAnterior} tinha o maior impacto, agora ${categoriaDominante?.categoria} aparece como principal categoria.`,
   ],
   `${chaveInsights}-mudanca-categoria-dominante`
 );
+
+const textoExplicacaoMudancaCategoria = escolherTexto(
+  [
+    "Isso ajuda a perceber que o padrão de consumo mudou. Vale observar se essa mudança veio de necessidade, compra planejada ou gasto extra.",
+
+    "Quando a categoria principal muda, é um sinal de que o dinheiro passou a ir mais para outro tipo de gasto. Isso merece atenção.",
+
+    "Essa mudança mostra que o principal peso financeiro saiu de uma área e foi para outra. Enxergar isso ajuda a entender melhor o comportamento do período.",
+  ],
+  `${chaveInsights}-explicacao-mudanca-categoria`
+);
+
+const deveMostrarExplicacaoMudancaCategoria =
+  mudouCategoriaDominante;
 
 const textoReconhecimentoEvolucao = escolherTexto(
   [
@@ -2714,6 +2728,12 @@ const labelX = Math.min(
 {mudouCategoriaDominante && (
   <Text style={styles.insightItem}>
     🔄 {textoMudancaCategoriaDominante}
+  </Text>
+)}
+
+{deveMostrarExplicacaoMudancaCategoria && (
+  <Text style={styles.insightItem}>
+    💡 {textoExplicacaoMudancaCategoria}
   </Text>
 )}
 
