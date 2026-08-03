@@ -821,12 +821,10 @@ if (
   }
 }
 
-if (
-  period === "all" &&
-  unidadeSingular === "mês"
-) {
+if (period === "all") {
   label = safeChartLabels[index] || label;
 }
+
 
     return {
       label,
@@ -1922,8 +1920,6 @@ const textoHojeVsMedia = escolherTexto(
   `${chaveInsights}-hoje-media`
 );
 
-const temConcentracaoBaixa =
-  percentualTop3 < 70;
 
 const temDistribuicaoSaudavel =
   percentualCategoriaDominante > 0 &&
@@ -1938,15 +1934,7 @@ const textoFeedbackPositivo = escolherTexto(
 
   `Os gastos ficaram mais espalhados entre diferentes categorias ${contextoPeriodoHumano}, o que pode facilitar a visualização e o controle do seu dinheiro.`,
 ]
-    : temConcentracaoBaixa
-    ? [
-  `Você evitou concentrar grande parte dos gastos em poucos momentos específicos ${contextoPeriodoHumano}.`,
-
-  `O dinheiro foi utilizado de forma mais distribuída ${contextoPeriodoHumano}, reduzindo a dependência de poucos eventos.`,
-
-  `Seus gastos ficaram mais espalhados ${contextoPeriodoHumano}, sem fortes concentrações em poucos pontos.`,
-]
-    : percentualDiasSemGasto >= 40
+  : percentualDiasSemGasto >= 40
     ? [
   `Houve vários dias sem movimentação financeira registrada ${contextoPeriodoHumano}. Se esses dias realmente tiveram menos gastos, isso pode representar um avanço importante dependendo do seu objetivo financeiro.`,
 
