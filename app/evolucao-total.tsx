@@ -1025,6 +1025,81 @@ const percentualCategoriaDominante =
     ? (categoriaDominante.total / totalGrafico) * 100
     : 0;
 
+    const categoriaDominantePeriodoAnterior = (() => {
+  let despesasAnterior: any[] = [];
+
+  if (period === "month") {
+    despesasAnterior = expenses.filter((item: any) => {
+      const d = parseDateSafe(item.data);
+
+      return (
+        d.getMonth() === previousMonthDate.getMonth() &&
+        d.getFullYear() === previousMonthDate.getFullYear()
+      );
+    });
+  }
+
+  if (period === "week") {
+    const inicioSemanaAnterior = new Date(startWeek);
+    inicioSemanaAnterior.setDate(startWeek.getDate() - 7);
+
+    const fimSemanaAnterior = new Date(endWeek);
+    fimSemanaAnterior.setDate(endWeek.getDate() - 7);
+
+    despesasAnterior = expenses.filter((item: any) => {
+      const d = parseDateSafe(item.data);
+
+      return d >= inicioSemanaAnterior && d <= fimSemanaAnterior;
+    });
+  }
+
+  if (period === "year") {
+    despesasAnterior = expenses.filter((item: any) => {
+      const d = parseDateSafe(item.data);
+
+      return d.getFullYear() === now.getFullYear() - 1;
+    });
+  }
+
+  const totalAnterior = despesasAnterior.reduce(
+    (sum, item: any) => sum + Number(item.valor || 0),
+    0
+  );
+
+  const categoriasAnterior = Object.entries(
+    despesasAnterior.reduce(
+      (acc: Record<string, number>, item: any) => {
+        const categoria = item.categoria || "Outros";
+
+        acc[categoria] =
+          (acc[categoria] || 0) + Number(item.valor || 0);
+
+        return acc;
+      },
+      {}
+    )
+  )
+    .map(([categoria, total]) => ({
+      categoria,
+      total: Number(total),
+    }))
+    .sort((a, b) => b.total - a.total);
+
+  const dominante = categoriasAnterior[0];
+
+  if (!dominante || totalAnterior <= 0) {
+    return null;
+  }
+
+  return (dominante.total / totalAnterior) * 100;
+})();
+
+const houveMelhoraDistribuicao =
+  categoriaDominantePeriodoAnterior !== null &&
+  percentualCategoriaDominante > 0 &&
+  percentualCategoriaDominante <
+    categoriaDominantePeriodoAnterior - 10;
+
 const deveMostrarCategoriaDominante =
   nivelMaturidade >= 3 &&
   !!categoriaDominante &&
@@ -1963,6 +2038,18 @@ const textoFeedbackPositivo = escolherTexto(
             "Os gastos ficaram mais espalhados entre diferentes categorias, o que pode facilitar a visualização e o controle do seu dinheiro.",
           ]
     )
+
+   const textoConquistaEntrePeriodos = escolherTexto(
+  [
+    "A principal categoria perdeu peso em relação ao período anterior, indicando uma distribuição mais equilibrada dos gastos.",
+
+    "Os gastos ficaram menos dependentes de uma única categoria quando comparados ao período anterior.",
+
+    "O dinheiro ficou mais distribuído entre diferentes áreas em relação ao período anterior.",
+  ],
+  `${chaveInsights}-conquista-periodo`
+);
+
   : percentualDiasSemGasto >= 40
     ? [
   `Houve vários dias sem movimentação financeira registrada ${contextoPeriodoHumano}. Se esses dias realmente tiveram menos gastos, isso pode representar um avanço importante dependendo do seu objetivo financeiro.`,
@@ -2506,6 +2593,12 @@ const labelX = Math.min(
 {deveMostrarFeedbackPositivo && (
   <Text style={styles.insightItem}>
     ✅ {textoFeedbackPositivo}
+  </Text>
+)}
+
+{houveMelhoraDistribuicao && (
+  <Text style={styles.insightItem}>
+    ✅ {textoConquistaEntrePeriodos}
   </Text>
 )}
 
