@@ -2000,6 +2000,13 @@ const temDistribuicaoSaudavel =
   percentualCategoriaDominante > 0 &&
   percentualCategoriaDominante < 50;
 
+const unidadeTempoPositiva =
+  unidadeSingular === "mês"
+    ? "meses"
+    : unidadeSingular === "ano"
+    ? "anos"
+    : "dias";
+
 const textoFeedbackPositivo = escolherTexto(
   temDistribuicaoSaudavel
   ? (
@@ -2043,11 +2050,11 @@ const textoFeedbackPositivo = escolherTexto(
 
   : percentualDiasSemGasto >= 40
     ? [
-  `Houve vários dias sem movimentação financeira registrada ${contextoPeriodoHumano}. Se esses dias realmente tiveram menos gastos, isso pode representar um avanço importante dependendo do seu objetivo financeiro.`,
+  `Houve vários ${unidadeTempoPositiva} sem movimentação financeira registrada ${contextoPeriodoHumano}.`,
 
-  `Boa parte dos dias ${contextoPeriodoHumano} não apresentou movimentação financeira registrada. Se isso refletir menos consumo, pode ser um sinal positivo de controle.`,
+  `Boa parte dos ${unidadeTempoPositiva} ${contextoPeriodoHumano} não apresentou movimentação financeira registrada.`,
 
-  `O período apresentou diversos dias sem movimentação financeira registrada ${contextoPeriodoHumano}. Quando isso acontece por decisão consciente, pode contribuir para o equilíbrio financeiro.`,
+  ``O período apresentou diversos ${unidadeTempoPositiva} sem movimentação financeira registrada ${contextoPeriodoHumano}.`,
 ]
 
 : [
