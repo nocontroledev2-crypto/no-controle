@@ -2080,12 +2080,26 @@ const textoConquistaEntrePeriodos = escolherTexto(
   `${chaveInsights}-conquista-periodo`
 );
 
+const textoReconhecimentoEvolucao = escolherTexto(
+  [
+    "Mudanças como essa podem facilitar a visualização dos seus hábitos financeiros e ajudar você a entender melhor para onde o dinheiro está indo.",
+
+    "Quando os gastos ficam menos concentrados em uma única área, costuma ser mais fácil identificar padrões e oportunidades de melhoria.",
+
+    "Observar essa distribuição ao longo do tempo pode ajudar a tomar decisões financeiras com mais clareza e menos esforço.",
+  ],
+  `${chaveInsights}-reconhecimento-evolucao`
+);
+
 const deveMostrarFeedbackPositivo =
   nivelMaturidade >= 3 &&
   (
     temDistribuicaoSaudavel ||
     percentualDiasSemGasto >= 40
   );
+
+  const deveMostrarReconhecimentoEvolucao =
+  houveMelhoraDistribuicao;
 
   function formatShortMoney(valor: number) {
   if (valor >= 1000) {
@@ -2609,6 +2623,12 @@ const labelX = Math.min(
 {houveMelhoraDistribuicao && (
   <Text style={styles.insightItem}>
     ✅ {textoConquistaEntrePeriodos}
+  </Text>
+)}
+
+{deveMostrarReconhecimentoEvolucao && (
+  <Text style={styles.insightItem}>
+    💡 {textoReconhecimentoEvolucao}
   </Text>
 )}
 
