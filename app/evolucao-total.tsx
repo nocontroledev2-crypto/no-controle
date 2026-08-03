@@ -2039,16 +2039,7 @@ const textoFeedbackPositivo = escolherTexto(
           ]
     )
 
-   const textoConquistaEntrePeriodos = escolherTexto(
-  [
-    "A principal categoria perdeu peso em relação ao período anterior, indicando uma distribuição mais equilibrada dos gastos.",
-
-    "Os gastos ficaram menos dependentes de uma única categoria quando comparados ao período anterior.",
-
-    "O dinheiro ficou mais distribuído entre diferentes áreas em relação ao período anterior.",
-  ],
-  `${chaveInsights}-conquista-periodo`
-);
+   
 
   : percentualDiasSemGasto >= 40
     ? [
@@ -2068,6 +2059,18 @@ const textoFeedbackPositivo = escolherTexto(
 ],
 
   `${chaveInsights}-feedback-positivo`
+);
+
+
+const textoConquistaEntrePeriodos = escolherTexto(
+  [
+    "A principal categoria perdeu peso em relação ao período anterior, indicando uma distribuição mais equilibrada dos gastos.",
+
+    "Os gastos ficaram menos dependentes de uma única categoria quando comparados ao período anterior.",
+
+    "O dinheiro ficou mais distribuído entre diferentes áreas em relação ao período anterior.",
+  ],
+  `${chaveInsights}-conquista-periodo`
 );
 
 const deveMostrarFeedbackPositivo =
