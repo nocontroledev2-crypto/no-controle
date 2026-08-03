@@ -1104,6 +1104,119 @@ const categoriaDominantePeriodoAnterior =
 const nomeCategoriaDominantePeriodoAnterior =
   resumoCategoriaDominantePeriodoAnterior?.categoria ?? "";
 
+  const despesasPeriodoAnteriorComparacao = (() => {
+  let despesasAnterior: any[] = [];
+
+  if (period === "month") {
+    despesasAnterior = expenses.filter((item: any) => {
+      const d = parseDateSafe(item.data);
+
+      return (
+        d.getMonth() === previousMonthDate.getMonth() &&
+        d.getFullYear() === previousMonthDate.getFullYear()
+      );
+    });
+  }
+
+  if (period === "week") {
+    const inicioSemanaAnterior = new Date(startWeek);
+    inicioSemanaAnterior.setDate(startWeek.getDate() - 7);
+
+    const fimSemanaAnterior = new Date(endWeek);
+    fimSemanaAnterior.setDate(endWeek.getDate() - 7);
+
+    despesasAnterior = expenses.filter((item: any) => {
+      const d = parseDateSafe(item.data);
+
+      return d >= inicioSemanaAnterior && d <= fimSemanaAnterior;
+    });
+  }
+
+  if (period === "year") {
+    despesasAnterior = expenses.filter((item: any) => {
+      const d = parseDateSafe(item.data);
+
+      return d.getFullYear() === now.getFullYear() - 1;
+    });
+  }
+
+  return despesasAnterior;
+})();
+
+const totalPeriodoAnteriorComparacao =
+  despesasPeriodoAnteriorComparacao.reduce(
+    (sum, item: any) => sum + Number(item.valor || 0),
+    0
+  );
+
+const mapaCategoriasAtual = categoriasPeriodo.reduce(
+  (acc: Record<string, number>, item: any) => {
+    acc[item.categoria] = Number(item.total || 0);
+    return acc;
+  },
+  {}
+);
+
+const mapaCategoriasAnterior =
+  despesasPeriodoAnteriorComparacao.reduce(
+    (acc: Record<string, number>, item: any) => {
+      const categoria = item.categoria || "Outros";
+
+      acc[categoria] =
+        (acc[categoria] || 0) + Number(item.valor || 0);
+
+      return acc;
+    },
+    {}
+  );
+
+  const categoriasParaComparar = Array.from(
+  new Set([
+    ...Object.keys(mapaCategoriasAtual),
+    ...Object.keys(mapaCategoriasAnterior),
+  ])
+).filter((categoria) => categoria !== "Outros");
+
+const comparacaoCategorias = categoriasParaComparar.map((categoria) => {
+  const totalAtualCategoria = mapaCategoriasAtual[categoria] || 0;
+  const totalAnteriorCategoria = mapaCategoriasAnterior[categoria] || 0;
+
+  const percentualAtual =
+    totalGrafico > 0
+      ? (totalAtualCategoria / totalGrafico) * 100
+      : 0;
+
+  const percentualAnterior =
+    totalPeriodoAnteriorComparacao > 0
+      ? (totalAnteriorCategoria / totalPeriodoAnteriorComparacao) * 100
+      : 0;
+
+  return {
+    categoria,
+    percentualAtual,
+    percentualAnterior,
+    diferenca: percentualAtual - percentualAnterior,
+  };
+});
+
+const categoriaQueMaisGanhouEspaco =
+  comparacaoCategorias
+    .filter(
+      (item) =>
+        item.percentualAtual >= 20 &&
+        item.diferenca >= 15
+    )
+    .sort((a, b) => b.diferenca - a.diferenca)[0];
+
+const categoriaQueMaisPerdeuEspaco =
+  comparacaoCategorias
+    .filter(
+      (item) =>
+        item.percentualAnterior >= 20 &&
+        item.diferenca <= -15
+    )
+    .sort((a, b) => a.diferenca - b.diferenca)[0];
+
 const houveMelhoraDistribuicao =
   categoriaDominantePeriodoAnterior !== null &&
   percentualCategoriaDominante > 0 &&
@@ -2147,6 +2260,11 @@ const mudouCategoriaDominante =
   percentualCategoriaDominante >= 35 &&
   (categoriaDominantePeriodoAnterior ?? 0) >= 35;
 
+const deveMostrarComparacaoCategorias =
+  nivelMaturidade >= 3 &&
+  totalPeriodoAnteriorComparacao > 0 &&
+  percentualLancamentosFuturos < 40;
+
   const textoMudancaCategoriaDominante = escolherTexto(
   [
     `A categoria que mais pesou mudou em relação ${periodoAnteriorComPreposicao}: antes o maior peso estava em ${nomeCategoriaDominantePeriodoAnterior}, agora está em ${categoriaDominante?.categoria}.`,
@@ -2157,6 +2275,52 @@ const mudouCategoriaDominante =
   ],
   `${chaveInsights}-mudanca-categoria-dominante`
 );
+
+const textoCategoriaGanhouEspaco =
+  categoriaQueMaisGanhouEspaco
+    ? escolherTexto(
+        [
+          `${categoriaQueMaisGanhouEspaco.categoria} ganhou espaço em relação ${periodoAnteriorComPreposicao}: antes representava ${categoriaQueMaisGanhouEspaco.percentualAnterior.toFixed(
+            0
+          )}% dos gastos, agora representa ${categoriaQueMaisGanhouEspaco.percentualAtual.toFixed(
+            0
+          )}%.`,
+
+          `${categoriaQueMaisGanhouEspaco.categoria} passou a pesar mais quando comparado com ${periodoAnteriorComparativo}. Esse é um ponto importante para observar.`,
+
+          `O peso de ${categoriaQueMaisGanhouEspaco.categoria} aumentou em relação ${periodoAnteriorComPreposicao}, mostrando que essa área ganhou mais espaço nos gastos.`,
+        ],
+        `${chaveInsights}-categoria-ganhou-espaco`
+      )
+    : "";
+
+    const textoCategoriaPerdeuEspaco =
+  categoriaQueMaisPerdeuEspaco
+    ? escolherTexto(
+        [
+          `${categoriaQueMaisPerdeuEspaco.categoria} perdeu espaço em relação ${periodoAnteriorComPreposicao}: antes representava ${categoriaQueMaisPerdeuEspaco.percentualAnterior.toFixed(
+            0
+          )}% dos gastos, agora representa ${categoriaQueMaisPerdeuEspaco.percentualAtual.toFixed(
+            0
+          )}%.`,
+
+          `${categoriaQueMaisPerdeuEspaco.categoria} teve menos participação nos gastos quando comparado com ${periodoAnteriorComparativo}.`,
+
+          `O peso de ${categoriaQueMaisPerdeuEspaco.categoria} diminuiu em relação ${periodoAnteriorComPreposicao}, indicando que essa área ocupou menos espaço no período atual.`,
+        ],
+        `${chaveInsights}-categoria-perdeu-espaco`
+      )
+    : "";
+
+    const deveMostrarCategoriaGanhouEspaco =
+  deveMostrarComparacaoCategorias &&
+  !!categoriaQueMaisGanhouEspaco;
+
+const deveMostrarCategoriaPerdeuEspaco =
+  deveMostrarComparacaoCategorias &&
+  !!categoriaQueMaisPerdeuEspaco &&
+  categoriaQueMaisPerdeuEspaco.categoria !==
+    categoriaQueMaisGanhouEspaco?.categoria;
 
 const textoExplicacaoMudancaCategoria = escolherTexto(
   [
@@ -2728,6 +2892,18 @@ const labelX = Math.min(
 {mudouCategoriaDominante && (
   <Text style={styles.insightItem}>
     🔄 {textoMudancaCategoriaDominante}
+  </Text>
+)}
+
+{deveMostrarCategoriaGanhouEspaco && (
+  <Text style={styles.insightItem}>
+    📈 {textoCategoriaGanhouEspaco}
+  </Text>
+)}
+
+{deveMostrarCategoriaPerdeuEspaco && (
+  <Text style={styles.insightItem}>
+    📉 {textoCategoriaPerdeuEspaco}
   </Text>
 )}
 
