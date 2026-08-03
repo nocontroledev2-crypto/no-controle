@@ -1953,6 +1953,14 @@ const textoFeedbackPositivo = escolherTexto(
   `Boa parte dos dias ${contextoPeriodoHumano} não apresentou movimentação financeira registrada. Se isso refletir menos consumo, pode ser um sinal positivo de controle.`,
 
   `O período apresentou diversos dias sem movimentação financeira registrada ${contextoPeriodoHumano}. Quando isso acontece por decisão consciente, pode contribuir para o equilíbrio financeiro.`,
+]
+
+: [
+  "Você está criando uma base cada vez mais rica de informações para entender seus hábitos financeiros.",
+
+  "Seus registros ajudam o Enxergaí a enxergar padrões mais úteis para apoiar suas decisões.",
+
+  "Quanto mais você registra, mais o Enxergaí consegue transformar movimentações em aprendizados sobre seu comportamento financeiro.",
 ],
 
   `${chaveInsights}-feedback-positivo`
