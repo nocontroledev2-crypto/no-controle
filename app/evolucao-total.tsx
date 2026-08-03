@@ -1927,7 +1927,6 @@ const temDistribuicaoSaudavel =
 
 const textoFeedbackPositivo = escolherTexto(
   temDistribuicaoSaudavel
-    temDistribuicaoSaudavel
   ? (
       period === "year"
         ? [
