@@ -1953,6 +1953,42 @@ if (variacaoMovimentoRecente >= 40) {
   tipoMovimentoRecente = "caiu-moderado";
 }
 
+const finalDoPeriodoComMuitosZeros = (() => {
+  if (safeChartValues.length < 6) {
+    return false;
+  }
+
+  const ultimoIndiceComGasto = safeChartValues.reduce(
+    (ultimo, value, index) =>
+      Number(value) > 0 ? index : ultimo,
+    -1
+  );
+
+  if (ultimoIndiceComGasto < 0) {
+    return false;
+  }
+
+  const pontosSemGastoNoFinal =
+    safeChartValues.length - 1 - ultimoIndiceComGasto;
+
+  if (unidadeSingular === "mês") {
+    return pontosSemGastoNoFinal >= 2;
+  }
+
+  if (unidadeSingular === "dia") {
+    return pontosSemGastoNoFinal >= 3;
+  }
+
+  return false;
+})();
+
+const deveTratarQuedaComoPossivelFaltaRegistro =
+  finalDoPeriodoComMuitosZeros &&
+  (
+    tipoTendenciaPeriodo === "queda-forte" ||
+    tipoTendenciaPeriodo === "queda-moderada"
+  );
+
 const alvoComparacaoMovimento =
   unidadeSingular === "mês"
     ? "os dois últimos meses com gasto neste período"
