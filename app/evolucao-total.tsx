@@ -1628,9 +1628,20 @@ const textoPoucosPontosMensais = escolherTexto(
 const textoConcentracaoAlta = escolherTexto(
   [
     `Grande parte dos gastos ${contextoPeriodoInsight} ficou concentrada em poucos momentos, indicando pontos específicos de maior impacto financeiro.`,
+
     `Boa parte do dinheiro gasto ${contextoPeriodoInsight} apareceu em poucos momentos específicos.`,
+
     `Uma pequena quantidade de movimentações respondeu pela maior parte dos gastos ${contextoPeriodoInsight}.`,
+
     `Uma parte importante do dinheiro gasto ${contextoPeriodoInsight} apareceu em poucos pontos. Vale observar o que aconteceu nesses momentos.`,
+
+    `Poucos registros puxaram boa parte do valor gasto ${contextoPeriodoInsight}. Esse é um sinal de que alguns momentos tiveram peso maior no período.`,
+
+    `O gasto ${contextoPeriodoInsight} não ficou espalhado de forma uniforme. Alguns pontos concentraram uma parte importante do dinheiro.`,
+
+    `Os maiores impactos ${contextoPeriodoInsight} vieram de poucos momentos. Enxergar esses pontos ajuda a entender onde o dinheiro pesou mais.`,
+
+    `O dinheiro gasto ${contextoPeriodoInsight} teve alguns picos importantes. Vale olhar com atenção o que aconteceu nesses registros.`,
   ],
   `${chaveInsights}-concentracao-alta`
 );
@@ -1638,9 +1649,20 @@ const textoConcentracaoAlta = escolherTexto(
 const textoConcentracaoBaixa = escolherTexto(
   [
     `Os gastos ${contextoPeriodoInsight} ficaram mais distribuídos, sem forte concentração em poucos momentos.`,
+
     `Não houve uma concentração forte dos gastos ${contextoPeriodoInsight}.`,
+
     `Os valores aparecem mais espalhados ${contextoPeriodoInsight}.`,
+
     `Os gastos ficaram mais divididos ao longo do período, sem um único ponto dominando muito o total.`,
+
+    `O dinheiro gasto ${contextoPeriodoInsight} apareceu de forma mais espalhada, sem depender tanto de poucos registros.`,
+
+    `Não existiu um único momento puxando quase todo o gasto ${contextoPeriodoInsight}. Isso ajuda a enxergar o período com mais equilíbrio.`,
+
+    `Os gastos ${contextoPeriodoInsight} não ficaram presos em poucos pontos. Eles apareceram de forma mais distribuída.`,
+
+    `O período teve uma distribuição mais aberta dos gastos, sem um pico dominando muito o total.`,
   ],
   `${chaveInsights}-concentracao-baixa`
 );
@@ -2074,19 +2096,43 @@ const textoCategoriaDominante =
         percentualCategoriaDominante >= 50
           ? [
               `${categoriaDominante.categoria} representa mais da metade dos gastos ${contextoPeriodoInsight}. Esse é um ponto importante para observar com atenção.`,
+
               `Mais de 50% dos gastos ${contextoPeriodoInsight} ficaram em ${categoriaDominante.categoria}. Pode ser um bom lugar para procurar oportunidades de economia.`,
+
               `${categoriaDominante.categoria} recebeu a maior parte do dinheiro gasto ${contextoPeriodoInsight}.`,
+
               `${categoriaDominante.categoria} teve um peso muito forte ${contextoPeriodoInsight}. Se a ideia for economizar, esse pode ser um dos primeiros lugares para olhar.`,
+
+              `A maior parte do dinheiro ${contextoPeriodoInsight} foi para ${categoriaDominante.categoria}. Isso mostra que essa área teve grande influência no resultado.`,
+
+              `${categoriaDominante.categoria} puxou mais da metade dos gastos ${contextoPeriodoInsight}. Vale entender se esse peso veio de necessidade, rotina ou gasto fora do planejado.`,
+
+              `O principal peso financeiro ${contextoPeriodoInsight} ficou em ${categoriaDominante.categoria}. Essa categoria merece atenção especial neste período.`,
+
+              `${categoriaDominante.categoria} dominou os gastos ${contextoPeriodoInsight}. Enxergar isso ajuda a saber por onde começar uma possível revisão.`,
             ]
           : [
               `${categoriaDominante.categoria} foi a categoria de maior peso ${contextoPeriodoInsight}, representando ${percentualCategoriaDominante.toFixed(
                 0
               )}% dos gastos.`,
+
               `A categoria ${categoriaDominante.categoria} teve o maior impacto ${contextoPeriodoInsight}, com ${percentualCategoriaDominante.toFixed(
                 0
               )}% do total gasto.`,
+
               `${categoriaDominante.categoria} foi o destino financeiro mais relevante ${contextoPeriodoInsight}.`,
+
               `Entre todas as categorias, ${categoriaDominante.categoria} teve o maior impacto ${contextoPeriodoInsight}.`,
+
+              `${categoriaDominante.categoria} apareceu como a área de maior peso ${contextoPeriodoInsight}. Isso ajuda a entender para onde foi a maior parte do dinheiro.`,
+
+              `O maior destaque entre as categorias ${contextoPeriodoInsight} foi ${categoriaDominante.categoria}. Essa área merece ser observada com atenção.`,
+
+              `${categoriaDominante.categoria} ficou no topo dos gastos ${contextoPeriodoInsight}, com ${percentualCategoriaDominante.toFixed(
+                0
+              )}% do total.`,
+
+              `A categoria que mais apareceu no resultado financeiro ${contextoPeriodoInsight} foi ${categoriaDominante.categoria}.`,
             ],
         `${chaveInsights}-categoria-dominante`
       )
