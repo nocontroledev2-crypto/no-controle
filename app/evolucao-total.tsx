@@ -2003,6 +2003,7 @@ const textoMovimentoRecente = escolherTexto(
 const deveMostrarAlertaTendencia =
   nivelMaturidade >= 3 &&
   !deveMostrarAvisoLancamentosFuturos &&
+  !deveTratarQuedaComoPossivelFaltaRegistro &&
   (
     tipoTendenciaPeriodo === "aumento-forte" ||
     tipoTendenciaPeriodo === "aumento-moderado" ||
@@ -3123,6 +3124,7 @@ const deveMostrarCrescimentoPessoal =
 const deveMostrarFeedbackPositivo =
   nivelMaturidade >= 3 &&
   !houveMelhoraDistribuicao &&
+  !deveTratarQuedaComoPossivelFaltaRegistro &&
   (
     temDistribuicaoSaudavel ||
     percentualDiasSemGasto >= 40
