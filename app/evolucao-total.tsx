@@ -1632,7 +1632,7 @@ const labelMaiorImpactoCorrigido = (() => {
   }
 
   if (unidadeSingular === "mês") {
-    const abreviado = labelMaiorImpactoCorrigido.split("/")[0];
+    const abreviado = maiorDia.label.split("/")[0];
 
     const mapaMeses: Record<string, string> = {
       Jan: "Janeiro",
@@ -1650,7 +1650,7 @@ const labelMaiorImpactoCorrigido = (() => {
     };
 
     const mesCompleto =
-      mapaMeses[abreviado] || labelMaiorImpactoCorrigido;
+      mapaMeses[abreviado] || maiorDia.label;
 
     if (period === "year") {
       return `${mesCompleto}/${now.getFullYear()}`;
@@ -1662,7 +1662,7 @@ const labelMaiorImpactoCorrigido = (() => {
 
     if (
       period === "custom" &&
-      labelMaiorImpactoCorrigido.includes("/")
+      maiorDia.label.includes("/")
     ) {
       const anoCurto = maiorDia.label.split("/")[1];
 
@@ -1672,7 +1672,7 @@ const labelMaiorImpactoCorrigido = (() => {
     return mesCompleto;
   }
 
-  return labelMaiorImpactoCorrigido;
+  return maiorDia.label;
 })();
 
 const textoMaiorImpacto = maiorDia
