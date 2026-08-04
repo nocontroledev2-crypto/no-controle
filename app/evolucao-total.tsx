@@ -2011,6 +2011,102 @@ const textoLeituraReducao = escolherTexto(
   `${chaveInsights}-leitura-reducao`
 );
 
+const tipoEducacaoContextual = (() => {
+  if (percentualTop3 >= 75) {
+    return "concentracao";
+  }
+
+  if (
+    categoriaDominante &&
+    percentualCategoriaDominante >= 50
+  ) {
+    return "categoria-dominante";
+  }
+
+  if (
+    deveMostrarSubcategoriaDominante &&
+    subcategoriaDominante
+  ) {
+    return "subcategoria";
+  }
+
+  if (
+    tipoTendenciaPeriodo === "aumento-forte" ||
+    tipoTendenciaPeriodo === "aumento-moderado"
+  ) {
+    return "aumento";
+  }
+
+  if (
+    tipoTendenciaPeriodo === "queda-forte" ||
+    tipoTendenciaPeriodo === "queda-moderada"
+  ) {
+    return "queda";
+  }
+
+  return "";
+})();
+
+const deveMostrarEducacaoContextual =
+  nivelMaturidade >= 3 &&
+  percentualLancamentosFuturos < 40 &&
+  tipoEducacaoContextual !== "";
+
+  const textoEducacaoContextual = escolherTexto(
+  tipoEducacaoContextual === "concentracao"
+    ? [
+        "Quando poucos pontos concentram boa parte dos gastos, o segredo não é olhar tudo de uma vez. Primeiro, vale entender o que aconteceu nesses momentos principais.",
+
+        "Se poucos dias puxaram grande parte do total, eles merecem mais atenção do que os dias com valores pequenos. É ali que o dinheiro mais pesou.",
+
+        "Quando o gasto fica concentrado em poucos momentos, uma boa estratégia é revisar esses registros maiores antes de tentar cortar tudo ao mesmo tempo.",
+
+        "A concentração mostra onde começar. Em vez de olhar todos os gastos, foque primeiro nos pontos que mais mexeram no total.",
+      ]
+    : tipoEducacaoContextual === "categoria-dominante"
+    ? [
+        `Quando ${categoriaDominante?.categoria} domina os gastos, revisar essa área pode trazer mais resultado do que tentar ajustar pequenos valores espalhados.`,
+
+        `Se ${categoriaDominante?.categoria} ficou com a maior parte do dinheiro, essa categoria virou um ponto-chave para entender o período.`,
+
+        `Uma categoria dominante mostra onde o dinheiro mais se concentrou. Olhar ${categoriaDominante?.categoria} com atenção pode ajudar a encontrar oportunidades de ajuste.`,
+
+        `Quando uma área pesa muito, como ${categoriaDominante?.categoria}, o primeiro passo é entender se esse gasto veio de necessidade, rotina ou decisão pontual.`,
+      ]
+    : tipoEducacaoContextual === "subcategoria"
+    ? [
+        `Quando ${subcategoriaDominante?.subcategoria} aparece como principal detalhe, isso ajuda a sair da visão geral e enxergar onde o dinheiro realmente pesou dentro da categoria.`,
+
+        `A subcategoria mostra o detalhe por trás do gasto. Nesse caso, olhar ${subcategoriaDominante?.subcategoria} ajuda a entender melhor o comportamento financeiro.`,
+
+        `Às vezes a categoria parece grande, mas o motivo está em um detalhe específico. Aqui, ${subcategoriaDominante?.subcategoria} merece atenção.`,
+
+        `O detalhe mais importante costuma mostrar onde existe mais chance de entender, ajustar ou planejar melhor. Neste período, esse detalhe foi ${subcategoriaDominante?.subcategoria}.`,
+      ]
+    : tipoEducacaoContextual === "aumento"
+    ? [
+        "Quando os gastos começam a subir, o mais importante é descobrir o motivo antes que isso vire um padrão difícil de controlar.",
+
+        "Uma alta nos gastos não significa automaticamente problema, mas merece atenção para entender se foi algo planejado ou fora do esperado.",
+
+        "Subida de gasto é um sinal para investigar. O objetivo não é cortar tudo, mas entender o que está puxando o aumento.",
+
+        "Quando o valor cresce no fim do período, vale observar se houve concentração de contas, compras necessárias ou decisões por impulso.",
+      ]
+    : tipoEducacaoContextual === "queda"
+    ? [
+        "Quando os gastos caem, isso pode indicar controle, mas o ideal é confirmar se a queda veio de escolhas conscientes e não de falta de registros.",
+
+        "Redução nos gastos pode ser positiva, principalmente quando vem de planejamento e constância nos registros.",
+
+        "Gastar menos pode ser um bom sinal, mas o Enxergaí precisa de registros consistentes para enxergar se foi economia real.",
+
+        "Uma queda nos valores ajuda no planejamento quando ela representa menor consumo de verdade, e não apenas menos lançamentos anotados.",
+      ]
+    : [""],
+  `${chaveInsights}-educacao-contextual`
+);
+
 const subcategoriasDaCategoriaDominante =
   categoriaDominante
     ? Object.entries(
@@ -3318,6 +3414,12 @@ const labelX = Math.min(
 {deveMostrarLeituraReducao && (
   <Text style={styles.insightItem}>
     💡 {textoLeituraReducao}
+  </Text>
+)}
+
+{deveMostrarEducacaoContextual && (
+  <Text style={styles.insightItem}>
+    📘 {textoEducacaoContextual}
   </Text>
 )}
 
