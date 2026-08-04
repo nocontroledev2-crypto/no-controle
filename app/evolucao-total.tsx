@@ -2497,7 +2497,7 @@ const deveMostrarEducacaoContextual =
         `Quando há poucos ${unidadePlural} com gasto, o principal é entender qual deles puxou mais o total antes de tirar conclusões maiores.`,
       ]
     : tipoEducacaoContextual === "concentracao"
-  tipoEducacaoContextual === "concentracao"
+  
     ? [
         "Quando poucos pontos concentram boa parte dos gastos, o segredo não é olhar tudo de uma vez. Primeiro, vale entender o que aconteceu nesses momentos principais.",
 
