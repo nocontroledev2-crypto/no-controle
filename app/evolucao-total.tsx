@@ -723,7 +723,12 @@ if (
   period === "year" ||
   period === "lastYear"
 ) {
-  label = labelsMonth[index];
+  const anoRanking =
+    period === "year"
+      ? now.getFullYear()
+      : now.getFullYear() - 1;
+
+  label = `${labelsMonthFull[index]}/${anoRanking}`;
 }
 
 if (
@@ -1632,7 +1637,9 @@ const labelMaiorImpactoCorrigido = (() => {
   }
 
   if (unidadeSingular === "mês") {
-    const abreviado = maiorDia.label.split("/")[0];
+    const partesLabel = maiorDia.label.split("/");
+    const mesOriginal = partesLabel[0];
+    const anoOriginal = partesLabel[1];
 
     const mapaMeses: Record<string, string> = {
       Jan: "Janeiro",
@@ -1650,7 +1657,15 @@ const labelMaiorImpactoCorrigido = (() => {
     };
 
     const mesCompleto =
-      mapaMeses[abreviado] || maiorDia.label;
+      mapaMeses[mesOriginal] || mesOriginal;
+
+    if (anoOriginal && anoOriginal.length === 4) {
+      return `${mesCompleto}/${anoOriginal}`;
+    }
+
+    if (anoOriginal && anoOriginal.length === 2) {
+      return `${mesCompleto}/20${anoOriginal}`;
+    }
 
     if (period === "year") {
       return `${mesCompleto}/${now.getFullYear()}`;
@@ -1658,15 +1673,6 @@ const labelMaiorImpactoCorrigido = (() => {
 
     if (period === "lastYear") {
       return `${mesCompleto}/${now.getFullYear() - 1}`;
-    }
-
-    if (
-      period === "custom" &&
-      maiorDia.label.includes("/")
-    ) {
-      const anoCurto = maiorDia.label.split("/")[1];
-
-      return `${mesCompleto}/20${anoCurto}`;
     }
 
     return mesCompleto;
