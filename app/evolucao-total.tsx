@@ -2777,6 +2777,20 @@ const unidadeTempoPositiva =
 const textoFeedbackPositivo = escolherTexto(
   temDistribuicaoSaudavel
   ? (
+      tipoEducacaoContextual === "poucos-pontos-temporais"
+        ? [
+            "Com os registros disponíveis, nenhuma categoria dominou claramente os gastos.",
+
+            "Mesmo com uma base ainda pequena, os gastos não ficaram presos em uma única categoria.",
+
+            "Pelos dados registrados até aqui, o dinheiro apareceu dividido entre diferentes áreas.",
+
+            "A leitura inicial mostra gastos distribuídos entre categorias, sem uma única área carregando quase tudo.",
+
+            "Com poucos registros no período, já dá para ver que os gastos não ficaram concentrados em apenas uma categoria.",
+          ]
+        :
+
       period === "year"
         ? [
   "Neste ano, seu dinheiro não ficou concentrado em uma única categoria. Os gastos ficaram mais divididos entre diferentes áreas da sua vida.",
