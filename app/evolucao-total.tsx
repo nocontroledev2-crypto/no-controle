@@ -3005,12 +3005,12 @@ const textoReconhecimentoEvolucao = escolherTexto(
 );
 
 const tipoCrescimentoPessoal = (() => {
-  if (deveTratarQuedaComoPossivelFaltaRegistro) {
-    return "registro";
-  }
-
   if (deveMostrarComparacaoInteligente) {
     return "mudanca";
+  }
+
+  if (deveTratarQuedaComoPossivelFaltaRegistro) {
+    return "registro";
   }
 
   if (houveMelhoraDistribuicao) {
