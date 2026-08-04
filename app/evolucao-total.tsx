@@ -3045,15 +3045,25 @@ const deveMostrarCrescimentoPessoal =
         "Antes de concluir que houve melhora, vale confirmar se todos os gastos foram registrados. Dados completos deixam a análise mais confiável.",
 
         "Registrar com constância é parte do controle financeiro. Sem isso, o Enxergaí enxerga menos do que realmente aconteceu.",
+
+        "Quando faltam registros, o Enxergaí prefere ser cuidadoso. Completar os lançamentos ajuda a separar economia real de falta de informação.",
+
+        "A leitura fica mais forte quando os registros estão completos. Isso ajuda o Enxergaí a mostrar o que realmente aconteceu no período.",
       ]
+
     : tipoCrescimentoPessoal === "mudanca"
     ? [
         "O mais importante aqui é perceber que o dinheiro mudou de direção. Enxergar essa virada ajuda a decidir onde prestar atenção primeiro.",
 
-        "Quando o peso muda de uma categoria para outra, o usuário ganha uma pista valiosa sobre o próprio comportamento financeiro.",
+        "Quando o peso muda de uma categoria para outra, aparece uma pista valiosa sobre o comportamento financeiro do período.",
 
         "Essa mudança mostra que o jeito de gastar não ficou igual. Perceber isso já é um passo importante para melhorar o controle.",
+
+        "O ganho aqui é enxergar a virada: o dinheiro saiu de uma área e passou a pesar mais em outra.",
+
+        "Essa troca de peso ajuda a entender para onde o dinheiro começou a ir com mais força.",
       ]
+
     : tipoCrescimentoPessoal === "evolucao"
     ? [
         "Esse período mostra uma distribuição mais equilibrada dos gastos. Enxergar isso ajuda a planejar com mais clareza.",
@@ -3061,7 +3071,12 @@ const deveMostrarCrescimentoPessoal =
         "Quando o dinheiro fica menos preso em uma única área, fica mais fácil entender o comportamento financeiro como um todo.",
 
         "Essa leitura mostra um sinal de evolução: os gastos ficaram menos dependentes de uma única categoria.",
+
+        "O avanço aqui está em ver o dinheiro mais dividido entre áreas diferentes, sem uma única categoria carregando quase tudo.",
+
+        "Uma distribuição mais equilibrada ajuda a enxergar o orçamento com menos confusão e mais clareza.",
       ]
+
     : tipoCrescimentoPessoal === "foco"
     ? [
         "O principal ganho aqui é saber por onde começar. Quando uma categoria pesa muito, ela vira o primeiro ponto de atenção.",
@@ -3069,7 +3084,12 @@ const deveMostrarCrescimentoPessoal =
         "Enxergar a categoria dominante evita tentar corrigir tudo ao mesmo tempo. O foco fica mais claro.",
 
         "Quando uma área concentra boa parte do dinheiro, entender essa área pode trazer mais resultado do que olhar pequenos gastos espalhados.",
+
+        "O Enxergaí está mostrando o ponto de maior peso para facilitar sua próxima decisão. O caminho começa por onde o dinheiro mais impactou.",
+
+        "Quando uma categoria domina, o melhor primeiro passo é entender o que aconteceu ali antes de tentar mexer em tudo.",
       ]
+
     : tipoCrescimentoPessoal === "concentracao"
     ? [
         "O aprendizado principal é simples: poucos pontos puxaram boa parte do total. Olhar esses pontos primeiro reduz o esforço da análise.",
@@ -3077,7 +3097,12 @@ const deveMostrarCrescimentoPessoal =
         "Quando os maiores impactos estão concentrados, o caminho mais eficiente é começar pelos registros que mais pesaram.",
 
         "O Enxergaí mostra onde o dinheiro mais mexeu no resultado. Isso ajuda a agir com mais foco e menos tentativa.",
+
+        "A concentração mostra onde começar. Em vez de olhar tudo ao mesmo tempo, foque primeiro nos registros que mais mudaram o total.",
+
+        "Quando poucos pontos pesam muito, eles contam a parte mais importante da história financeira do período.",
       ]
+
     : tipoCrescimentoPessoal === "equilibrio"
     ? [
         "Esse período mostra que o dinheiro ficou mais dividido entre diferentes áreas. Isso ajuda a enxergar o orçamento com mais equilíbrio.",
@@ -3085,7 +3110,12 @@ const deveMostrarCrescimentoPessoal =
         "Quando nenhuma categoria domina tudo, fica mais fácil entender o conjunto dos gastos e planejar os próximos passos.",
 
         "A distribuição entre categorias ficou mais aberta. Isso pode facilitar a leitura do comportamento financeiro.",
+
+        "O dinheiro não ficou preso em uma única área. Isso ajuda a olhar o período com mais equilíbrio.",
+
+        "Quando os gastos ficam distribuídos entre áreas diferentes, o Enxergaí consegue mostrar uma visão mais clara do conjunto.",
       ]
+
     : [""],
   `${chaveInsights}-crescimento-pessoal`
 );
