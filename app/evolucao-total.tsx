@@ -1977,6 +1977,40 @@ const textoAlertaTendencia = escolherTexto(
   `${chaveInsights}-alerta-tendencia`
 );
 
+const deveMostrarLeituraReducao =
+  nivelMaturidade >= 3 &&
+  !deveMostrarAvisoLancamentosFuturos &&
+  (
+    tipoTendenciaPeriodo === "queda-forte" ||
+    tipoTendenciaPeriodo === "queda-moderada" ||
+    tipoMovimentoRecente === "caiu-forte" ||
+    tipoMovimentoRecente === "caiu-moderado"
+  );
+
+const textoLeituraReducao = escolherTexto(
+  tipoTendenciaPeriodo === "queda-forte" ||
+    tipoMovimentoRecente === "caiu-forte"
+    ? [
+        "A redução dos gastos pode ser um bom sinal se veio de escolhas conscientes. Se aconteceu por falta de registro, vale continuar anotando para manter a leitura confiável.",
+
+        "Os gastos caíram com força. Se isso foi planejado, pode indicar avanço no controle. Se foi apenas falta de lançamento, o ideal é registrar para o Enxergaí enxergar melhor.",
+
+        "Essa queda merece uma leitura cuidadosa: pode ser economia real, mas também pode ser menos registros no período.",
+
+        "Quando os gastos caem bastante, vale confirmar se isso veio de menor consumo ou se alguns lançamentos ficaram de fora.",
+      ]
+    : [
+        "Houve redução nos gastos. Se essa queda foi intencional, pode ser um sinal positivo de controle.",
+
+        "Os gastos ficaram menores, mas vale acompanhar se isso representa economia real ou apenas menos registros.",
+
+        "Essa redução pode ajudar no planejamento, principalmente se veio de escolhas conscientes.",
+
+        "Quando os valores diminuem, observar a constância dos registros ajuda a entender se houve economia ou apenas menos movimentações anotadas.",
+      ],
+  `${chaveInsights}-leitura-reducao`
+);
+
 const subcategoriasDaCategoriaDominante =
   categoriaDominante
     ? Object.entries(
@@ -3278,6 +3312,12 @@ const labelX = Math.min(
 {deveMostrarAlertaTendencia && (
   <Text style={styles.insightItem}>
     ⚠️ {textoAlertaTendencia}
+  </Text>
+)}
+
+{deveMostrarLeituraReducao && (
+  <Text style={styles.insightItem}>
+    💡 {textoLeituraReducao}
   </Text>
 )}
 
