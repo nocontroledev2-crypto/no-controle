@@ -1943,6 +1943,40 @@ const textoMovimentoRecente = escolherTexto(
   `${chaveInsights}-movimento-recente`
 );
 
+const deveMostrarAlertaTendencia =
+  nivelMaturidade >= 3 &&
+  !deveMostrarAvisoLancamentosFuturos &&
+  (
+    tipoTendenciaPeriodo === "aumento-forte" ||
+    tipoTendenciaPeriodo === "aumento-moderado" ||
+    tipoMovimentoRecente === "subiu-forte" ||
+    tipoMovimentoRecente === "subiu-moderado"
+  );
+
+const textoAlertaTendencia = escolherTexto(
+  tipoTendenciaPeriodo === "aumento-forte" ||
+    tipoMovimentoRecente === "subiu-forte"
+    ? [
+        "Esse aumento merece atenção. Vale olhar os maiores registros do fim do período e separar o que foi planejado do que apareceu fora do esperado.",
+
+        "Quando os gastos sobem com força, o melhor caminho é identificar o que puxou essa alta: conta concentrada, compra necessária ou gasto por impulso.",
+
+        "A alta no fim do período pode esconder poucos gastos grandes. Enxergar esses registros ajuda a entender se foi algo pontual ou um novo padrão.",
+
+        "Esse crescimento dos gastos é um sinal para revisar os últimos lançamentos e entender se houve necessidade, oportunidade ou falta de planejamento.",
+      ]
+    : [
+        "Houve aumento nos gastos. Vale acompanhar se isso foi algo pontual ou se começa a se repetir nos próximos períodos.",
+
+        "Esse crescimento não parece tão brusco, mas já merece atenção para evitar que vire um padrão.",
+
+        "Os gastos subiram um pouco. Observar os registros mais recentes pode ajudar a entender o que mudou.",
+
+        "Quando os gastos começam a subir, acompanhar cedo ajuda a corrigir o caminho antes que o valor pese mais.",
+      ],
+  `${chaveInsights}-alerta-tendencia`
+);
+
 const subcategoriasDaCategoriaDominante =
   categoriaDominante
     ? Object.entries(
@@ -3238,6 +3272,12 @@ const labelX = Math.min(
 {deveMostrarMovimentoRecente && !deveMostrarAvisoLancamentosFuturos && (
   <Text style={styles.insightItem}>
     • {textoMovimentoRecente}
+  </Text>
+)}
+
+{deveMostrarAlertaTendencia && (
+  <Text style={styles.insightItem}>
+    ⚠️ {textoAlertaTendencia}
   </Text>
 )}
 
