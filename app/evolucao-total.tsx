@@ -1555,10 +1555,32 @@ const textoMaiorImpacto = maiorDia
         `O ${unidadeSingular} de maior impacto financeiro deste período foi ${maiorDia.label}, responsável por ${percentualMaiorDia.toFixed(
           1
         )}% do total gasto.`,
+
         `${maiorDia.label} concentrou ${percentualMaiorDia.toFixed(
           1
         )}% de todo o valor gasto neste período.`,
+
         `O maior impacto financeiro do período ocorreu no ${maiorDia.label}, representando ${percentualMaiorDia.toFixed(
+          1
+        )}% do total.`,
+
+        `${maiorDia.label} foi o ponto que mais pesou no período, com ${percentualMaiorDia.toFixed(
+          1
+        )}% do total gasto.`,
+
+        `O principal peso financeiro apareceu em ${maiorDia.label}, que respondeu por ${percentualMaiorDia.toFixed(
+          1
+        )}% do total.`,
+
+        `Se for olhar por onde começar, ${maiorDia.label} merece atenção: esse ponto representou ${percentualMaiorDia.toFixed(
+          1
+        )}% dos gastos do período.`,
+
+        `${maiorDia.label} teve o maior peso dentro do período analisado, concentrando ${percentualMaiorDia.toFixed(
+          1
+        )}% do dinheiro gasto.`,
+
+        `O gasto ficou mais forte em ${maiorDia.label}, que sozinho representou ${percentualMaiorDia.toFixed(
           1
         )}% do total.`,
       ],
@@ -1571,14 +1593,38 @@ const textoTop3Impacto = escolherTexto(
     `Os 3 ${unidadePlural} que mais impactaram o período representam ${percentualTop3.toFixed(
       0
     )}% de todo o valor gasto.`,
+
     `A soma dos 3 principais ${unidadePlural} representa ${percentualTop3.toFixed(
       0
     )}% dos gastos do período.`,
+
     `Os 3 maiores impactos financeiros concentram ${percentualTop3.toFixed(
       0
     )}% do total analisado.`,
+
+    `Boa parte do dinheiro ficou nos 3 principais ${unidadePlural}, que juntos somaram ${percentualTop3.toFixed(
+      0
+    )}% do total.`,
+
+    `Os 3 pontos de maior peso responderam por ${percentualTop3.toFixed(
+      0
+    )}% dos gastos do período.`,
+
+    `Quando olhamos os principais impactos, os 3 maiores ${unidadePlural} concentraram ${percentualTop3.toFixed(
+      0
+    )}% do dinheiro gasto.`,
+
+    `O período teve uma concentração importante nos 3 maiores ${unidadePlural}, que somaram ${percentualTop3.toFixed(
+      0
+    )}% do total.`,
+
+    `Os maiores pesos do período ficaram em 3 ${unidadePlural}, responsáveis por ${percentualTop3.toFixed(
+      0
+    )}% dos gastos.`,
   ],
   `${chaveInsights}-top3`
+);
+
 );
 
 const deveMostrarTop3Impacto =
@@ -2107,23 +2153,51 @@ const textoAvisoLancamentosFuturos = escolherTexto(
         )} em lançamentos futuros, representando ${percentualLancamentosFuturos.toFixed(
           0
         )}% do total. Esses valores ajudam a enxergar compromissos próximos, mas ainda não são gastos já realizados.`,
+
         `Uma parte importante do total vem de lançamentos futuros: ${formatMoney(
           totalLancamentosFuturos
         )}. Vale separar mentalmente o que já aconteceu do que ainda está previsto.`,
+
         `Há ${formatMoney(
           totalLancamentosFuturos
         )} em registros futuros neste período. Isso ajuda no planejamento, mas precisa ser lido como compromisso previsto.`,
+
+        `Atenção: uma parte relevante deste período ainda está no futuro. São ${formatMoney(
+          totalLancamentosFuturos
+        )} previstos, então vale diferenciar gasto realizado de compromisso que ainda vai acontecer.`,
+
+        `Os lançamentos futuros têm peso importante neste período. Eles somam ${formatMoney(
+          totalLancamentosFuturos
+        )}, então a leitura precisa considerar que nem tudo já aconteceu.`,
+
+        `O Enxergaí encontrou ${formatMoney(
+          totalLancamentosFuturos
+        )} em valores futuros neste período. Isso pode ajudar no planejamento, mas não deve ser lido como gasto já realizado.`,
       ]
     : [
         `Este período inclui ${formatMoney(
           totalLancamentosFuturos
         )} em lançamentos futuros. Eles ajudam a antecipar compromissos, mas ainda não representam gastos já realizados.`,
+
         `Há alguns registros futuros neste período, somando ${formatMoney(
           totalLancamentosFuturos
         )}. Isso pode ajudar no planejamento dos próximos dias.`,
+
         `O período mistura gastos já registrados com lançamentos futuros. A parte futura soma ${formatMoney(
           totalLancamentosFuturos
         )}.`,
+
+        `Existem lançamentos futuros neste período, somando ${formatMoney(
+          totalLancamentosFuturos
+        )}. Eles ajudam a enxergar o que vem pela frente.`,
+
+        `Além dos gastos já registrados, há ${formatMoney(
+          totalLancamentosFuturos
+        )} previstos para os próximos dias dentro deste período.`,
+
+        `O Enxergaí identificou ${formatMoney(
+          totalLancamentosFuturos
+        )} em valores futuros. Use essa informação como apoio para se preparar, não como gasto já confirmado.`,
       ],
   `${chaveInsights}-lancamentos-futuros`
 );
