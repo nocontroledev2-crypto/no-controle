@@ -2383,13 +2383,37 @@ const deveMostrarComparacaoInteligente =
   const textoComparacaoInteligente =
   deveMostrarComparacaoInteligente
     ? escolherTexto(
-        [
-          `Na prática, o dinheiro saiu mais de ${categoriaQueMaisPerdeuEspaco?.categoria} e passou a pesar mais em ${categoriaQueMaisGanhouEspaco?.categoria}. Esse é o principal movimento para observar neste período.`,
+        period === "week"
+          ? [
+              `Nesta semana, o ponto que mais mudou foi a troca entre ${categoriaQueMaisPerdeuEspaco?.categoria} e ${categoriaQueMaisGanhouEspaco?.categoria}. Vale observar o que levou essa mudança acontecer.`,
 
-          `O principal movimento foi uma troca de peso: ${categoriaQueMaisGanhouEspaco?.categoria} ganhou espaço enquanto ${categoriaQueMaisPerdeuEspaco?.categoria} perdeu força.`,
+              `Comparando com a semana passada, ${categoriaQueMaisGanhouEspaco?.categoria} ganhou espaço e ${categoriaQueMaisPerdeuEspaco?.categoria} perdeu força. Esse é o movimento principal para enxergar agora.`,
 
-          `Esse comparativo mostra uma mudança clara no jeito de gastar: menos peso em ${categoriaQueMaisPerdeuEspaco?.categoria} e mais peso em ${categoriaQueMaisGanhouEspaco?.categoria}.`,
-        ],
+              `Na prática, esta semana mostrou uma mudança de foco: menos peso em ${categoriaQueMaisPerdeuEspaco?.categoria} e mais peso em ${categoriaQueMaisGanhouEspaco?.categoria}.`,
+            ]
+          : period === "month"
+          ? [
+              `Na prática, o dinheiro saiu mais de ${categoriaQueMaisPerdeuEspaco?.categoria} e passou a pesar mais em ${categoriaQueMaisGanhouEspaco?.categoria}. Esse é o principal movimento para observar neste mês.`,
+
+              `Este mês mostra uma mudança clara de direção: ${categoriaQueMaisPerdeuEspaco?.categoria} perdeu espaço e ${categoriaQueMaisGanhouEspaco?.categoria} ganhou força.`,
+
+              `O principal movimento deste mês foi a troca de peso entre categorias: menos em ${categoriaQueMaisPerdeuEspaco?.categoria} e mais em ${categoriaQueMaisGanhouEspaco?.categoria}.`,
+            ]
+          : period === "year"
+          ? [
+              `Ao olhar o ano, a mudança mais importante foi a troca de peso entre ${categoriaQueMaisPerdeuEspaco?.categoria} e ${categoriaQueMaisGanhouEspaco?.categoria}. Isso ajuda a entender como o comportamento financeiro mudou.`,
+
+              `Neste ano, ${categoriaQueMaisGanhouEspaco?.categoria} ganhou espaço enquanto ${categoriaQueMaisPerdeuEspaco?.categoria} perdeu força. Essa virada mostra para onde o dinheiro passou a ir com mais frequência.`,
+
+              `Esse comparativo mostra uma mudança clara no jeito de gastar ao longo do ano: menos peso em ${categoriaQueMaisPerdeuEspaco?.categoria} e mais peso em ${categoriaQueMaisGanhouEspaco?.categoria}.`,
+            ]
+          : [
+              `Na prática, o dinheiro saiu mais de ${categoriaQueMaisPerdeuEspaco?.categoria} e passou a pesar mais em ${categoriaQueMaisGanhouEspaco?.categoria}. Esse é o principal movimento para observar neste período.`,
+
+              `O principal movimento foi uma troca de peso: ${categoriaQueMaisGanhouEspaco?.categoria} ganhou espaço enquanto ${categoriaQueMaisPerdeuEspaco?.categoria} perdeu força.`,
+
+              `Esse comparativo mostra uma mudança clara no jeito de gastar: menos peso em ${categoriaQueMaisPerdeuEspaco?.categoria} e mais peso em ${categoriaQueMaisGanhouEspaco?.categoria}.`,
+            ],
         `${chaveInsights}-comparacao-inteligente`
       )
     : "";
