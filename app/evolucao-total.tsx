@@ -1770,7 +1770,9 @@ const deveMostrarTop3Impacto =
   }
 
   if (unidadeSingular === "mês") {
-    const abreviado = maiorDia.label.split("/")[0];
+    const partesLabel = maiorDia.label.split("/");
+    const mesOriginal = partesLabel[0];
+    const anoOriginal = partesLabel[1];
 
     const mapaMeses: Record<string, string> = {
       Jan: "Janeiro",
@@ -1785,9 +1787,41 @@ const deveMostrarTop3Impacto =
       Out: "Outubro",
       Nov: "Novembro",
       Dez: "Dezembro",
+
+      Janeiro: "Janeiro",
+      Fevereiro: "Fevereiro",
+      Março: "Março",
+      Abril: "Abril",
+      Maio: "Maio",
+      Junho: "Junho",
+      Julho: "Julho",
+      Agosto: "Agosto",
+      Setembro: "Setembro",
+      Outubro: "Outubro",
+      Novembro: "Novembro",
+      Dezembro: "Dezembro",
     };
 
-    return mapaMeses[abreviado] || maiorDia.label;
+    const mesCompleto =
+      mapaMeses[mesOriginal] || mesOriginal;
+
+    if (anoOriginal && anoOriginal.length === 4) {
+      return `${mesCompleto}/${anoOriginal}`;
+    }
+
+    if (anoOriginal && anoOriginal.length === 2) {
+      return `${mesCompleto}/20${anoOriginal}`;
+    }
+
+    if (period === "year") {
+      return `${mesCompleto}/${now.getFullYear()}`;
+    }
+
+    if (period === "lastYear") {
+      return `${mesCompleto}/${now.getFullYear() - 1}`;
+    }
+
+    return mesCompleto;
   }
 
   return maiorDia.label;
