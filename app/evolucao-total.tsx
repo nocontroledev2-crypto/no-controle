@@ -2312,53 +2312,55 @@ const textoCategoriaGanhouEspaco =
   categoriaQueMaisGanhouEspaco
     ? escolherTexto(
         [
-          `${categoriaQueMaisGanhouEspaco.categoria} ganhou espaço: saiu de ${categoriaQueMaisGanhouEspaco.percentualAnterior.toFixed(
+          `${categoriaQueMaisGanhouEspaco.categoria} ganhou mais espaço nos gastos: antes representava ${categoriaQueMaisGanhouEspaco.percentualAnterior.toFixed(
             0
-          )}% ${periodoAnteriorComEm} para ${categoriaQueMaisGanhouEspaco.percentualAtual.toFixed(
-            0
-          )}% ${periodoAtualComparativo}.`,
-
-          `${categoriaQueMaisGanhouEspaco.categoria} passou a pesar mais nos gastos. ${periodoAnteriorComEm}, representava ${categoriaQueMaisGanhouEspaco.percentualAnterior.toFixed(
-            0
-          )}%; ${periodoAtualComparativo}, chegou a ${categoriaQueMaisGanhouEspaco.percentualAtual.toFixed(
+          )}%; agora chegou a ${categoriaQueMaisGanhouEspaco.percentualAtual.toFixed(
             0
           )}%.`,
 
-          `O peso de ${categoriaQueMaisGanhouEspaco.categoria} aumentou em relação ${periodoAnteriorComPreposicao}: foi de ${categoriaQueMaisGanhouEspaco.percentualAnterior.toFixed(
+          `${categoriaQueMaisGanhouEspaco.categoria} passou a pesar mais: saiu de ${categoriaQueMaisGanhouEspaco.percentualAnterior.toFixed(
             0
           )}% para ${categoriaQueMaisGanhouEspaco.percentualAtual.toFixed(
             0
-          )}% ${periodoAtualComparativo}.`,
+          )}% do total.`,
+
+          `O peso de ${categoriaQueMaisGanhouEspaco.categoria} aumentou: antes era ${categoriaQueMaisGanhouEspaco.percentualAnterior.toFixed(
+            0
+          )}%; agora é ${categoriaQueMaisGanhouEspaco.percentualAtual.toFixed(
+            0
+          )}%.`,
         ],
         `${chaveInsights}-categoria-ganhou-espaco`
       )
     : "";
 
+
     const textoCategoriaPerdeuEspaco =
   categoriaQueMaisPerdeuEspaco
     ? escolherTexto(
         [
-          `${categoriaQueMaisPerdeuEspaco.categoria} perdeu espaço: era ${categoriaQueMaisPerdeuEspaco.percentualAnterior.toFixed(
+          `${categoriaQueMaisPerdeuEspaco.categoria} perdeu peso nos gastos: antes representava ${categoriaQueMaisPerdeuEspaco.percentualAnterior.toFixed(
             0
-          )}% ${periodoAnteriorComEm} e ficou em ${categoriaQueMaisPerdeuEspaco.percentualAtual.toFixed(
-            0
-          )}% ${periodoAtualComparativo}.`,
-
-          `${categoriaQueMaisPerdeuEspaco.categoria} passou a representar uma parte menor dos gastos. ${periodoAnteriorComEm}, era ${categoriaQueMaisPerdeuEspaco.percentualAnterior.toFixed(
-            0
-          )}%; ${periodoAtualComparativo}, ficou em ${categoriaQueMaisPerdeuEspaco.percentualAtual.toFixed(
+          )}%; agora ficou em ${categoriaQueMaisPerdeuEspaco.percentualAtual.toFixed(
             0
           )}%.`,
 
-          `O peso de ${categoriaQueMaisPerdeuEspaco.categoria} diminuiu em relação ${periodoAnteriorComPreposicao}: caiu de ${categoriaQueMaisPerdeuEspaco.percentualAnterior.toFixed(
+          `${categoriaQueMaisPerdeuEspaco.categoria} passou a pesar menos: caiu de ${categoriaQueMaisPerdeuEspaco.percentualAnterior.toFixed(
             0
           )}% para ${categoriaQueMaisPerdeuEspaco.percentualAtual.toFixed(
             0
-          )}% ${periodoAtualComparativo}.`,
+          )}% do total.`,
+
+          `O peso de ${categoriaQueMaisPerdeuEspaco.categoria} diminuiu: antes era ${categoriaQueMaisPerdeuEspaco.percentualAnterior.toFixed(
+            0
+          )}%; agora é ${categoriaQueMaisPerdeuEspaco.percentualAtual.toFixed(
+            0
+          )}%.`,
         ],
         `${chaveInsights}-categoria-perdeu-espaco`
       )
     : "";
+
 
     const deveMostrarCategoriaGanhouEspaco =
   deveMostrarComparacaoCategorias &&
