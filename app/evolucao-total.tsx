@@ -1626,38 +1626,87 @@ const textoProximoPassoPoucosDados = escolherTexto(
   `${chaveInsights}-proximo-passo-poucos-dados`
 );
 
+const labelMaiorImpactoCorrigido = (() => {
+  if (!maiorDia?.label) {
+    return "";
+  }
+
+  if (unidadeSingular === "mês") {
+    const abreviado = labelMaiorImpactoCorrigido.split("/")[0];
+
+    const mapaMeses: Record<string, string> = {
+      Jan: "Janeiro",
+      Fev: "Fevereiro",
+      Mar: "Março",
+      Abr: "Abril",
+      Mai: "Maio",
+      Jun: "Junho",
+      Jul: "Julho",
+      Ago: "Agosto",
+      Set: "Setembro",
+      Out: "Outubro",
+      Nov: "Novembro",
+      Dez: "Dezembro",
+    };
+
+    const mesCompleto =
+      mapaMeses[abreviado] || labelMaiorImpactoCorrigido;
+
+    if (period === "year") {
+      return `${mesCompleto}/${now.getFullYear()}`;
+    }
+
+    if (period === "lastYear") {
+      return `${mesCompleto}/${now.getFullYear() - 1}`;
+    }
+
+    if (
+      period === "custom" &&
+      labelMaiorImpactoCorrigido.includes("/")
+    ) {
+      const anoCurto = maiorDia.label.split("/")[1];
+
+      return `${mesCompleto}/20${anoCurto}`;
+    }
+
+    return mesCompleto;
+  }
+
+  return labelMaiorImpactoCorrigido;
+})();
+
 const textoMaiorImpacto = maiorDia
   ? escolherTexto(
       [
-        `O ${unidadeSingular} de maior impacto financeiro deste período foi ${maiorDia.label}, responsável por ${percentualMaiorDia.toFixed(
+        `O ${unidadeSingular} de maior impacto financeiro deste período foi ${labelMaiorImpactoCorrigido}, responsável por ${percentualMaiorDia.toFixed(
           1
         )}% do total gasto.`,
 
-        `${maiorDia.label} concentrou ${percentualMaiorDia.toFixed(
+        `${labelMaiorImpactoCorrigido} concentrou ${percentualMaiorDia.toFixed(
           1
         )}% de todo o valor gasto neste período.`,
 
-        `O maior impacto financeiro do período ocorreu no ${maiorDia.label}, representando ${percentualMaiorDia.toFixed(
+        `O maior impacto financeiro do período ocorreu no ${labelMaiorImpactoCorrigido}, representando ${percentualMaiorDia.toFixed(
           1
         )}% do total.`,
 
-        `${maiorDia.label} foi o ponto que mais pesou no período, com ${percentualMaiorDia.toFixed(
+        `${labelMaiorImpactoCorrigido} foi o ponto que mais pesou no período, com ${percentualMaiorDia.toFixed(
           1
         )}% do total gasto.`,
 
-        `O principal peso financeiro apareceu em ${maiorDia.label}, que respondeu por ${percentualMaiorDia.toFixed(
+        `O principal peso financeiro apareceu em ${labelMaiorImpactoCorrigido}, que respondeu por ${percentualMaiorDia.toFixed(
           1
         )}% do total.`,
 
-        `Se for olhar por onde começar, ${maiorDia.label} merece atenção: esse ponto representou ${percentualMaiorDia.toFixed(
+        `Se for olhar por onde começar, ${labelMaiorImpactoCorrigido} merece atenção: esse ponto representou ${percentualMaiorDia.toFixed(
           1
         )}% dos gastos do período.`,
 
-        `${maiorDia.label} teve o maior peso dentro do período analisado, concentrando ${percentualMaiorDia.toFixed(
+        `${labelMaiorImpactoCorrigido} teve o maior peso dentro do período analisado, concentrando ${percentualMaiorDia.toFixed(
           1
         )}% do dinheiro gasto.`,
 
-        `O gasto ficou mais forte em ${maiorDia.label}, que sozinho representou ${percentualMaiorDia.toFixed(
+        `O gasto ficou mais forte em ${labelMaiorImpactoCorrigido}, que sozinho representou ${percentualMaiorDia.toFixed(
           1
         )}% do total.`,
       ],
@@ -1749,19 +1798,19 @@ const textoPoucosPontosMensais = escolherTexto(
 
 const textoConcentracaoAlta = escolherTexto(
   [
-    `Grande parte dos gastos ${contextoPeriodoInsight} ficou concentrada em poucos momentos, indicando pontos específicos de maior impacto financeiro.`,
+    `Grande parte dos gastos ${contextoPeriodoInsight} ficou concentrada nos pontos de maior valor. Isso mostra onde o dinheiro pesou mais.`,
 
-    `Boa parte do dinheiro gasto ${contextoPeriodoInsight} apareceu em poucos momentos específicos.`,
+    `Boa parte do dinheiro gasto ${contextoPeriodoInsight} apareceu nos maiores registros do período.`,
 
-    `Uma pequena quantidade de movimentações respondeu pela maior parte dos gastos ${contextoPeriodoInsight}.`,
+    `Os maiores valores puxaram boa parte dos gastos ${contextoPeriodoInsight}. Vale olhar esses registros com mais atenção.`,
 
-    `Uma parte importante do dinheiro gasto ${contextoPeriodoInsight} apareceu em poucos pontos. Vale observar o que aconteceu nesses momentos.`,
+    `Uma parte importante do dinheiro gasto ${contextoPeriodoInsight} ficou nos pontos de maior impacto. É por ali que a análise deve começar.`,
 
-    `Poucos registros puxaram boa parte do valor gasto ${contextoPeriodoInsight}. Esse é um sinal de que alguns momentos tiveram peso maior no período.`,
+    `Alguns registros tiveram peso maior no resultado ${contextoPeriodoInsight}. Enxergar esses pontos ajuda a entender o que mais mexeu no total.`,
 
-    `O gasto ${contextoPeriodoInsight} não ficou espalhado de forma uniforme. Alguns pontos concentraram uma parte importante do dinheiro.`,
+    `O gasto ${contextoPeriodoInsight} teve alguns pontos de maior valor. Esses registros explicam boa parte do resultado do período.`,
 
-    `Os maiores impactos ${contextoPeriodoInsight} vieram de poucos momentos. Enxergar esses pontos ajuda a entender onde o dinheiro pesou mais.`,
+    `Os maiores impactos ${contextoPeriodoInsight} vieram dos registros de maior peso. Eles ajudam a mostrar onde o dinheiro ficou mais concentrado.`,
 
     `O dinheiro gasto ${contextoPeriodoInsight} teve alguns picos importantes. Vale olhar com atenção o que aconteceu nesses registros.`,
   ],
@@ -1770,21 +1819,21 @@ const textoConcentracaoAlta = escolherTexto(
 
 const textoConcentracaoBaixa = escolherTexto(
   [
-    `Os gastos ${contextoPeriodoInsight} ficaram mais distribuídos, sem forte concentração em poucos momentos.`,
+    `Os gastos ${contextoPeriodoInsight} ficaram mais divididos, sem um único ponto puxando grande parte do total.`,
 
-    `Não houve uma concentração forte dos gastos ${contextoPeriodoInsight}.`,
+    `Não houve um ponto isolado dominando os gastos ${contextoPeriodoInsight}. Isso deixa a leitura do período mais equilibrada.`,
 
-    `Os valores aparecem mais espalhados ${contextoPeriodoInsight}.`,
+    `O dinheiro gasto ${contextoPeriodoInsight} apareceu de forma mais distribuída entre os registros.`,
 
-    `Os gastos ficaram mais divididos ao longo do período, sem um único ponto dominando muito o total.`,
+    `Os gastos ficaram mais espalhados ao longo do período, sem um único registro dominando muito o total.`,
 
-    `O dinheiro gasto ${contextoPeriodoInsight} apareceu de forma mais espalhada, sem depender tanto de poucos registros.`,
+    `O dinheiro gasto ${contextoPeriodoInsight} não ficou preso em poucos registros de maior peso.`,
 
     `Não existiu um único momento puxando quase todo o gasto ${contextoPeriodoInsight}. Isso ajuda a enxergar o período com mais equilíbrio.`,
 
-    `Os gastos ${contextoPeriodoInsight} não ficaram presos em poucos pontos. Eles apareceram de forma mais distribuída.`,
+    `Os gastos ${contextoPeriodoInsight} ficaram mais abertos, sem depender tanto de poucos pontos de maior valor.`,
 
-    `O período teve uma distribuição mais aberta dos gastos, sem um pico dominando muito o total.`,
+    `O período teve uma distribuição mais equilibrada dos gastos, sem um pico dominando muito o total.`,
   ],
   `${chaveInsights}-concentracao-baixa`
 );
@@ -1838,11 +1887,19 @@ const textoTendenciaPeriodo = escolherTexto(
         "A parte final do período teve menos gastos que a parte inicial, indicando uma redução moderada.",
         "Os valores ficaram menores na parte final do período. Isso pode ajudar no planejamento, se a redução foi intencional.",
       ]
+
     : [
-        `Os gastos ficaram relativamente equilibrados entre a primeira e a segunda metade ${contextoPeriodoComDe}.`,
-        "Não houve grande diferença entre o começo e o fim do período analisado.",
-        "Os valores ficaram próximos entre as duas partes do período, o que pode facilitar o planejamento financeiro.",
-      ],
+  `O começo e o fim ${contextoPeriodoComDe} ficaram parecidos em valor, sem uma virada forte nos gastos.`,
+
+  "Não houve grande diferença entre a primeira e a segunda parte do período analisado.",
+
+  "Os gastos ficaram próximos entre o começo e o fim do período, o que indica uma leitura mais estável.",
+
+  `Os valores ficaram mais equilibrados entre as duas partes ${contextoPeriodoComDe}, sem uma mudança brusca no comportamento dos gastos.`,
+
+  "O período não mostrou uma grande aceleração nem uma grande queda entre o começo e o fim.",
+],
+
   `${chaveInsights}-tendencia-periodo`
 );
 
@@ -2652,11 +2709,15 @@ const textoFeedbackPositivo = escolherTexto(
 
   : percentualDiasSemGasto >= 40
     ? [
-  `Houve vários ${unidadeTempoPositiva} sem movimentação financeira registrada ${contextoPeriodoHumano}.`,
+  `Boa parte dos ${unidadeTempoPositiva} ${contextoPeriodoHumano} não apresentou movimentação financeira registrada. Se isso refletir menor consumo, pode ser um sinal positivo de controle. Se faltou registrar, vale manter os lançamentos em dia.`,
 
-  `Boa parte dos ${unidadeTempoPositiva} ${contextoPeriodoHumano} não apresentou movimentação financeira registrada.`,
+  `Houve vários ${unidadeTempoPositiva} sem movimentação financeira registrada ${contextoPeriodoHumano}. Se esses períodos realmente tiveram menos gastos, isso pode representar avanço; se não, o ideal é completar os registros.`,
 
-  `O período apresentou diversos ${unidadeTempoPositiva} sem movimentação financeira registrada ${contextoPeriodoHumano}.`,
+  `O período apresentou diversos ${unidadeTempoPositiva} sem movimentação financeira registrada ${contextoPeriodoHumano}. Isso pode indicar menor consumo, mas também pode apontar falta de registros.`,
+
+  `Muitos ${unidadeTempoPositiva} ficaram sem movimentação registrada ${contextoPeriodoHumano}. Para o Enxergaí enxergar melhor, é importante manter os registros completos.`,
+
+  `A ausência de movimentação em vários ${unidadeTempoPositiva} pode ser um bom sinal quando representa menos consumo de verdade. Se foi esquecimento, vale registrar para manter a leitura confiável.`,
 ]
 
 : [
