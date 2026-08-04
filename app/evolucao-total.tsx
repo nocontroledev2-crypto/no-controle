@@ -3070,6 +3070,14 @@ const tipoCrescimentoPessoal = (() => {
     return "mudanca";
   }
 
+  if (
+    unidadeSingular !== "dia" &&
+    pontosFinanceiros <= 3 &&
+    pontosFinanceiros > 0
+  ) {
+    return "poucos-pontos-temporais";
+  }
+
   if (deveTratarQuedaComoPossivelFaltaRegistro) {
     return "registro";
   }
@@ -3098,8 +3106,21 @@ const deveMostrarCrescimentoPessoal =
   tipoCrescimentoPessoal !== "" &&
   percentualLancamentosFuturos < 60;
 
-  const textoCrescimentoPessoal = escolherTexto(
-  tipoCrescimentoPessoal === "registro"
+  
+   const textoCrescimentoPessoal = escolherTexto(
+   tipoCrescimentoPessoal === "poucos-pontos-temporais"
+    ? [
+        `Como este período tem poucos ${unidadePlural} com movimentação, o mais importante é usar essa leitura como ponto de partida, não como conclusão final.`,
+
+        `Com poucos ${unidadePlural} registrados, o Enxergaí já mostra onde o dinheiro pesou mais, mas a leitura fica melhor conforme o histórico cresce.`,
+
+        `Esse período ainda tem pouca base em ${unidadePlural}. Mesmo assim, já dá para enxergar o ponto de maior impacto e acompanhar a evolução depois.`,
+
+        `Quando há poucos ${unidadePlural} com gasto, o caminho é começar pelo maior peso e continuar registrando para ganhar mais clareza.`,
+      ]
+
+    : tipoCrescimentoPessoal === "registro"
+
     ? [
         "O ponto principal aqui é manter os registros completos. Quanto mais fiel for o registro, mais clara fica a leitura do Enxergaí.",
 
