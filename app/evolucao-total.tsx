@@ -3535,12 +3535,6 @@ const labelX = Math.min(
     </Text>
 )}
 
-{deveMostrarEducacaoContextual && (
-  <Text style={styles.insightItem}>
-    📘 {textoEducacaoContextual}
-  </Text>
-)}
-
 {deveMostrarCategoriaDominante && (
   <Text style={styles.insightItem}>
     • {textoCategoriaDominante}
@@ -3556,6 +3550,12 @@ const labelX = Math.min(
 {deveMostrarOrientacaoPraticaCategoria && (
   <Text style={styles.insightItem}>
     • {textoOrientacaoPraticaCategoria}
+  </Text>
+)}
+
+{deveMostrarEducacaoContextual && (
+  <Text style={styles.insightItem}>
+    📘 {textoEducacaoContextual}
   </Text>
 )}
 
