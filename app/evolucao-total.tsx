@@ -1878,15 +1878,39 @@ const textoSubcategoriaDominante =
         percentualSubcategoriaDominante >= 70
           ? [
               `Dentro de ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} apareceu como principal destino dos valores registrados.`,
+
               `${subcategoriaDominante.subcategoria} se destacou dentro de ${categoriaDominante?.categoria}, representando ${percentualSubcategoriaDominante.toFixed(
                 0
               )}% dessa categoria.`,
+
               `Ao detalhar ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} aparece como o destaque financeiro mais relevante.`,
+
+              `A maior parte dos gastos em ${categoriaDominante?.categoria} ficou ligada a ${subcategoriaDominante.subcategoria}. Esse detalhe merece atenção.`,
+
+              `${subcategoriaDominante.subcategoria} puxou boa parte do valor dentro de ${categoriaDominante?.categoria}. Isso mostra onde o dinheiro mais pesou nessa categoria.`,
+
+              `Quando olhamos só para ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} aparece como o ponto mais forte.`,
+
+              `${subcategoriaDominante.subcategoria} ficou no centro dos gastos de ${categoriaDominante?.categoria}, mostrando onde houve maior impacto dentro dessa área.`,
+
+              `O principal detalhe dentro de ${categoriaDominante?.categoria} foi ${subcategoriaDominante.subcategoria}. É ali que vale olhar com mais calma.`,
             ]
           : [
               `Dentro de ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} foi o detalhe que mais pesou.`,
+
               `${subcategoriaDominante.subcategoria} teve o maior impacto dentro de ${categoriaDominante?.categoria}.`,
+
               `Ao detalhar ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} aparece como o principal ponto de atenção.`,
+
+              `${subcategoriaDominante.subcategoria} foi o detalhe mais relevante dentro de ${categoriaDominante?.categoria}.`,
+
+              `Entre os detalhes de ${categoriaDominante?.categoria}, ${subcategoriaDominante.subcategoria} foi o que mais chamou atenção.`,
+
+              `${subcategoriaDominante.subcategoria} aparece como o principal detalhe para entender melhor os gastos em ${categoriaDominante?.categoria}.`,
+
+              `O maior peso dentro de ${categoriaDominante?.categoria} ficou em ${subcategoriaDominante.subcategoria}.`,
+
+              `Ao abrir melhor ${categoriaDominante?.categoria}, o destaque ficou com ${subcategoriaDominante.subcategoria}.`,
             ],
         `${chaveInsights}-subcategoria-dominante`
       )
@@ -2039,15 +2063,29 @@ if (
   }
 
   return escolherTexto(
-    [
-      `Como ${subcategoria} foi o ponto que mais pesou dentro de ${categoria}, vale olhar os maiores lançamentos desse detalhe e procurar padrões: valor alto, repetição ou compras não planejadas.`,
-      `${subcategoria} apareceu como principal detalhe dentro de ${categoria}. Observar frequência e valores maiores pode ajudar a entender melhor para onde o dinheiro está indo.`,
-      `Vale olhar com atenção os registros de ${subcategoria}. Às vezes, a economia começa quando percebemos quais gastos se repetem mais vezes.`,
-      `Esse detalhe teve peso importante dentro de ${categoria}. Um bom começo é observar se os maiores valores foram planejados ou se aconteceram sem perceber.`,
-      `Ao enxergar melhor ${subcategoria}, fica mais fácil identificar se o gasto foi pontual, recorrente ou algo que merece ajuste no planejamento.`,
-    ],
-    `${chaveInsights}-orientacao-generica`
-  );
+  [
+    `Como ${subcategoria} foi o ponto que mais pesou dentro de ${categoria}, vale olhar os maiores lançamentos desse detalhe e procurar padrões: valor alto, repetição ou compras não planejadas.`,
+
+    `${subcategoria} apareceu como principal detalhe dentro de ${categoria}. Observar frequência e valores maiores pode ajudar a entender melhor para onde o dinheiro está indo.`,
+
+    `Vale olhar com atenção os registros de ${subcategoria}. Às vezes, a economia começa quando percebemos quais gastos se repetem mais vezes.`,
+
+    `Esse detalhe teve peso importante dentro de ${categoria}. Um bom começo é observar se os maiores valores foram planejados ou se aconteceram sem perceber.`,
+
+    `Ao enxergar melhor ${subcategoria}, fica mais fácil identificar se o gasto foi pontual, recorrente ou algo que merece ajuste no planejamento.`,
+
+    `Se ${subcategoria} apareceu com força dentro de ${categoria}, vale conferir se os gastos foram necessários, planejados ou se alguns aconteceram no impulso.`,
+
+    `${subcategoria} merece atenção porque ajudou a puxar o resultado de ${categoria}. Olhar os registros maiores pode mostrar onde existe chance de ajuste.`,
+
+    `Esse detalhe pode revelar um padrão importante. Veja se ${subcategoria} aparece por necessidade, por hábito ou por compras concentradas em poucos momentos.`,
+
+    `Quando ${subcategoria} pesa dentro de ${categoria}, o primeiro passo é enxergar os maiores valores e entender se eles fazem sentido para o seu momento.`,
+
+    `Observar ${subcategoria} com calma pode ajudar a separar gasto essencial, gasto planejado e gasto que talvez possa ser reduzido.`,
+  ],
+  `${chaveInsights}-orientacao-generica`
+);
 }
 
 const textoOrientacaoPraticaCategoria =
