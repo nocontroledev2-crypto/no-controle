@@ -2437,6 +2437,14 @@ const deveMostrarOrientacaoPraticaCategoria =
   !!textoOrientacaoPraticaCategoria;
 
   const tipoEducacaoContextual = (() => {
+  if (
+    unidadeSingular !== "dia" &&
+    pontosFinanceiros <= 3 &&
+    pontosFinanceiros > 0
+  ) {
+    return "poucos-pontos-temporais";
+  }
+
   if (percentualTop3 >= 75) {
     return "concentracao";
   }
@@ -2478,6 +2486,17 @@ const deveMostrarEducacaoContextual =
   tipoEducacaoContextual !== "";
 
   const textoEducacaoContextual = escolherTexto(
+  tipoEducacaoContextual === "poucos-pontos-temporais"
+    ? [
+        `Como o período possui movimentação em apenas ${pontosFinanceiros} ${unidadePlural}, a leitura ainda é mais geral. Mesmo assim, já dá para enxergar onde o dinheiro pesou mais.`,
+
+        `Com poucos ${unidadePlural} registrados, o Enxergaí evita conclusões exageradas. O melhor é olhar primeiro o ${unidadeSingular} de maior impacto.`,
+
+        `Este período ainda tem poucos ${unidadePlural} com movimentação. A análise ajuda a mostrar o maior peso, mas fica melhor conforme mais registros aparecem.`,
+
+        `Quando há poucos ${unidadePlural} com gasto, o principal é entender qual deles puxou mais o total antes de tirar conclusões maiores.`,
+      ]
+    : tipoEducacaoContextual === "concentracao"
   tipoEducacaoContextual === "concentracao"
     ? [
         "Quando poucos pontos concentram boa parte dos gastos, o segredo não é olhar tudo de uma vez. Primeiro, vale entender o que aconteceu nesses momentos principais.",
