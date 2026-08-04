@@ -1609,6 +1609,23 @@ const textoDadosInsuficientes = escolherTexto(
   `${chaveInsights}-insuficiente`
 );
 
+const textoProximoPassoPoucosDados = escolherTexto(
+  [
+    "Continue registrando seus gastos para que o Enxergaí consiga identificar padrões com mais segurança.",
+
+    "Com mais alguns registros, a leitura do período ficará mais clara e útil.",
+
+    "O próximo passo é simples: manter os registros em dia para o Enxergaí enxergar melhor o período.",
+
+    "Quanto mais o período for preenchido, mais fácil será separar gasto pontual de comportamento repetido.",
+
+    "Mais registros ajudam o Enxergaí a transformar movimentações soltas em uma leitura financeira mais completa.",
+
+    "Continue alimentando o Enxergaí. Aos poucos, os números começam a mostrar um caminho mais claro.",
+  ],
+  `${chaveInsights}-proximo-passo-poucos-dados`
+);
+
 const textoMaiorImpacto = maiorDia
   ? escolherTexto(
       [
@@ -3164,12 +3181,16 @@ const labelX = Math.min(
   )}
 
   {nivelMaturidade === 2 && (
-    <>
-      <Text style={styles.insightItem}>
-        • {textoDadosInsuficientes}
-      </Text>
-    </>
-  )}
+  <>
+    <Text style={styles.insightItem}>
+      • {textoDadosInsuficientes}
+    </Text>
+
+    <Text style={styles.insightItem}>
+      • {textoProximoPassoPoucosDados}
+    </Text>
+  </>
+)}
 
   {nivelMaturidade >= 3 && (
     <>
