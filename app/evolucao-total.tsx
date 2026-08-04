@@ -1625,7 +1625,6 @@ const textoTop3Impacto = escolherTexto(
   `${chaveInsights}-top3`
 );
 
-);
 
 const deveMostrarTop3Impacto =
   !(unidadeSingular !== "dia" && pontosFinanceiros <= 3);
