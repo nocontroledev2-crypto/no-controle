@@ -3004,6 +3004,92 @@ const textoReconhecimentoEvolucao = escolherTexto(
   `${chaveInsights}-reconhecimento-evolucao`
 );
 
+const tipoCrescimentoPessoal = (() => {
+  if (deveTratarQuedaComoPossivelFaltaRegistro) {
+    return "registro";
+  }
+
+  if (deveMostrarComparacaoInteligente) {
+    return "mudanca";
+  }
+
+  if (houveMelhoraDistribuicao) {
+    return "evolucao";
+  }
+
+  if (percentualCategoriaDominante >= 50) {
+    return "foco";
+  }
+
+  if (percentualTop3 >= 75) {
+    return "concentracao";
+  }
+
+  if (temDistribuicaoSaudavel) {
+    return "equilibrio";
+  }
+
+  return "";
+})();
+
+const deveMostrarCrescimentoPessoal =
+  nivelMaturidade >= 3 &&
+  tipoCrescimentoPessoal !== "" &&
+  percentualLancamentosFuturos < 60;
+
+  const textoCrescimentoPessoal = escolherTexto(
+  tipoCrescimentoPessoal === "registro"
+    ? [
+        "O ponto principal aqui é manter os registros completos. Quanto mais fiel for o registro, mais clara fica a leitura do Enxergaí.",
+
+        "Antes de concluir que houve melhora, vale confirmar se todos os gastos foram registrados. Dados completos deixam a análise mais confiável.",
+
+        "Registrar com constância é parte do controle financeiro. Sem isso, o Enxergaí enxerga menos do que realmente aconteceu.",
+      ]
+    : tipoCrescimentoPessoal === "mudanca"
+    ? [
+        "O mais importante aqui é perceber que o dinheiro mudou de direção. Enxergar essa virada ajuda a decidir onde prestar atenção primeiro.",
+
+        "Quando o peso muda de uma categoria para outra, o usuário ganha uma pista valiosa sobre o próprio comportamento financeiro.",
+
+        "Essa mudança mostra que o jeito de gastar não ficou igual. Perceber isso já é um passo importante para melhorar o controle.",
+      ]
+    : tipoCrescimentoPessoal === "evolucao"
+    ? [
+        "Esse período mostra uma distribuição mais equilibrada dos gastos. Enxergar isso ajuda a planejar com mais clareza.",
+
+        "Quando o dinheiro fica menos preso em uma única área, fica mais fácil entender o comportamento financeiro como um todo.",
+
+        "Essa leitura mostra um sinal de evolução: os gastos ficaram menos dependentes de uma única categoria.",
+      ]
+    : tipoCrescimentoPessoal === "foco"
+    ? [
+        "O principal ganho aqui é saber por onde começar. Quando uma categoria pesa muito, ela vira o primeiro ponto de atenção.",
+
+        "Enxergar a categoria dominante evita tentar corrigir tudo ao mesmo tempo. O foco fica mais claro.",
+
+        "Quando uma área concentra boa parte do dinheiro, entender essa área pode trazer mais resultado do que olhar pequenos gastos espalhados.",
+      ]
+    : tipoCrescimentoPessoal === "concentracao"
+    ? [
+        "O aprendizado principal é simples: poucos pontos puxaram boa parte do total. Olhar esses pontos primeiro reduz o esforço da análise.",
+
+        "Quando os maiores impactos estão concentrados, o caminho mais eficiente é começar pelos registros que mais pesaram.",
+
+        "O Enxergaí mostra onde o dinheiro mais mexeu no resultado. Isso ajuda a agir com mais foco e menos tentativa.",
+      ]
+    : tipoCrescimentoPessoal === "equilibrio"
+    ? [
+        "Esse período mostra que o dinheiro ficou mais dividido entre diferentes áreas. Isso ajuda a enxergar o orçamento com mais equilíbrio.",
+
+        "Quando nenhuma categoria domina tudo, fica mais fácil entender o conjunto dos gastos e planejar os próximos passos.",
+
+        "A distribuição entre categorias ficou mais aberta. Isso pode facilitar a leitura do comportamento financeiro.",
+      ]
+    : [""],
+  `${chaveInsights}-crescimento-pessoal`
+);
+
 const deveMostrarFeedbackPositivo =
   nivelMaturidade >= 3 &&
   !houveMelhoraDistribuicao &&
@@ -3604,6 +3690,12 @@ const labelX = Math.min(
 {deveMostrarExplicacaoMudancaCategoria && (
   <Text style={styles.insightItem}>
     💡 {textoExplicacaoMudancaCategoria}
+  </Text>
+)}
+
+{deveMostrarCrescimentoPessoal && (
+  <Text style={styles.insightItem}>
+    ✨ {textoCrescimentoPessoal}
   </Text>
 )}
 
