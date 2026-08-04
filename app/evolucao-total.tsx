@@ -1507,8 +1507,20 @@ const periodoAtualComparativo = (() => {
 const textoSemMovimentacao = escolherTexto(
   [
     "Nenhuma movimentação financeira foi identificada neste período.",
+
     "Ainda não há gastos registrados no período selecionado.",
+
     "O Enxergaí não encontrou movimentações financeiras para este período.",
+
+    "Este período ainda está vazio. Assim que houver registros, o Enxergaí começa a mostrar o que está acontecendo.",
+
+    "Por enquanto, não há movimentações para analisar neste período.",
+
+    "Ainda não apareceu nenhum gasto aqui. Quando você registrar, o Enxergaí vai começar a transformar esses dados em entendimento.",
+
+    "Sem registros neste período, ainda não há caminho financeiro para enxergar.",
+
+    "Este período ainda não tem dados suficientes para mostrar movimentações.",
   ],
   `${chaveInsights}-sem-movimentacao`
 );
@@ -1516,8 +1528,20 @@ const textoSemMovimentacao = escolherTexto(
 const textoDesbloquearAnalises = escolherTexto(
   [
     "Registre seus gastos para desbloquear análises inteligentes do Enxergaí.",
+
     "Assim que houver registros, o Enxergaí começará a transformar seus dados em entendimento.",
+
     "Com novos registros, o Enxergaí poderá gerar análises mais úteis para você.",
+
+    "Cada gasto registrado ajuda o Enxergaí a enxergar melhor seu comportamento financeiro.",
+
+    "Comece registrando os gastos do dia. Aos poucos, o Enxergaí mostrará padrões que talvez passem despercebidos.",
+
+    "Quanto mais você registra, mais fácil fica entender para onde o dinheiro está indo.",
+
+    "O primeiro passo é simples: registrar. Depois disso, o Enxergaí ajuda você a enxergar o que os números querem dizer.",
+
+    "Com alguns registros, o Enxergaí já começa a montar uma visão mais clara do período.",
   ],
   `${chaveInsights}-desbloquear`
 );
@@ -1525,8 +1549,20 @@ const textoDesbloquearAnalises = escolherTexto(
 const textoPrimeiraMovimentacao = escolherTexto(
   [
     `Apenas um ${unidadeSingular} com movimentação financeira foi identificado neste período.`,
+
     `Este período ainda possui somente um ${unidadeSingular} com gasto registrado.`,
+
     `Até agora, há movimentação financeira em apenas um ${unidadeSingular} deste período.`,
+
+    `O Enxergaí já encontrou o primeiro ponto com gasto neste período, mas ainda precisa de mais registros para enxergar padrões.`,
+
+    `Existe apenas um ${unidadeSingular} com movimentação. É um começo, mas ainda é cedo para conclusões maiores.`,
+
+    `O primeiro registro já apareceu. Com mais movimentações, o Enxergaí conseguirá mostrar uma leitura mais completa.`,
+
+    `Ainda temos pouca base neste período: só um ${unidadeSingular} com gasto registrado.`,
+
+    `Por enquanto, este período mostra apenas um ponto de movimentação financeira.`,
   ],
   `${chaveInsights}-primeira`
 );
@@ -1534,8 +1570,20 @@ const textoPrimeiraMovimentacao = escolherTexto(
 const textoContinuarRegistrando = escolherTexto(
   [
     "Continue registrando seus gastos para que o Enxergaí possa identificar padrões e gerar análises mais completas.",
+
     "Com mais registros, o Enxergaí conseguirá enxergar melhor seu comportamento financeiro.",
+
     "Quanto mais informações forem registradas, mais precisas serão as análises do Enxergaí.",
+
+    "Continue alimentando o Enxergaí com seus gastos. Aos poucos, os padrões começam a aparecer.",
+
+    "Registrar com constância ajuda o Enxergaí a separar gasto pontual de comportamento repetido.",
+
+    "Cada novo registro melhora a leitura do período e aproxima o Enxergaí de uma análise mais útil.",
+
+    "Com poucos registros, o Enxergaí ainda enxerga pouco. Com mais dados, a leitura fica muito mais clara.",
+
+    "Continue registrando. O valor do Enxergaí cresce conforme ele aprende com seus próprios dados.",
   ],
   `${chaveInsights}-continuar`
 );
@@ -1543,8 +1591,20 @@ const textoContinuarRegistrando = escolherTexto(
 const textoDadosInsuficientes = escolherTexto(
   [
     "Ainda não existem dados suficientes para gerar análises financeiras confiáveis.",
+
     "O período ainda possui poucos dados para conclusões financeiras mais completas.",
+
     "O Enxergaí ainda precisa de mais movimentações neste período para gerar uma análise confiável.",
+
+    "Ainda é cedo para tirar grandes conclusões. Com mais registros, o Enxergaí poderá enxergar padrões com mais segurança.",
+
+    "Os dados deste período ainda são poucos. O ideal é continuar registrando para melhorar a leitura.",
+
+    "Por enquanto, o Enxergaí evita conclusões fortes porque ainda há pouca informação registrada.",
+
+    "Ainda falta volume de dados para uma análise mais firme. Continue registrando para liberar leituras mais completas.",
+
+    "O Enxergaí prefere esperar mais dados a mostrar uma conclusão apressada.",
   ],
   `${chaveInsights}-insuficiente`
 );
