@@ -2361,6 +2361,38 @@ const textoCategoriaGanhouEspaco =
       )
     : "";
 
+    const variacaoCategoriaGanhouEspaco =
+  categoriaQueMaisGanhouEspaco
+    ? categoriaQueMaisGanhouEspaco.percentualAtual -
+      categoriaQueMaisGanhouEspaco.percentualAnterior
+    : 0;
+
+const variacaoCategoriaPerdeuEspaco =
+  categoriaQueMaisPerdeuEspaco
+    ? categoriaQueMaisPerdeuEspaco.percentualAnterior -
+      categoriaQueMaisPerdeuEspaco.percentualAtual
+    : 0;
+
+const deveMostrarComparacaoInteligente =
+  deveMostrarComparacaoCategorias &&
+  !!categoriaQueMaisGanhouEspaco &&
+  !!categoriaQueMaisPerdeuEspaco &&
+  variacaoCategoriaGanhouEspaco >= 15 &&
+  variacaoCategoriaPerdeuEspaco >= 15;
+
+  const textoComparacaoInteligente =
+  deveMostrarComparacaoInteligente
+    ? escolherTexto(
+        [
+          `Na prática, o dinheiro saiu mais de ${categoriaQueMaisPerdeuEspaco?.categoria} e passou a pesar mais em ${categoriaQueMaisGanhouEspaco?.categoria}. Esse é o principal movimento para observar neste período.`,
+
+          `O principal movimento foi uma troca de peso: ${categoriaQueMaisGanhouEspaco?.categoria} ganhou espaço enquanto ${categoriaQueMaisPerdeuEspaco?.categoria} perdeu força.`,
+
+          `Esse comparativo mostra uma mudança clara no jeito de gastar: menos peso em ${categoriaQueMaisPerdeuEspaco?.categoria} e mais peso em ${categoriaQueMaisGanhouEspaco?.categoria}.`,
+        ],
+        `${chaveInsights}-comparacao-inteligente`
+      )
+    : "";
 
     const deveMostrarCategoriaGanhouEspaco =
   deveMostrarComparacaoCategorias &&
@@ -2384,7 +2416,9 @@ const textoExplicacaoMudancaCategoria = escolherTexto(
 );
 
 const deveMostrarExplicacaoMudancaCategoria =
-  mudouCategoriaDominante;
+  mudouCategoriaDominante &&
+  !deveMostrarComparacaoInteligente;
+
 
 const textoReconhecimentoEvolucao = escolherTexto(
   [
@@ -2954,6 +2988,12 @@ const labelX = Math.min(
 {deveMostrarCategoriaPerdeuEspaco && (
   <Text style={styles.insightItem}>
     📉 {textoCategoriaPerdeuEspaco}
+  </Text>
+)}
+
+{deveMostrarComparacaoInteligente && (
+  <Text style={styles.insightItem}>
+    🧠 {textoComparacaoInteligente}
   </Text>
 )}
 
