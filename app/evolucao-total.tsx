@@ -2068,6 +2068,18 @@ const textoLeituraReducao = escolherTexto(
   `${chaveInsights}-leitura-reducao`
 );
 
+const textoPossivelFaltaRegistroNoFinal = escolherTexto(
+  [
+    "A parte final do período aparece com pouca ou nenhuma movimentação registrada. Antes de entender isso como queda nos gastos, vale confirmar se os registros estão completos.",
+
+    "O fim do período está com vários pontos sem movimentação. Isso pode indicar menos consumo, mas também pode ser falta de registros.",
+
+    "Como o final do período tem muitos pontos zerados, o Enxergaí evita tratar isso automaticamente como economia.",
+
+    "Antes de interpretar a queda no fim do período como melhora, vale conferir se os gastos realmente diminuíram ou se alguns lançamentos ficaram de fora.",
+  ],
+  `${chaveInsights}-possivel-falta-registro-final`
+);
 
   const subcategoriasDaCategoriaDominante =
   categoriaDominante
@@ -2622,6 +2634,41 @@ const deveMostrarHojeVsMedia =
   mediaDiasComMovimentacao > 0 &&
   indiceHojeNoGrafico >= 0;
 
+  const finalDoPeriodoComMuitosZeros = (() => {
+  if (safeChartValues.length < 6) {
+    return false;
+  }
+
+  const ultimoIndiceComGasto = safeChartValues.reduce(
+    (ultimo, value, index) =>
+      Number(value) > 0 ? index : ultimo,
+    -1
+  );
+
+  if (ultimoIndiceComGasto < 0) {
+    return false;
+  }
+
+  const pontosSemGastoNoFinal =
+    safeChartValues.length - 1 - ultimoIndiceComGasto;
+
+  if (unidadeSingular === "mês") {
+    return pontosSemGastoNoFinal >= 2;
+  }
+
+  if (unidadeSingular === "dia") {
+    return pontosSemGastoNoFinal >= 3;
+  }
+
+  return false;
+})();
+
+const deveTratarQuedaComoPossivelFaltaRegistro =
+  finalDoPeriodoComMuitosZeros &&
+  (
+    tipoTendenciaPeriodo === "queda-forte" ||
+    tipoTendenciaPeriodo === "queda-moderada"
+  );
 
 const textoHojeVsMedia = escolherTexto(
   percentualHojeVsMedia >= 20
@@ -3455,10 +3502,18 @@ const labelX = Math.min(
   </Text>
 )}
 
-{!deveMostrarAvisoLancamentosFuturos && (
-  <Text style={styles.insightItem}>
-    • {textoTendenciaPeriodo}
-  </Text>
+{!deveMostrarAvisoLancamentosFuturos &&
+  !deveTratarQuedaComoPossivelFaltaRegistro && (
+    <Text style={styles.insightItem}>
+      • {textoTendenciaPeriodo}
+    </Text>
+)}
+
+{!deveMostrarAvisoLancamentosFuturos &&
+  deveTratarQuedaComoPossivelFaltaRegistro && (
+    <Text style={styles.insightItem}>
+      💡 {textoPossivelFaltaRegistroNoFinal}
+    </Text>
 )}
 
 {deveMostrarMovimentoRecente && !deveMostrarAvisoLancamentosFuturos && (
@@ -3473,10 +3528,11 @@ const labelX = Math.min(
   </Text>
 )}
 
-{deveMostrarLeituraReducao && (
-  <Text style={styles.insightItem}>
-    💡 {textoLeituraReducao}
-  </Text>
+{deveMostrarLeituraReducao &&
+  !deveTratarQuedaComoPossivelFaltaRegistro && (
+    <Text style={styles.insightItem}>
+      💡 {textoLeituraReducao}
+    </Text>
 )}
 
 {deveMostrarEducacaoContextual && (
