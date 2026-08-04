@@ -2076,10 +2076,15 @@ const textoMovimentoRecente = escolherTexto(
   `${chaveInsights}-movimento-recente`
 );
 
+const periodoTemTendenciaDeQueda =
+  tipoTendenciaPeriodo === "queda-forte" ||
+  tipoTendenciaPeriodo === "queda-moderada";
+
 const deveMostrarAlertaTendencia =
   nivelMaturidade >= 3 &&
   !deveMostrarAvisoLancamentosFuturos &&
   !deveTratarQuedaComoPossivelFaltaRegistro &&
+  !periodoTemTendenciaDeQueda &&
   (
     tipoTendenciaPeriodo === "aumento-forte" ||
     tipoTendenciaPeriodo === "aumento-moderado" ||
