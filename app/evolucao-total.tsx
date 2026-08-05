@@ -2130,22 +2130,26 @@ const textoLeituraReducao = escolherTexto(
   tipoTendenciaPeriodo === "queda-forte" ||
     tipoMovimentoRecente === "caiu-forte"
     ? [
-        "A redução dos gastos pode ser um bom sinal se veio de escolhas conscientes. Se aconteceu por falta de registro, vale continuar anotando para manter a leitura confiável.",
+        "Essa queda precisa ser lida com cuidado: pode ser economia real, mas também pode indicar falta de registros.",
 
-        "Os gastos caíram com força. Se isso foi planejado, pode indicar avanço no controle. Se foi apenas falta de lançamento, o ideal é registrar para o Enxergaí enxergar melhor.",
+        "Se essa redução veio de escolhas conscientes, pode ser um bom sinal. Se veio de falta de lançamento, a leitura fica menos confiável.",
 
-        "Essa queda merece uma leitura cuidadosa: pode ser economia real, mas também pode ser menos registros no período.",
+        "Antes de entender essa queda como melhora, vale confirmar se os registros estão completos e se os gastos realmente diminuíram.",
 
-        "Quando os gastos caem bastante, vale confirmar se isso veio de menor consumo ou se alguns lançamentos ficaram de fora.",
+        "A redução pode indicar avanço no controle, mas o Enxergaí precisa de registros completos para enxergar isso com mais segurança.",
+
+        "Quando os valores caem bastante, o ideal é separar duas possibilidades: menor consumo de verdade ou registros que ficaram de fora.",
       ]
     : [
         "Houve redução nos gastos. Se essa queda foi intencional, pode ser um sinal positivo de controle.",
 
-        "Os gastos ficaram menores, mas vale acompanhar se isso representa economia real ou apenas menos registros.",
+        "Os valores ficaram menores, mas vale acompanhar se isso representa economia real ou apenas menos registros.",
 
         "Essa redução pode ajudar no planejamento, principalmente se veio de escolhas conscientes.",
 
         "Quando os valores diminuem, observar a constância dos registros ajuda a entender se houve economia ou apenas menos movimentações anotadas.",
+
+        "A queda foi mais moderada. Vale acompanhar os próximos registros para entender se isso vira um padrão.",
       ],
   `${chaveInsights}-leitura-reducao`
 );
