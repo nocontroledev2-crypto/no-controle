@@ -1878,6 +1878,25 @@ const textoConcentracaoBaixa = escolherTexto(
   `${chaveInsights}-concentracao-baixa`
 );
 
+const textoConcentracaoModerada = escolherTexto(
+  [
+    `Os gastos ${contextoPeriodoInsight} não ficaram totalmente concentrados, mas os principais registros ainda tiveram peso importante no período.`,
+
+    `Alguns pontos tiveram peso maior ${contextoPeriodoInsight}, mesmo sem dominar todo o resultado. Vale observar os maiores registros.`,
+
+    `O dinheiro ${contextoPeriodoInsight} ficou parcialmente concentrado nos maiores impactos. Isso mostra onde começar a análise sem ignorar o restante.`,
+
+    `Os principais registros tiveram bastante influência ${contextoPeriodoInsight}, mas não chegaram a carregar quase todo o período sozinhos.`,
+
+    `Existe uma concentração moderada dos gastos ${contextoPeriodoInsight}: os maiores pontos pesaram, mas o restante do período também teve participação.`,
+  ],
+  `${chaveInsights}-concentracao-moderada`
+);
+
+const deveMostrarConcentracaoModerada =
+  percentualTop3 >= 50 &&
+  percentualTop3 < 70;
+
 const diferencaEntreMetades =
   primeiraMetade > 0
     ? ((segundaMetade - primeiraMetade) / primeiraMetade) * 100
@@ -3700,6 +3719,7 @@ const labelX = Math.min(
   </Text>
 )}
 
+
       {deveMostrarTop3Impacto ? (
   <>
     <Text style={styles.insightItem}>
@@ -3707,10 +3727,12 @@ const labelX = Math.min(
     </Text>
 
     <Text style={styles.insightItem}>
-      • {percentualTop3 >= 70
-        ? textoConcentracaoAlta
-        : textoConcentracaoBaixa}
-    </Text>
+  • {percentualTop3 >= 70
+    ? textoConcentracaoAlta
+    : deveMostrarConcentracaoModerada
+    ? textoConcentracaoModerada
+    : textoConcentracaoBaixa}
+</Text>
   </>
 ) : (
   <Text style={styles.insightItem}>
