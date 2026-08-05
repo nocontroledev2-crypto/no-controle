@@ -3916,6 +3916,21 @@ const labelX = Math.min(
       >
         {renderInsightsContent()}
       </ScrollView>
+
+      <View style={styles.insightsModalFooter}>
+        <Text style={styles.insightsModalFooterText}>
+          O Enxergaí transforma seus números em uma leitura simples para ajudar você a decidir melhor.
+        </Text>
+
+        <TouchableOpacity
+          style={styles.insightsModalFooterButton}
+          onPress={() => setShowInsightsPopup(false)}
+        >
+          <Text style={styles.insightsModalFooterButtonText}>
+            Fechar insights
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   </View>
 </Modal>
@@ -4305,6 +4320,34 @@ insightsModalCloseText: {
 
 insightsModalScroll: {
   maxHeight: 520,
+},
+
+insightsModalFooter: {
+  borderTopWidth: 0.5,
+  borderTopColor: "#E4EAE6",
+  paddingTop: 12,
+  marginTop: 10,
+  gap: 10,
+},
+
+insightsModalFooterText: {
+  fontSize: 12,
+  color: "#6B7C72",
+  lineHeight: 17,
+},
+
+insightsModalFooterButton: {
+  backgroundColor: "#0A8F55",
+  borderRadius: 12,
+  paddingVertical: 10,
+  paddingHorizontal: 14,
+  alignItems: "center",
+},
+
+insightsModalFooterButtonText: {
+  color: "#FFFFFF",
+  fontSize: 14,
+  fontWeight: "700",
 },
 
 });
