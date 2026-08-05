@@ -4,7 +4,9 @@ import {
   useRouter,
 } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
+
 import {
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -12,6 +14,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+
 import { BarChart, LineChart } from "react-native-chart-kit";
 import { Text as SvgText } from "react-native-svg";
 import { getAllExpenses } from "./storage/expenseStorage";
@@ -27,6 +30,7 @@ export default function EvolucaoTotal() {
 
   const [expenses, setExpenses] = useState<any[]>([]);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showInsightsPopup, setShowInsightsPopup] = useState(false);
   const [chartType, setChartType] = useState<"line" | "bar">("bar");
   const [selectedPoint, setSelectedPoint] = useState<{
   label: string;
@@ -3256,6 +3260,199 @@ const deveMostrarFeedbackPositivo =
   const deveMostrarReconhecimentoEvolucao =
   houveMelhoraDistribuicao;
 
+const renderInsightsContent = () => (
+  <>
+    {nivelMaturidade === 0 && (
+      <>
+        <Text style={styles.insightItem}>
+          • {textoSemMovimentacao}
+        </Text>
+
+        <Text style={styles.insightItem}>
+          • {textoDesbloquearAnalises}
+        </Text>
+      </>
+    )}
+
+    {nivelMaturidade === 1 && (
+      <>
+        <Text style={styles.insightItem}>
+          • {textoPrimeiraMovimentacao}
+        </Text>
+
+        <Text style={styles.insightItem}>
+          • {textoContinuarRegistrando}
+        </Text>
+      </>
+    )}
+
+    {nivelMaturidade === 2 && (
+      <>
+        <Text style={styles.insightItem}>
+          • {textoDadosInsuficientes}
+        </Text>
+
+        <Text style={styles.insightItem}>
+          • {textoProximoPassoPoucosDados}
+        </Text>
+      </>
+    )}
+
+    {nivelMaturidade >= 3 && (
+      <>
+        {deveMostrarAvisoLancamentosFuturos && (
+          <Text style={styles.insightItem}>
+            • {textoAvisoLancamentosFuturos}
+          </Text>
+        )}
+
+        {maiorDia && deveMostrarMaiorImpacto && (
+          <Text style={styles.insightItem}>
+            • {textoMaiorImpacto}
+          </Text>
+        )}
+
+        {deveMostrarTop3Impacto ? (
+          <>
+            <Text style={styles.insightItem}>
+              • {textoTop3Impacto}
+            </Text>
+
+            <Text style={styles.insightItem}>
+              • {percentualTop3 >= 70
+                ? textoConcentracaoAlta
+                : deveMostrarConcentracaoModerada
+                ? textoConcentracaoModerada
+                : textoConcentracaoBaixa}
+            </Text>
+          </>
+        ) : (
+          <Text style={styles.insightItem}>
+            • {textoPoucosPontosMensais}
+          </Text>
+        )}
+
+        {deveMostrarHojeVsMedia && !deveMostrarAvisoLancamentosFuturos && (
+          <Text style={styles.insightItem}>
+            • {textoHojeVsMedia}
+          </Text>
+        )}
+
+        {!deveMostrarAvisoLancamentosFuturos &&
+          !deveTratarQuedaComoPossivelFaltaRegistro && (
+            <Text style={styles.insightItem}>
+              • {textoTendenciaPeriodo}
+            </Text>
+          )}
+
+        {!deveMostrarAvisoLancamentosFuturos &&
+          deveTratarQuedaComoPossivelFaltaRegistro && (
+            <Text style={styles.insightItem}>
+              💡 {textoPossivelFaltaRegistroNoFinal}
+            </Text>
+          )}
+
+        {deveMostrarMovimentoRecente && !deveMostrarAvisoLancamentosFuturos && (
+          <Text style={styles.insightItem}>
+            • {textoMovimentoRecente}
+          </Text>
+        )}
+
+        {deveMostrarAlertaTendencia && (
+          <Text style={styles.insightItem}>
+            ⚠️ {textoAlertaTendencia}
+          </Text>
+        )}
+
+        {deveMostrarLeituraReducao &&
+          !deveTratarQuedaComoPossivelFaltaRegistro && (
+            <Text style={styles.insightItem}>
+              💡 {textoLeituraReducao}
+            </Text>
+          )}
+
+        {deveMostrarCategoriaDominante && (
+          <Text style={styles.insightItem}>
+            • {textoCategoriaDominante}
+          </Text>
+        )}
+
+        {deveMostrarSubcategoriaDominante && (
+          <Text style={styles.insightItem}>
+            • {textoSubcategoriaDominante}
+          </Text>
+        )}
+
+        {deveMostrarOrientacaoPraticaCategoria && (
+          <Text style={styles.insightItem}>
+            • {textoOrientacaoPraticaCategoria}
+          </Text>
+        )}
+
+        {deveMostrarEducacaoContextual && (
+          <Text style={styles.insightItem}>
+            📘 {textoEducacaoContextual}
+          </Text>
+        )}
+
+        {deveMostrarFeedbackPositivo && (
+          <Text style={styles.insightItem}>
+            ✅ {textoFeedbackPositivo}
+          </Text>
+        )}
+
+        {houveMelhoraDistribuicao && (
+          <Text style={styles.insightItem}>
+            ✅ {textoConquistaEntrePeriodos}
+          </Text>
+        )}
+
+        {deveMostrarReconhecimentoEvolucao && (
+          <Text style={styles.insightItem}>
+            💡 {textoReconhecimentoEvolucao}
+          </Text>
+        )}
+
+        {mudouCategoriaDominante && (
+          <Text style={styles.insightItem}>
+            🔄 {textoMudancaCategoriaDominante}
+          </Text>
+        )}
+
+        {deveMostrarCategoriaGanhouEspaco && (
+          <Text style={styles.insightItem}>
+            📈 {textoCategoriaGanhouEspaco}
+          </Text>
+        )}
+
+        {deveMostrarCategoriaPerdeuEspaco && (
+          <Text style={styles.insightItem}>
+            📉 {textoCategoriaPerdeuEspaco}
+          </Text>
+        )}
+
+        {deveMostrarComparacaoInteligente && (
+          <Text style={styles.insightItem}>
+            🧠 {textoComparacaoInteligente}
+          </Text>
+        )}
+
+        {deveMostrarExplicacaoMudancaCategoria && (
+          <Text style={styles.insightItem}>
+            💡 {textoExplicacaoMudancaCategoria}
+          </Text>
+        )}
+
+        {deveMostrarCrescimentoPessoal && (
+          <Text style={styles.insightItem}>
+            ✨ {textoCrescimentoPessoal}
+          </Text>
+        )}
+      </>
+    )}
+  </>
+);
+
   function formatShortMoney(valor: number) {
   if (valor >= 1000) {
     return `R$ ${(valor / 1000).toFixed(1)}k`;
@@ -3670,196 +3867,58 @@ const labelX = Math.min(
     🔥 Insight Financeiro
   </Text>
 
-  {nivelMaturidade === 0 && (
-    <>
-      <Text style={styles.insightItem}>
-        • {textoSemMovimentacao}
-      </Text>
+  <Text style={styles.insightSummaryText}>
+    O Enxergaí analisou este período e preparou uma leitura completa dos seus gastos.
+  </Text>
 
-      <Text style={styles.insightItem}>
-        • {textoDesbloquearAnalises}
-      </Text>
-    </>
-  )}
-
-  {nivelMaturidade === 1 && (
-    <>
-      <Text style={styles.insightItem}>
-        • {textoPrimeiraMovimentacao}
-      </Text>
-
-      <Text style={styles.insightItem}>
-        • {textoContinuarRegistrando}
-      </Text>
-    </>
-  )}
-
-  {nivelMaturidade === 2 && (
-  <>
-    <Text style={styles.insightItem}>
-      • {textoDadosInsuficientes}
+  <TouchableOpacity
+    style={styles.openInsightsButton}
+    onPress={() => setShowInsightsPopup(true)}
+  >
+    <Text style={styles.openInsightsButtonText}>
+      🔥 Ver insights completos
     </Text>
-
-    <Text style={styles.insightItem}>
-      • {textoProximoPassoPoucosDados}
-    </Text>
-  </>
-)}
-
-  {nivelMaturidade >= 3 && (
-    <>
-    {deveMostrarAvisoLancamentosFuturos && (
-  <Text style={styles.insightItem}>
-    • {textoAvisoLancamentosFuturos}
-  </Text>
-)}
-      {maiorDia && deveMostrarMaiorImpacto && (
-  <Text style={styles.insightItem}>
-    • {textoMaiorImpacto}
-  </Text>
-)}
-
-
-      {deveMostrarTop3Impacto ? (
-  <>
-    <Text style={styles.insightItem}>
-      • {textoTop3Impacto}
-    </Text>
-
-    <Text style={styles.insightItem}>
-  • {percentualTop3 >= 70
-    ? textoConcentracaoAlta
-    : deveMostrarConcentracaoModerada
-    ? textoConcentracaoModerada
-    : textoConcentracaoBaixa}
-</Text>
-  </>
-) : (
-  <Text style={styles.insightItem}>
-    • {textoPoucosPontosMensais}
-  </Text>
-)}
-
-{deveMostrarHojeVsMedia && !deveMostrarAvisoLancamentosFuturos && (
-  <Text style={styles.insightItem}>
-    • {textoHojeVsMedia}
-  </Text>
-)}
-
-{!deveMostrarAvisoLancamentosFuturos &&
-  !deveTratarQuedaComoPossivelFaltaRegistro && (
-    <Text style={styles.insightItem}>
-      • {textoTendenciaPeriodo}
-    </Text>
-)}
-
-{!deveMostrarAvisoLancamentosFuturos &&
-  deveTratarQuedaComoPossivelFaltaRegistro && (
-    <Text style={styles.insightItem}>
-      💡 {textoPossivelFaltaRegistroNoFinal}
-    </Text>
-)}
-
-{deveMostrarMovimentoRecente && !deveMostrarAvisoLancamentosFuturos && (
-  <Text style={styles.insightItem}>
-    • {textoMovimentoRecente}
-  </Text>
-)}
-
-{deveMostrarAlertaTendencia && (
-  <Text style={styles.insightItem}>
-    ⚠️ {textoAlertaTendencia}
-  </Text>
-)}
-
-{deveMostrarLeituraReducao &&
-  !deveTratarQuedaComoPossivelFaltaRegistro && (
-    <Text style={styles.insightItem}>
-      💡 {textoLeituraReducao}
-    </Text>
-)}
-
-{deveMostrarCategoriaDominante && (
-  <Text style={styles.insightItem}>
-    • {textoCategoriaDominante}
-  </Text>
-)}
-
-{deveMostrarSubcategoriaDominante && (
-  <Text style={styles.insightItem}>
-    • {textoSubcategoriaDominante}
-  </Text>
-)}
-
-{deveMostrarOrientacaoPraticaCategoria && (
-  <Text style={styles.insightItem}>
-    • {textoOrientacaoPraticaCategoria}
-  </Text>
-)}
-
-{deveMostrarEducacaoContextual && (
-  <Text style={styles.insightItem}>
-    📘 {textoEducacaoContextual}
-  </Text>
-)}
-
-{deveMostrarFeedbackPositivo && (
-  <Text style={styles.insightItem}>
-    ✅ {textoFeedbackPositivo}
-  </Text>
-)}
-
-{houveMelhoraDistribuicao && (
-  <Text style={styles.insightItem}>
-    ✅ {textoConquistaEntrePeriodos}
-  </Text>
-)}
-
-{deveMostrarReconhecimentoEvolucao && (
-  <Text style={styles.insightItem}>
-    💡 {textoReconhecimentoEvolucao}
-  </Text>
-)}
-
-{mudouCategoriaDominante && (
-  <Text style={styles.insightItem}>
-    🔄 {textoMudancaCategoriaDominante}
-  </Text>
-)}
-
-{deveMostrarCategoriaGanhouEspaco && (
-  <Text style={styles.insightItem}>
-    📈 {textoCategoriaGanhouEspaco}
-  </Text>
-)}
-
-{deveMostrarCategoriaPerdeuEspaco && (
-  <Text style={styles.insightItem}>
-    📉 {textoCategoriaPerdeuEspaco}
-  </Text>
-)}
-
-{deveMostrarComparacaoInteligente && (
-  <Text style={styles.insightItem}>
-    🧠 {textoComparacaoInteligente}
-  </Text>
-)}
-
-{deveMostrarExplicacaoMudancaCategoria && (
-  <Text style={styles.insightItem}>
-    💡 {textoExplicacaoMudancaCategoria}
-  </Text>
-)}
-
-{deveMostrarCrescimentoPessoal && (
-  <Text style={styles.insightItem}>
-    ✨ {textoCrescimentoPessoal}
-  </Text>
-)}
-
-</>
-)}
+  </TouchableOpacity>
 </View>
+
+<Modal
+  visible={showInsightsPopup}
+  transparent
+  animationType="fade"
+  onRequestClose={() => setShowInsightsPopup(false)}
+>
+  <View style={styles.insightsModalOverlay}>
+    <View style={styles.insightsModalBox}>
+      <View style={styles.insightsModalHeader}>
+        <View>
+          <Text style={styles.insightsModalTitle}>
+            🔥 Insight Financeiro
+          </Text>
+
+          <Text style={styles.insightsModalSubtitle}>
+            {labelPeriod(String(period))}
+          </Text>
+        </View>
+
+        <TouchableOpacity
+          style={styles.insightsModalCloseButton}
+          onPress={() => setShowInsightsPopup(false)}
+        >
+          <Text style={styles.insightsModalCloseText}>
+            Fechar
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView
+        style={styles.insightsModalScroll}
+        showsVerticalScrollIndicator={true}
+      >
+        {renderInsightsContent()}
+      </ScrollView>
+    </View>
+  </View>
+</Modal>
 
 </ScrollView>
 );
@@ -4167,6 +4226,85 @@ insightItem: {
   color: "#4D6659",
   marginBottom: 8,
   lineHeight: 20,
+},
+
+insightSummaryText: {
+  fontSize: 13,
+  color: "#4D6659",
+  lineHeight: 19,
+  marginBottom: 12,
+},
+
+openInsightsButton: {
+  backgroundColor: "#0A8F55",
+  borderRadius: 12,
+  paddingVertical: 10,
+  paddingHorizontal: 14,
+  alignItems: "center",
+},
+
+openInsightsButtonText: {
+  color: "#FFFFFF",
+  fontSize: 14,
+  fontWeight: "700",
+},
+
+insightsModalOverlay: {
+  flex: 1,
+  backgroundColor: "rgba(0, 0, 0, 0.42)",
+  justifyContent: "center",
+  alignItems: "center",
+  padding: 16,
+},
+
+insightsModalBox: {
+  width: "100%",
+  maxWidth: 760,
+  maxHeight: "82%",
+  backgroundColor: "#FFFFFF",
+  borderRadius: 18,
+  padding: 16,
+  borderWidth: 0.5,
+  borderColor: "#E8EAEE",
+},
+
+insightsModalHeader: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "flex-start",
+  gap: 12,
+  marginBottom: 12,
+},
+
+insightsModalTitle: {
+  fontSize: 17,
+  fontWeight: "800",
+  color: "#0A8F55",
+},
+
+insightsModalSubtitle: {
+  fontSize: 12,
+  color: "#6B7C72",
+  marginTop: 2,
+},
+
+insightsModalCloseButton: {
+  backgroundColor: "#F4F6F5",
+  borderRadius: 10,
+  paddingVertical: 7,
+  paddingHorizontal: 12,
+  borderWidth: 0.5,
+  borderColor: "#DDE5E0",
+},
+
+insightsModalCloseText: {
+  fontSize: 13,
+  color: "#395247",
+  fontWeight: "700",
+},
+
+insightsModalScroll: {
+  maxHeight: 520,
 },
 
 });
