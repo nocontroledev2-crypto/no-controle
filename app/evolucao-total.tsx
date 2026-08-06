@@ -3464,6 +3464,29 @@ function exportarInsightsTexto() {
   URL.revokeObjectURL(url);
 }
 
+ async function compartilharInsightsTexto() {
+  const texto = getInsightsTextoCompleto();
+
+  if (
+    typeof navigator !== "undefined" &&
+    navigator.share
+  ) {
+    try {
+      await navigator.share({
+        title: "Insight Financeiro - Enxergaí",
+        text: texto,
+      });
+
+      return;
+    } catch (error) {
+      return;
+    }
+  }
+
+  alert(
+    "Compartilhamento não disponível neste dispositivo. Use Copiar ou Exportar."
+  );
+}
   function formatShortMoney(valor: number) {
   if (valor >= 1000) {
     return `R$ ${(valor / 1000).toFixed(1)}k`;
@@ -3928,6 +3951,16 @@ const labelX = Math.min(
           ⬇️ Exportar
         </Text>
       </TouchableOpacity>
+     
+     <TouchableOpacity
+  style={styles.insightsModalActionButton}
+  onPress={compartilharInsightsTexto}
+>
+  <Text style={styles.insightsModalActionText}>
+    📤 Compartilhar
+  </Text>
+</TouchableOpacity>
+
     </View>
   </View>
 
