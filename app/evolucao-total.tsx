@@ -32,8 +32,9 @@ export default function EvolucaoTotal() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showInsightsPopup, setShowInsightsPopup] = useState(false);
   const [modoInsights, setModoInsights] = useState<
-  "essencial" | "completo"
+  "essencial" | "completo" | "comparativo"
 >("essencial");
+
   const [chartType, setChartType] = useState<"line" | "bar">("bar");
   const [selectedPoint, setSelectedPoint] = useState<{
   label: string;
@@ -2943,7 +2944,7 @@ const textoCategoriaGanhouEspaco =
               )}% do total.`,
             ]
           : [
-              `${categoriaQueMaisGanhouEspaco.categoria} ganhou mais espaço nos gastos: antes representava ${categoriaQueMaisGanhouEspaco.percentualAnterior.toFixed(
+              `${categoriaQueMaisGanhouEspaco.categoria} ganhou mais espaço nos gastos: antes representava: antes representava ${categoriaQueMaisGanhouEspaco.percentualAnterior.toFixed(
                 0
               )}%; agora chegou a ${categoriaQueMaisGanhouEspaco.percentualAtual.toFixed(
                 0
@@ -3264,6 +3265,7 @@ const deveMostrarFeedbackPositivo =
   houveMelhoraDistribuicao;
 
 const getInsightsTextLinesEssencial = () => {
+  
   const insights: {
     peso: number;
     texto: string;
@@ -3358,6 +3360,38 @@ const getInsightsTextLinesEssencial = () => {
     .slice(0, 4)
     .map((item) => item.texto);
 };
+
+const getInsightsTextLinesComparativo = (): string[] => {
+  const insights: string[] = [];
+
+  if (deveMostrarComparacaoInteligente) {
+    insights.push(`🧠 ${textoComparacaoInteligente}`);
+  }
+
+  if (
+    deveMostrarComparacaoCategorias &&
+    mudouCategoriaDominante
+  ) {
+    insights.push(`🔄 ${textoMudancaCategoriaDominante}`);
+  }
+
+  if (
+    deveMostrarComparacaoCategorias &&
+    textoCategoriaGanhouEspaco
+  ) {
+    insights.push(`📈 ${textoCategoriaGanhouEspaco}`);
+  }
+
+  if (
+    deveMostrarComparacaoCategorias &&
+    textoCategoriaPerdeuEspaco
+  ) {
+    insights.push(`📉 ${textoCategoriaPerdeuEspaco}`);
+  }
+
+  return insights.filter(Boolean);
+};
+
 
 const getInsightsTextLines = () => {
   const linhas: string[] = [];
@@ -3493,9 +3527,11 @@ const getInsightsTextLines = () => {
 
 const getInsightsTextoCompleto = () => {
   const linhas =
-    modoInsights === "essencial"
-      ? getInsightsTextLinesEssencial()
-      : getInsightsTextLines();
+  modoInsights === "essencial"
+    ? getInsightsTextLinesEssencial()
+    : modoInsights === "comparativo"
+    ? getInsightsTextLinesComparativo()
+    : getInsightsTextLines();
 
   return [
     "🔥 Insight Financeiro",
@@ -3505,15 +3541,17 @@ const getInsightsTextoCompleto = () => {
     "",
     "Gerado pelo Enxergaí.",
   ].join("\n");
-};
+}; 
 
 const renderInsightsContent = () => (
   <>
     {(
-  modoInsights === "essencial"
-    ? getInsightsTextLinesEssencial()
-    : getInsightsTextLines()
-).map((linha, index) => (
+      modoInsights === "essencial"
+        ? getInsightsTextLinesEssencial()
+        : modoInsights === "comparativo"
+        ? getInsightsTextLinesComparativo()
+        : getInsightsTextLines()
+    ).map((linha, index) => (
       <Text
         key={`insight-popup-${index}`}
         style={styles.insightItem}
@@ -4072,6 +4110,26 @@ const labelX = Math.min(
     ]}
     onPress={() => setModoInsights("completo")}
   >
+
+<TouchableOpacity
+  style={[
+    styles.insightsModeButton,
+    modoInsights === "comparativo" &&
+      styles.insightsModeButtonActive,
+  ]}
+  onPress={() => setModoInsights("comparativo")}
+>
+  <Text
+    style={[
+      styles.insightsModeText,
+      modoInsights === "comparativo" &&
+        styles.insightsModeTextActive,
+    ]}
+  >
+    🧠 Comparativo
+  </Text>
+</TouchableOpacity>
+
     <Text
       style={[
         styles.insightsModeText,
