@@ -31,6 +31,9 @@ export default function EvolucaoTotal() {
   const [expenses, setExpenses] = useState<any[]>([]);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showInsightsPopup, setShowInsightsPopup] = useState(false);
+  const [modoInsights, setModoInsights] = useState<
+  "essencial" | "completo"
+>("essencial");
   const [chartType, setChartType] = useState<"line" | "bar">("bar");
   const [selectedPoint, setSelectedPoint] = useState<{
   label: string;
@@ -3260,6 +3263,28 @@ const deveMostrarFeedbackPositivo =
   const deveMostrarReconhecimentoEvolucao =
   houveMelhoraDistribuicao;
 
+const getInsightsTextLinesEssencial = () => {
+  const linhas: string[] = [];
+
+  if (deveMostrarAvisoLancamentosFuturos) {
+    linhas.push(`• ${textoAvisoLancamentosFuturos}`);
+  }
+
+  if (maiorDia && deveMostrarMaiorImpacto) {
+    linhas.push(`• ${textoMaiorImpacto}`);
+  }
+
+  if (deveMostrarCategoriaDominante) {
+    linhas.push(`• ${textoCategoriaDominante}`);
+  }
+
+  if (deveMostrarComparacaoInteligente) {
+    linhas.push(`🧠 ${textoComparacaoInteligente}`);
+  }
+
+  return linhas.filter(Boolean);
+};
+
 const getInsightsTextLines = () => {
   const linhas: string[] = [];
 
@@ -3405,7 +3430,11 @@ const getInsightsTextoCompleto = () => {
 
 const renderInsightsContent = () => (
   <>
-    {getInsightsTextLines().map((linha, index) => (
+    {(
+  modoInsights === "essencial"
+    ? getInsightsTextLinesEssencial()
+    : getInsightsTextLines()
+).map((linha, index) => (
       <Text
         key={`insight-popup-${index}`}
         style={styles.insightItem}
@@ -3934,32 +3963,80 @@ const labelX = Math.min(
     </Text>
 
     <View style={styles.insightsModalActions}>
-      <TouchableOpacity
-        style={styles.insightsModalActionButton}
-        onPress={copiarInsightsTexto}
-      >
-        <Text style={styles.insightsModalActionText}>
-          📋 Copiar
-        </Text>
-      </TouchableOpacity>
+      
 
-      <TouchableOpacity
-        style={styles.insightsModalActionButton}
-        onPress={exportarInsightsTexto}
-      >
-        <Text style={styles.insightsModalActionText}>
-          ⬇️ Exportar
-        </Text>
-      </TouchableOpacity>
-     
-     <TouchableOpacity
-  style={styles.insightsModalActionButton}
-  onPress={compartilharInsightsTexto}
->
-  <Text style={styles.insightsModalActionText}>
-    📤 Compartilhar
-  </Text>
-</TouchableOpacity>
+<View style={styles.insightsModeRow}>
+  <TouchableOpacity
+    style={[
+      styles.insightsModeButton,
+      modoInsights === "essencial" &&
+        styles.insightsModeButtonActive,
+    ]}
+    onPress={() => setModoInsights("essencial")}
+  >
+    <Text
+      style={[
+        styles.insightsModeText,
+        modoInsights === "essencial" &&
+          styles.insightsModeTextActive,
+      ]}
+    >
+      ⚡ Essencial
+    </Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    style={[
+      styles.insightsModeButton,
+      modoInsights === "completo" &&
+        styles.insightsModeButtonActive,
+    ]}
+    onPress={() => setModoInsights("completo")}
+  >
+    <Text
+      style={[
+        styles.insightsModeText,
+        modoInsights === "completo" &&
+          styles.insightsModeTextActive,
+      ]}
+    >
+      📚 Completo
+    </Text>
+  </TouchableOpacity>
+</View>
+
+<View style={styles.insightsDivider} />
+
+<View style={styles.insightsActionsRow}>
+  <TouchableOpacity
+    style={styles.insightsModalActionButton}
+    onPress={copiarInsightsTexto}
+  >
+    <Text style={styles.insightsModalActionText}>
+      📋 Copiar
+    </Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    style={styles.insightsModalActionButton}
+    onPress={compartilharInsightsTexto}
+  >
+    <Text style={styles.insightsModalActionText}>
+      📤 Compartilhar
+    </Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    style={styles.insightsModalActionButton}
+    onPress={exportarInsightsTexto}
+  >
+    <Text style={styles.insightsModalActionText}>
+      ⬇️ Exportar
+    </Text>
+  </TouchableOpacity>
+</View>
+
+<View style={styles.insightsDivider} />
 
     </View>
   </View>
@@ -4438,6 +4515,56 @@ insightsModalActionText: {
   fontSize: 12,
   color: "#0A8F55",
   fontWeight: "700",
+},
+
+insightsSectionLabel: {
+  fontSize: 11,
+  fontWeight: "700",
+  color: "#6B7C72",
+  textTransform: "uppercase",
+  marginBottom: 8,
+},
+
+insightsModeRow: {
+  flexDirection: "row",
+  gap: 8,
+  marginBottom: 10,
+},
+
+insightsModeButton: {
+  backgroundColor: "#FFFFFF",
+  borderWidth: 1,
+  borderColor: "#DDE5E0",
+  borderRadius: 12,
+  paddingVertical: 8,
+  paddingHorizontal: 12,
+},
+
+insightsModeButtonActive: {
+  backgroundColor: "#0A8F55",
+  borderColor: "#0A8F55",
+},
+
+insightsModeText: {
+  fontSize: 12,
+  fontWeight: "700",
+  color: "#395247",
+},
+
+insightsModeTextActive: {
+  color: "#FFFFFF",
+},
+
+insightsActionsRow: {
+  flexDirection: "row",
+  flexWrap: "wrap",
+  gap: 8,
+},
+
+insightsDivider: {
+  height: 1,
+  backgroundColor: "#E6ECE8",
+  marginVertical: 10,
 },
 
 });
