@@ -3260,198 +3260,209 @@ const deveMostrarFeedbackPositivo =
   const deveMostrarReconhecimentoEvolucao =
   houveMelhoraDistribuicao;
 
+const getInsightsTextLines = () => {
+  const linhas: string[] = [];
+
+  if (nivelMaturidade === 0) {
+    linhas.push(`• ${textoSemMovimentacao}`);
+    linhas.push(`• ${textoDesbloquearAnalises}`);
+  }
+
+  if (nivelMaturidade === 1) {
+    linhas.push(`• ${textoPrimeiraMovimentacao}`);
+    linhas.push(`• ${textoContinuarRegistrando}`);
+  }
+
+  if (nivelMaturidade === 2) {
+    linhas.push(`• ${textoDadosInsuficientes}`);
+    linhas.push(`• ${textoProximoPassoPoucosDados}`);
+  }
+
+  if (nivelMaturidade >= 3) {
+    if (deveMostrarAvisoLancamentosFuturos) {
+      linhas.push(`• ${textoAvisoLancamentosFuturos}`);
+    }
+
+    if (maiorDia && deveMostrarMaiorImpacto) {
+      linhas.push(`• ${textoMaiorImpacto}`);
+    }
+
+    if (deveMostrarTop3Impacto) {
+      linhas.push(`• ${textoTop3Impacto}`);
+
+      linhas.push(
+        `• ${
+          percentualTop3 >= 70
+            ? textoConcentracaoAlta
+            : deveMostrarConcentracaoModerada
+            ? textoConcentracaoModerada
+            : textoConcentracaoBaixa
+        }`
+      );
+    } else {
+      linhas.push(`• ${textoPoucosPontosMensais}`);
+    }
+
+    if (deveMostrarHojeVsMedia && !deveMostrarAvisoLancamentosFuturos) {
+      linhas.push(`• ${textoHojeVsMedia}`);
+    }
+
+    if (
+      !deveMostrarAvisoLancamentosFuturos &&
+      !deveTratarQuedaComoPossivelFaltaRegistro
+    ) {
+      linhas.push(`• ${textoTendenciaPeriodo}`);
+    }
+
+    if (
+      !deveMostrarAvisoLancamentosFuturos &&
+      deveTratarQuedaComoPossivelFaltaRegistro
+    ) {
+      linhas.push(`💡 ${textoPossivelFaltaRegistroNoFinal}`);
+    }
+
+    if (deveMostrarMovimentoRecente && !deveMostrarAvisoLancamentosFuturos) {
+      linhas.push(`• ${textoMovimentoRecente}`);
+    }
+
+    if (deveMostrarAlertaTendencia) {
+      linhas.push(`⚠️ ${textoAlertaTendencia}`);
+    }
+
+    if (
+      deveMostrarLeituraReducao &&
+      !deveTratarQuedaComoPossivelFaltaRegistro
+    ) {
+      linhas.push(`💡 ${textoLeituraReducao}`);
+    }
+
+    if (deveMostrarCategoriaDominante) {
+      linhas.push(`• ${textoCategoriaDominante}`);
+    }
+
+    if (deveMostrarSubcategoriaDominante) {
+      linhas.push(`• ${textoSubcategoriaDominante}`);
+    }
+
+    if (deveMostrarOrientacaoPraticaCategoria) {
+      linhas.push(`• ${textoOrientacaoPraticaCategoria}`);
+    }
+
+    if (deveMostrarEducacaoContextual) {
+      linhas.push(`📘 ${textoEducacaoContextual}`);
+    }
+
+    if (deveMostrarFeedbackPositivo) {
+      linhas.push(`✅ ${textoFeedbackPositivo}`);
+    }
+
+    if (houveMelhoraDistribuicao) {
+      linhas.push(`✅ ${textoConquistaEntrePeriodos}`);
+    }
+
+    if (deveMostrarReconhecimentoEvolucao) {
+      linhas.push(`💡 ${textoReconhecimentoEvolucao}`);
+    }
+
+    if (mudouCategoriaDominante) {
+      linhas.push(`🔄 ${textoMudancaCategoriaDominante}`);
+    }
+
+    if (deveMostrarCategoriaGanhouEspaco) {
+      linhas.push(`📈 ${textoCategoriaGanhouEspaco}`);
+    }
+
+    if (deveMostrarCategoriaPerdeuEspaco) {
+      linhas.push(`📉 ${textoCategoriaPerdeuEspaco}`);
+    }
+
+    if (deveMostrarComparacaoInteligente) {
+      linhas.push(`🧠 ${textoComparacaoInteligente}`);
+    }
+
+    if (deveMostrarExplicacaoMudancaCategoria) {
+      linhas.push(`💡 ${textoExplicacaoMudancaCategoria}`);
+    }
+
+    if (deveMostrarCrescimentoPessoal) {
+      linhas.push(`✨ ${textoCrescimentoPessoal}`);
+    }
+  }
+
+  return linhas.filter(Boolean);
+};
+
+const getInsightsTextoCompleto = () => {
+  return [
+    "🔥 Insight Financeiro",
+    `Período: ${labelPeriod(String(period))}`,
+    "",
+    ...getInsightsTextLines(),
+    "",
+    "Gerado pelo Enxergaí.",
+  ].join("\n");
+};
+
 const renderInsightsContent = () => (
   <>
-    {nivelMaturidade === 0 && (
-      <>
-        <Text style={styles.insightItem}>
-          • {textoSemMovimentacao}
-        </Text>
-
-        <Text style={styles.insightItem}>
-          • {textoDesbloquearAnalises}
-        </Text>
-      </>
-    )}
-
-    {nivelMaturidade === 1 && (
-      <>
-        <Text style={styles.insightItem}>
-          • {textoPrimeiraMovimentacao}
-        </Text>
-
-        <Text style={styles.insightItem}>
-          • {textoContinuarRegistrando}
-        </Text>
-      </>
-    )}
-
-    {nivelMaturidade === 2 && (
-      <>
-        <Text style={styles.insightItem}>
-          • {textoDadosInsuficientes}
-        </Text>
-
-        <Text style={styles.insightItem}>
-          • {textoProximoPassoPoucosDados}
-        </Text>
-      </>
-    )}
-
-    {nivelMaturidade >= 3 && (
-      <>
-        {deveMostrarAvisoLancamentosFuturos && (
-          <Text style={styles.insightItem}>
-            • {textoAvisoLancamentosFuturos}
-          </Text>
-        )}
-
-        {maiorDia && deveMostrarMaiorImpacto && (
-          <Text style={styles.insightItem}>
-            • {textoMaiorImpacto}
-          </Text>
-        )}
-
-        {deveMostrarTop3Impacto ? (
-          <>
-            <Text style={styles.insightItem}>
-              • {textoTop3Impacto}
-            </Text>
-
-            <Text style={styles.insightItem}>
-              • {percentualTop3 >= 70
-                ? textoConcentracaoAlta
-                : deveMostrarConcentracaoModerada
-                ? textoConcentracaoModerada
-                : textoConcentracaoBaixa}
-            </Text>
-          </>
-        ) : (
-          <Text style={styles.insightItem}>
-            • {textoPoucosPontosMensais}
-          </Text>
-        )}
-
-        {deveMostrarHojeVsMedia && !deveMostrarAvisoLancamentosFuturos && (
-          <Text style={styles.insightItem}>
-            • {textoHojeVsMedia}
-          </Text>
-        )}
-
-        {!deveMostrarAvisoLancamentosFuturos &&
-          !deveTratarQuedaComoPossivelFaltaRegistro && (
-            <Text style={styles.insightItem}>
-              • {textoTendenciaPeriodo}
-            </Text>
-          )}
-
-        {!deveMostrarAvisoLancamentosFuturos &&
-          deveTratarQuedaComoPossivelFaltaRegistro && (
-            <Text style={styles.insightItem}>
-              💡 {textoPossivelFaltaRegistroNoFinal}
-            </Text>
-          )}
-
-        {deveMostrarMovimentoRecente && !deveMostrarAvisoLancamentosFuturos && (
-          <Text style={styles.insightItem}>
-            • {textoMovimentoRecente}
-          </Text>
-        )}
-
-        {deveMostrarAlertaTendencia && (
-          <Text style={styles.insightItem}>
-            ⚠️ {textoAlertaTendencia}
-          </Text>
-        )}
-
-        {deveMostrarLeituraReducao &&
-          !deveTratarQuedaComoPossivelFaltaRegistro && (
-            <Text style={styles.insightItem}>
-              💡 {textoLeituraReducao}
-            </Text>
-          )}
-
-        {deveMostrarCategoriaDominante && (
-          <Text style={styles.insightItem}>
-            • {textoCategoriaDominante}
-          </Text>
-        )}
-
-        {deveMostrarSubcategoriaDominante && (
-          <Text style={styles.insightItem}>
-            • {textoSubcategoriaDominante}
-          </Text>
-        )}
-
-        {deveMostrarOrientacaoPraticaCategoria && (
-          <Text style={styles.insightItem}>
-            • {textoOrientacaoPraticaCategoria}
-          </Text>
-        )}
-
-        {deveMostrarEducacaoContextual && (
-          <Text style={styles.insightItem}>
-            📘 {textoEducacaoContextual}
-          </Text>
-        )}
-
-        {deveMostrarFeedbackPositivo && (
-          <Text style={styles.insightItem}>
-            ✅ {textoFeedbackPositivo}
-          </Text>
-        )}
-
-        {houveMelhoraDistribuicao && (
-          <Text style={styles.insightItem}>
-            ✅ {textoConquistaEntrePeriodos}
-          </Text>
-        )}
-
-        {deveMostrarReconhecimentoEvolucao && (
-          <Text style={styles.insightItem}>
-            💡 {textoReconhecimentoEvolucao}
-          </Text>
-        )}
-
-        {mudouCategoriaDominante && (
-          <Text style={styles.insightItem}>
-            🔄 {textoMudancaCategoriaDominante}
-          </Text>
-        )}
-
-        {deveMostrarCategoriaGanhouEspaco && (
-          <Text style={styles.insightItem}>
-            📈 {textoCategoriaGanhouEspaco}
-          </Text>
-        )}
-
-        {deveMostrarCategoriaPerdeuEspaco && (
-          <Text style={styles.insightItem}>
-            📉 {textoCategoriaPerdeuEspaco}
-          </Text>
-        )}
-
-        {deveMostrarComparacaoInteligente && (
-          <Text style={styles.insightItem}>
-            🧠 {textoComparacaoInteligente}
-          </Text>
-        )}
-
-        {deveMostrarExplicacaoMudancaCategoria && (
-          <Text style={styles.insightItem}>
-            💡 {textoExplicacaoMudancaCategoria}
-          </Text>
-        )}
-
-        {deveMostrarCrescimentoPessoal && (
-          <Text style={styles.insightItem}>
-            ✨ {textoCrescimentoPessoal}
-          </Text>
-        )}
-      </>
-    )}
+    {getInsightsTextLines().map((linha, index) => (
+      <Text
+        key={`insight-popup-${index}`}
+        style={styles.insightItem}
+      >
+        {linha}
+      </Text>
+    ))}
   </>
 );
+
+function copiarInsightsTexto() {
+  const texto = getInsightsTextoCompleto();
+
+  if (
+    typeof navigator !== "undefined" &&
+    navigator.clipboard &&
+    navigator.clipboard.writeText
+  ) {
+    navigator.clipboard
+      .writeText(texto)
+      .then(() => {
+        alert("Insights copiados com sucesso.");
+      })
+      .catch(() => {
+        alert("Não foi possível copiar automaticamente. Tente novamente.");
+      });
+
+    return;
+  }
+
+  alert("Cópia automática não disponível neste dispositivo.");
+}
+
+function exportarInsightsTexto() {
+  if (typeof document === "undefined") {
+    alert("Exportação disponível apenas na versão web.");
+    return;
+  }
+
+  const texto = getInsightsTextoCompleto();
+
+  const blob = new Blob([texto], {
+    type: "text/plain;charset=utf-8",
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = `insights-enxergai-${String(period)}.txt`;
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  URL.revokeObjectURL(url);
+}
 
   function formatShortMoney(valor: number) {
   if (valor >= 1000) {
@@ -3890,25 +3901,45 @@ const labelX = Math.min(
   <View style={styles.insightsModalOverlay}>
     <View style={styles.insightsModalBox}>
       <View style={styles.insightsModalHeader}>
-        <View>
-          <Text style={styles.insightsModalTitle}>
-            🔥 Insight Financeiro
-          </Text>
+  <View style={styles.insightsModalTitleBox}>
+    <Text style={styles.insightsModalTitle}>
+      🔥 Insight Financeiro
+    </Text>
 
-          <Text style={styles.insightsModalSubtitle}>
-            {labelPeriod(String(period))}
-          </Text>
-        </View>
+    <Text style={styles.insightsModalSubtitle}>
+      {labelPeriod(String(period))}
+    </Text>
 
-        <TouchableOpacity
-          style={styles.insightsModalCloseButton}
-          onPress={() => setShowInsightsPopup(false)}
-        >
-          <Text style={styles.insightsModalCloseText}>
-            Fechar
-          </Text>
-        </TouchableOpacity>
-      </View>
+    <View style={styles.insightsModalActions}>
+      <TouchableOpacity
+        style={styles.insightsModalActionButton}
+        onPress={copiarInsightsTexto}
+      >
+        <Text style={styles.insightsModalActionText}>
+          📋 Copiar
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.insightsModalActionButton}
+        onPress={exportarInsightsTexto}
+      >
+        <Text style={styles.insightsModalActionText}>
+          ⬇️ Exportar
+        </Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+
+  <TouchableOpacity
+    style={styles.insightsModalCloseButton}
+    onPress={() => setShowInsightsPopup(false)}
+  >
+    <Text style={styles.insightsModalCloseText}>
+      Fechar
+    </Text>
+  </TouchableOpacity>
+</View>
 
       <ScrollView
         style={styles.insightsModalScroll}
@@ -4347,6 +4378,32 @@ insightsModalFooterButton: {
 insightsModalFooterButtonText: {
   color: "#FFFFFF",
   fontSize: 14,
+  fontWeight: "700",
+},
+
+insightsModalTitleBox: {
+  flex: 1,
+},
+
+insightsModalActions: {
+  flexDirection: "row",
+  flexWrap: "wrap",
+  gap: 8,
+  marginTop: 10,
+},
+
+insightsModalActionButton: {
+  backgroundColor: "#EEF7F3",
+  borderRadius: 10,
+  paddingVertical: 7,
+  paddingHorizontal: 10,
+  borderWidth: 0.5,
+  borderColor: "#CFE8DB",
+},
+
+insightsModalActionText: {
+  fontSize: 12,
+  color: "#0A8F55",
   fontWeight: "700",
 },
 
