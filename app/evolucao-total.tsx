@@ -3264,25 +3264,99 @@ const deveMostrarFeedbackPositivo =
   houveMelhoraDistribuicao;
 
 const getInsightsTextLinesEssencial = () => {
-  const linhas: string[] = [];
+  const insights: {
+    peso: number;
+    texto: string;
+  }[] = [];
+
+  if (deveMostrarAlertaTendencia) {
+    insights.push({
+      peso: 100,
+      texto: `⚠️ ${textoAlertaTendencia}`,
+    });
+  }
 
   if (deveMostrarAvisoLancamentosFuturos) {
-    linhas.push(`• ${textoAvisoLancamentosFuturos}`);
-  }
-
-  if (maiorDia && deveMostrarMaiorImpacto) {
-    linhas.push(`• ${textoMaiorImpacto}`);
-  }
-
-  if (deveMostrarCategoriaDominante) {
-    linhas.push(`• ${textoCategoriaDominante}`);
+    insights.push({
+      peso: 95,
+      texto: `• ${textoAvisoLancamentosFuturos}`,
+    });
   }
 
   if (deveMostrarComparacaoInteligente) {
-    linhas.push(`🧠 ${textoComparacaoInteligente}`);
+    insights.push({
+      peso: 90,
+      texto: `🧠 ${textoComparacaoInteligente}`,
+    });
   }
 
-  return linhas.filter(Boolean);
+  if (maiorDia && deveMostrarMaiorImpacto) {
+    insights.push({
+      peso: 85,
+      texto: `• ${textoMaiorImpacto}`,
+    });
+  }
+
+  if (deveMostrarCategoriaDominante) {
+    insights.push({
+      peso: 80,
+      texto: `• ${textoCategoriaDominante}`,
+    });
+  }
+
+  if (deveMostrarCategoriaGanhouEspaco) {
+    insights.push({
+      peso: 75,
+      texto: `📈 ${textoCategoriaGanhouEspaco}`,
+    });
+  }
+
+  if (deveMostrarCategoriaPerdeuEspaco) {
+    insights.push({
+      peso: 70,
+      texto: `📉 ${textoCategoriaPerdeuEspaco}`,
+    });
+  }
+
+  if (deveMostrarMovimentoRecente) {
+    insights.push({
+      peso: 65,
+      texto: `• ${textoMovimentoRecente}`,
+    });
+  }
+
+  if (deveMostrarSubcategoriaDominante) {
+    insights.push({
+      peso: 60,
+      texto: `• ${textoSubcategoriaDominante}`,
+    });
+  }
+
+  if (deveMostrarEducacaoContextual) {
+    insights.push({
+      peso: 50,
+      texto: `📘 ${textoEducacaoContextual}`,
+    });
+  }
+
+  if (deveMostrarFeedbackPositivo) {
+    insights.push({
+      peso: 40,
+      texto: `✅ ${textoFeedbackPositivo}`,
+    });
+  }
+
+  if (deveMostrarCrescimentoPessoal) {
+    insights.push({
+      peso: 30,
+      texto: `✨ ${textoCrescimentoPessoal}`,
+    });
+  }
+
+  return insights
+    .sort((a, b) => b.peso - a.peso)
+    .slice(0, 4)
+    .map((item) => item.texto);
 };
 
 const getInsightsTextLines = () => {
@@ -3418,11 +3492,16 @@ const getInsightsTextLines = () => {
 };
 
 const getInsightsTextoCompleto = () => {
+  const linhas =
+    modoInsights === "essencial"
+      ? getInsightsTextLinesEssencial()
+      : getInsightsTextLines();
+
   return [
     "🔥 Insight Financeiro",
     `Período: ${labelPeriod(String(period))}`,
     "",
-    ...getInsightsTextLines(),
+    ...linhas,
     "",
     "Gerado pelo Enxergaí.",
   ].join("\n");
