@@ -4195,9 +4195,7 @@ const labelX = Math.min(
       </ScrollView>
 
       <View style={styles.insightsModalFooter}>
-        <Text style={styles.insightsModalFooterText}>
-          O Enxergaí transforma seus números em uma leitura simples para ajudar você a decidir melhor.
-        </Text>
+       
 
         <TouchableOpacity
           style={styles.insightsModalFooterButton}
@@ -4550,9 +4548,9 @@ insightsModalOverlay: {
 },
 
 insightsModalBox: {
-  width: "100%",
+  width: "95%",
   maxWidth: 760,
-  maxHeight: "82%",
+  height: "92%",
   backgroundColor: "#FFFFFF",
   borderRadius: 18,
   padding: 16,
@@ -4634,21 +4632,21 @@ insightsModalTitleBox: {
 insightsModalActions: {
   flexDirection: "row",
   flexWrap: "wrap",
-  gap: 8,
-  marginTop: 10,
+  gap: 3,
+  marginTop: 4,
 },
 
 insightsModalActionButton: {
   backgroundColor: "#EEF7F3",
-  borderRadius: 10,
-  paddingVertical: 7,
-  paddingHorizontal: 10,
+  borderRadius: 8,
+  paddingVertical: 5,
+  paddingHorizontal: 9,
   borderWidth: 0.5,
   borderColor: "#CFE8DB",
 },
 
 insightsModalActionText: {
-  fontSize: 12,
+  fontSize: 11,
   color: "#0A8F55",
   fontWeight: "700",
 },
@@ -4663,17 +4661,17 @@ insightsSectionLabel: {
 
 insightsModeRow: {
   flexDirection: "row",
-  gap: 8,
-  marginBottom: 10,
+  gap: 4,
+  marginBottom: 0,
 },
 
 insightsModeButton: {
   backgroundColor: "#FFFFFF",
   borderWidth: 1,
   borderColor: "#DDE5E0",
-  borderRadius: 12,
-  paddingVertical: 8,
-  paddingHorizontal: 12,
+  borderRadius: 8,
+  paddingVertical: 5,
+  paddingHorizontal: 9,
 },
 
 insightsModeButtonActive: {
@@ -4682,7 +4680,7 @@ insightsModeButtonActive: {
 },
 
 insightsModeText: {
-  fontSize: 12,
+  fontSize: 11,
   fontWeight: "700",
   color: "#395247",
 },
@@ -4700,7 +4698,7 @@ insightsActionsRow: {
 insightsDivider: {
   height: 1,
   backgroundColor: "#E6ECE8",
-  marginVertical: 10,
+  marginVertical: 2,
 },
 
 });
