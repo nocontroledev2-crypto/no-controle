@@ -3692,13 +3692,13 @@ function exportarInsightsTexto() {
       <Text style={styles.title}>Evolução do Total Gasto</Text>
 
       <TouchableOpacity
-        style={styles.filterButton}
-        onPress={() => setMenuOpen((prev) => !prev)}
-      >
-        <Text style={styles.filterText}>
-          📅 {labelPeriod(String(period))}
-        </Text>
-      </TouchableOpacity>
+  style={styles.filterButton}
+  onPress={() => setMenuOpen((prev) => !prev)}
+>
+  <Text style={styles.filterText}>
+    📅 {labelPeriod(String(period))} • 💰 {formatMoney(totalGrafico)}
+  </Text>
+</TouchableOpacity>
 
       {period === "custom" && startDateInput && endDateInput && (
         <Text style={styles.customRangeText}>
@@ -3812,16 +3812,7 @@ function exportarInsightsTexto() {
         </View>
       )}
 
-      <View style={styles.totalRow}>
-  <Text style={styles.totalLabel}>
-    {period === "today" ? "Total últimos 7 dias: " : "Total no gráfico: "}
-  </Text>
-
-  <Text style={styles.totalValue}>
-    {formatMoney(totalGrafico)}
-  </Text>
-</View>
-
+     
 {period === "today" && (
   <Text style={styles.todayHighlight}>
     HOJE: {formatMoney(todayValue)}
@@ -4048,8 +4039,9 @@ const labelX = Math.min(
   </Text>
 
   <Text style={styles.insightSummaryText}>
-    O Enxergaí analisou este período e preparou uma leitura completa dos seus gastos.
-  </Text>
+  {getInsightsTextLinesEssencial()[0] ||
+    "O Enxergaí encontrou informações relevantes neste período."}
+</Text>
 
   <TouchableOpacity
     style={styles.openInsightsButton}
@@ -4259,7 +4251,7 @@ containerDesktop: {
     fontSize: 20,
     fontWeight: "bold",
     color: "#0A8F55",
-    marginBottom: 16,
+    marginBottom: 2,
     textAlign: "center",
   },
 
