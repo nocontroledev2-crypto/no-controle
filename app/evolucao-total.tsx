@@ -3716,9 +3716,13 @@ function exportarInsightsTexto() {
     </Text>
   </TouchableOpacity>
 
-  <Text style={styles.totalText}>
-    💰 {formatMoney(totalGrafico)}
-  </Text>
+<Text style={styles.totalText}>
+  💰 {formatMoney(
+    period === "today"
+      ? todayValue
+      : totalGrafico
+  )}
+</Text>
 </View>
 
       {period === "custom" && startDateInput && endDateInput && (
@@ -3834,12 +3838,6 @@ function exportarInsightsTexto() {
       )}
 
      
-{period === "today" && (
-  <Text style={styles.todayHighlight}>
-    HOJE: {formatMoney(todayValue)}
-  </Text>
-)}
-
 {selectedPoint && (
   <Text style={styles.pointInfo}>
     {selectedPoint.label}: {formatMoney(selectedPoint.value)}
@@ -4272,7 +4270,7 @@ containerDesktop: {
     fontSize: 20,
     fontWeight: "bold",
     color: "#0A8F55",
-    marginBottom: 2,
+    marginBottom: 4,
     textAlign: "center",
   },
 
@@ -4354,11 +4352,12 @@ containerDesktop: {
   },
 
   totalText: {
-    textAlign: "center",
-    fontSize: 14,
-    color: "#555",
-    marginBottom: 10,
-  },
+  textAlign: "center",
+  fontSize: 14,
+  color: "#555",
+  marginBottom: 10,
+  marginTop: 6,
+},
 
   chartBox: {
   backgroundColor: "#FFFFFF",
