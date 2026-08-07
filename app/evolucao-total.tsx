@@ -3685,11 +3685,28 @@ function exportarInsightsTexto() {
       paddingBottom: 40,
     }}
   >
-      <TouchableOpacity onPress={() => router.back()}>
-        <Text style={styles.backText}>← Voltar</Text>
-      </TouchableOpacity>
+      <View
+  style={{
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  }}
+>
+  <TouchableOpacity
+    onPress={() => router.back()}
+    style={{
+      position: "absolute",
+      left: 0,
+    }}
+  >
+    <Text style={styles.backText}>← Voltar</Text>
+  </TouchableOpacity>
 
-      <Text style={styles.title}>Evolução do Total Gasto</Text>
+  <Text style={styles.title}>
+    Evolução do Total Gasto
+  </Text>
+</View>
 
   <View
   style={{
