@@ -4105,31 +4105,30 @@ const labelX = Math.min(
   <TouchableOpacity
     style={[
       styles.insightsModeButton,
+      modoInsights === "comparativo" &&
+        styles.insightsModeButtonActive,
+    ]}
+    onPress={() => setModoInsights("comparativo")}
+  >
+    <Text
+      style={[
+        styles.insightsModeText,
+        modoInsights === "comparativo" &&
+          styles.insightsModeTextActive,
+      ]}
+    >
+      🧠 Comparativo
+    </Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    style={[
+      styles.insightsModeButton,
       modoInsights === "completo" &&
         styles.insightsModeButtonActive,
     ]}
     onPress={() => setModoInsights("completo")}
   >
-
-<TouchableOpacity
-  style={[
-    styles.insightsModeButton,
-    modoInsights === "comparativo" &&
-      styles.insightsModeButtonActive,
-  ]}
-  onPress={() => setModoInsights("comparativo")}
->
-  <Text
-    style={[
-      styles.insightsModeText,
-      modoInsights === "comparativo" &&
-        styles.insightsModeTextActive,
-    ]}
-  >
-    🧠 Comparativo
-  </Text>
-</TouchableOpacity>
-
     <Text
       style={[
         styles.insightsModeText,
