@@ -4194,18 +4194,7 @@ const labelX = Math.min(
         {renderInsightsContent()}
       </ScrollView>
 
-      <View style={styles.insightsModalFooter}>
-       
-
-        <TouchableOpacity
-          style={styles.insightsModalFooterButton}
-          onPress={() => setShowInsightsPopup(false)}
-        >
-          <Text style={styles.insightsModalFooterButtonText}>
-            Fechar insights
-          </Text>
-        </TouchableOpacity>
-      </View>
+      
     </View>
   </View>
 </Modal>
