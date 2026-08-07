@@ -3691,14 +3691,35 @@ function exportarInsightsTexto() {
 
       <Text style={styles.title}>Evolução do Total Gasto</Text>
 
-      <TouchableOpacity
-  style={styles.filterButton}
-  onPress={() => setMenuOpen((prev) => !prev)}
+  <View
+  style={{
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 4,
+  }}
 >
-  <Text style={styles.filterText}>
-    📅 {labelPeriod(String(period))} • 💰 {formatMoney(totalGrafico)}
+  <TouchableOpacity
+    style={{
+      backgroundColor: "#FFFFFF",
+      borderWidth: 1,
+      borderColor: "#DDE5E0",
+      borderRadius: 10,
+      paddingVertical: 5,
+      paddingHorizontal: 10,
+    }}
+    onPress={() => setMenuOpen((prev) => !prev)}
+  >
+    <Text style={styles.filterText}>
+      📅 {labelPeriod(String(period))} ▼
+    </Text>
+  </TouchableOpacity>
+
+  <Text style={styles.totalText}>
+    💰 {formatMoney(totalGrafico)}
   </Text>
-</TouchableOpacity>
+</View>
 
       {period === "custom" && startDateInput && endDateInput && (
         <Text style={styles.customRangeText}>
