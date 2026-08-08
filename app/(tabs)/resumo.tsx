@@ -1,4 +1,3 @@
-import { usePrivacy } from "../context/privacyContext";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
@@ -9,6 +8,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+import { usePrivacy } from "../context/privacyContext";
 
 import AuthRequiredCard from "../components/AuthRequiredCard";
 import { getCurrentUser } from "../services/authService";
@@ -423,7 +423,7 @@ if (usuarioLogado === false) {
         onPress={() => setMenuAberto(!menuAberto)}
       >
         <Text style={styles.periodText}>
-          📅 {labelPeriod(period)}
+          📅 {labelPeriod(period)} ▼
         </Text>
 
        {period === "custom" && startDate && (

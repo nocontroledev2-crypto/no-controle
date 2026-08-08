@@ -1,9 +1,6 @@
 // @ts-nocheck
-import { usePrivacy } from "../context/privacyContext";
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import AuthRequiredCard from "../components/AuthRequiredCard";
-import { getCurrentUser } from "../services/authService";
 import {
   Modal,
   ScrollView,
@@ -14,6 +11,9 @@ import {
   View,
   useWindowDimensions
 } from "react-native";
+import AuthRequiredCard from "../components/AuthRequiredCard";
+import { usePrivacy } from "../context/privacyContext";
+import { getCurrentUser } from "../services/authService";
 
 import { MASTER_CATEGORIES } from "../constants/categories";
 import {
@@ -944,7 +944,7 @@ const selectedCategoryCountText =
 
             
             <Text style={styles.topControlText}>
-              📅 {labelPeriod(period)}
+              📅 {labelPeriod(period)} ▼
             </Text>
           </TouchableOpacity>
 
@@ -994,7 +994,7 @@ const selectedCategoryCountText =
             }}
           >
             <Text style={styles.topControlText}>
-              🏷️ {categoriaSelecionada}
+              🏷️ {categoriaSelecionada} ▼
             </Text>
           </TouchableOpacity>
 
