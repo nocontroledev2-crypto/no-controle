@@ -3740,6 +3740,26 @@ function exportarInsightsTexto() {
       : totalGrafico
   )}
 </Text>
+
+{!isBarBlockedOnMobile && (
+  <TouchableOpacity
+    style={styles.chartTypeButton}
+    onPress={() =>
+      setChartType(
+        chartType === "line"
+          ? "bar"
+          : "line"
+      )
+    }
+  >
+    <Text style={styles.chartTypeText}>
+      {chartType === "line"
+        ? "📊 Ver Colunas"
+        : "📈 Ver Linha"}
+    </Text>
+  </TouchableOpacity>
+)}
+
 </View>
 
       {period === "custom" && startDateInput && endDateInput && (
@@ -3861,48 +3881,8 @@ function exportarInsightsTexto() {
   </Text>
 )}
 
-<View style={styles.chartTypeRow}>
-  <TouchableOpacity
-    style={[
-      styles.chartTypeButton,
-      chartType === "line" && styles.chartTypeButtonActive,
-    ]}
-    onPress={() => setChartType("line")}
-  >
-    <Text
-      style={[
-        styles.chartTypeText,
-        chartType === "line" && styles.chartTypeTextActive,
-      ]}
-    >
-      📈 Linha
-    </Text>
-  </TouchableOpacity>
-
-  {!isBarBlockedOnMobile && (
-  <TouchableOpacity
-    style={[
-      styles.chartTypeButton,
-      chartType === "bar" && styles.chartTypeButtonActive,
-    ]}
-    onPress={() => setChartType("bar")}
-  >
-    <Text
-      style={[
-        styles.chartTypeText,
-        chartType === "bar" && styles.chartTypeTextActive,
-      ]}
-    >
-      📊 Colunas
-    </Text>
-  </TouchableOpacity>
-)}
-
-
-</View>
     
  
-
 {shouldUseHorizontalScroll && (
   <Text style={styles.scrollHint}>
     ↔ Arraste o gráfico para ver mais dias
