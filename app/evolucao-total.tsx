@@ -32,7 +32,7 @@ export default function EvolucaoTotal() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showInsightsPopup, setShowInsightsPopup] = useState(false);
   const [modoInsights, setModoInsights] = useState<
-  "essencial" | "completo" | "comparativo"
+  "essencial" | "completo" | "comparativo" | "aprendizado"
 >("essencial");
 
   const [chartType, setChartType] = useState<"line" | "bar">("bar");
@@ -3392,6 +3392,23 @@ const getInsightsTextLinesComparativo = (): string[] => {
   return insights.filter(Boolean);
 };
 
+const getInsightsTextLinesAprendizado = (): string[] => {
+  const insights: string[] = [];
+
+  if (deveMostrarEducacaoContextual) {
+    insights.push(`📘 ${textoEducacaoContextual}`);
+  }
+
+  if (deveMostrarFeedbackPositivo) {
+    insights.push(`✅ ${textoFeedbackPositivo}`);
+  }
+
+  if (deveMostrarCrescimentoPessoal) {
+    insights.push(`✨ ${textoCrescimentoPessoal}`);
+  }
+
+  return insights.filter(Boolean);
+};
 
 const getInsightsTextLines = () => {
   const linhas: string[] = [];
@@ -3531,6 +3548,8 @@ const getInsightsTextoCompleto = () => {
     ? getInsightsTextLinesEssencial()
     : modoInsights === "comparativo"
     ? getInsightsTextLinesComparativo()
+    : modoInsights === "aprendizado"
+    ? getInsightsTextLinesAprendizado()
     : getInsightsTextLines();
 
   return [
@@ -3546,12 +3565,14 @@ const getInsightsTextoCompleto = () => {
 const renderInsightsContent = () => (
   <>
     {(
-      modoInsights === "essencial"
-        ? getInsightsTextLinesEssencial()
-        : modoInsights === "comparativo"
-        ? getInsightsTextLinesComparativo()
-        : getInsightsTextLines()
-    ).map((linha, index) => (
+  modoInsights === "essencial"
+    ? getInsightsTextLinesEssencial()
+    : modoInsights === "comparativo"
+    ? getInsightsTextLinesComparativo()
+    : modoInsights === "aprendizado"
+    ? getInsightsTextLinesAprendizado()
+    : getInsightsTextLines()
+).map((linha, index) => (
       <Text
         key={`insight-popup-${index}`}
         style={styles.insightItem}
@@ -4148,6 +4169,25 @@ const labelX = Math.min(
     </Text>
   </TouchableOpacity>
 </View>
+
+<TouchableOpacity
+  style={[
+    styles.insightsModeButton,
+    modoInsights === "aprendizado" &&
+      styles.insightsModeButtonActive,
+  ]}
+  onPress={() => setModoInsights("aprendizado")}
+>
+  <Text
+    style={[
+      styles.insightsModeText,
+      modoInsights === "aprendizado" &&
+        styles.insightsModeTextActive,
+    ]}
+  >
+    📘 Aprendizado
+  </Text>
+</TouchableOpacity>
 
 <View style={styles.insightsDivider} />
 
