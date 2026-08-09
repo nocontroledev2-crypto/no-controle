@@ -4150,24 +4150,7 @@ const labelX = Math.min(
     </Text>
   </TouchableOpacity>
 
-  <TouchableOpacity
-    style={[
-      styles.insightsModeButton,
-      modoInsights === "completo" &&
-        styles.insightsModeButtonActive,
-    ]}
-    onPress={() => setModoInsights("completo")}
-  >
-    <Text
-      style={[
-        styles.insightsModeText,
-        modoInsights === "completo" &&
-          styles.insightsModeTextActive,
-      ]}
-    >
-      📚 Completo
-    </Text>
-  </TouchableOpacity>
+  
 </View>
 
 <TouchableOpacity
@@ -4188,6 +4171,27 @@ const labelX = Math.min(
     📘 Aprendizado
   </Text>
 </TouchableOpacity>
+
+
+<TouchableOpacity
+    style={[
+      styles.insightsModeButton,
+      modoInsights === "completo" &&
+        styles.insightsModeButtonActive,
+    ]}
+    onPress={() => setModoInsights("completo")}
+  >
+    <Text
+      style={[
+        styles.insightsModeText,
+        modoInsights === "completo" &&
+          styles.insightsModeTextActive,
+      ]}
+    >
+      📚 Completo
+    </Text>
+  </TouchableOpacity>
+
 
 <View style={styles.insightsDivider} />
 
