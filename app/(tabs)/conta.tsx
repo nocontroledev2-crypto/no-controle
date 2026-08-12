@@ -1,4 +1,3 @@
-import { usePrivacy } from "../context/privacyContext";
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
@@ -10,12 +9,14 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+import { usePrivacy } from "../context/privacyContext";
 import {
   getCurrentUser,
   getProfile,
   signIn,
   signOut,
   signUp,
+  solicitarRecuperacaoSenha,
   upsertProfile,
 } from "../services/authService";
 import { getAllExpenses } from "../storage/expenseStorage";
@@ -97,7 +98,8 @@ export default function Conta() {
   const [salvandoNome, setSalvandoNome] = useState(false);
 
   const [mensagem, setMensagem] = useState("");
-  const [carregando, setCarregando] = useState(false);
+const [carregando, setCarregando] = useState(false);
+const [enviandoRecuperacao, setEnviandoRecuperacao] = useState(false);
   
   
   const [totalRegistros, setTotalRegistros] = useState(0);
@@ -301,6 +303,48 @@ if (
     } catch (profileError) {
       console.error("Erro ao atualizar perfil após login:", profileError);
     }
+  }
+}
+
+async function recuperarSenha() {
+  const emailLimpo = email.trim().toLowerCase();
+
+  if (!emailLimpo) {
+    alert(
+      "Informe o e-mail usado no cadastro antes de solicitar a recuperação."
+    );
+    return;
+  }
+
+  setEnviandoRecuperacao(true);
+
+  try {
+    const { error } = await solicitarRecuperacaoSenha(
+      emailLimpo,
+      "https://www.enxergai.com.br/redefinir-senha"
+    );
+
+    if (error) {
+      alert(
+        "Não foi possível enviar o link de recuperação.\n\n" +
+          traduzirErroAuth(error.message)
+      );
+      return;
+    }
+
+    setMensagem(
+      "Se existir uma conta com este e-mail, você receberá um link para criar uma nova senha."
+    );
+
+    limparMensagemDepois();
+  } catch (error) {
+    console.error("Erro ao solicitar recuperação de senha:", error);
+
+    alert(
+      "Não foi possível enviar o link de recuperação. Verifique sua conexão e tente novamente."
+    );
+  } finally {
+    setEnviandoRecuperacao(false);
   }
 }
 
@@ -544,6 +588,20 @@ async function salvarNomeConta() {
                     : "🔑 Entrar na minha conta"}
                 </Text>
               </TouchableOpacity>
+
+              {authMode === "login" ? (
+  <TouchableOpacity
+    style={styles.forgotPasswordButton}
+    onPress={recuperarSenha}
+    disabled={enviandoRecuperacao}
+  >
+    <Text style={styles.forgotPasswordText}>
+      {enviandoRecuperacao
+        ? "Enviando link..."
+        : "Esqueci minha senha"}
+    </Text>
+  </TouchableOpacity>
+) : null}
 
               <Text style={styles.infoTextSmall}>
                 Ao criar uma conta, seus dados ficarão prontos para serem protegidos
@@ -1019,6 +1077,21 @@ editNameButtonText: {
   fontSize: 12,
   fontWeight: "800",
 },
+
+forgotPasswordButton: {
+  alignSelf: "center",
+  paddingVertical: 10,
+  paddingHorizontal: 12,
+  marginTop: 4,
+},
+
+forgotPasswordText: {
+  color: "#0A8F55",
+  fontSize: 13,
+  fontWeight: "700",
+  textDecorationLine: "underline",
+},
+
 headerRow: {
   flexDirection: "row",
   justifyContent: "center",

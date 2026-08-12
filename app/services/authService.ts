@@ -84,10 +84,24 @@ export async function upsertProfile(profile: {
   if (profile.meta_economia !== undefined) {
     payload.meta_economia = profile.meta_economia;
   }
- 
-  return dbClient
+     return dbClient
     .from("profiles")
     .upsert(payload, {
       onConflict: "id",
     });
+}
+
+export async function solicitarRecuperacaoSenha(
+  email: string,
+  redirectTo: string
+) {
+  return authClient.resetPasswordForEmail(email, {
+    redirectTo,
+  });
+}
+
+export async function atualizarSenha(novaSenha: string) {
+  return authClient.updateUser({
+    password: novaSenha,
+  });
 }
