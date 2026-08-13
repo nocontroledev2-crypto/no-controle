@@ -1,12 +1,12 @@
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 import { supabase } from "./lib/supabase";
@@ -75,12 +75,21 @@ export default function RedefinirSenha() {
       const { error } = await atualizarSenha(novaSenha);
 
       if (error) {
-        alert(
-          "Não foi possível atualizar sua senha.\n\n" +
-            (error.message || "Tente solicitar um novo link.")
-        );
-        return;
-      }
+  const mensagemErro = (error.message || "").toLowerCase();
+
+  const mensagemTraduzida =
+    mensagemErro.includes("new password should be different") ||
+    mensagemErro.includes("same_password")
+      ? "A nova senha precisa ser diferente da senha atual."
+      : "Tente solicitar um novo link de recuperação.";
+
+  alert(
+    "Não foi possível atualizar sua senha.\n\n" +
+      mensagemTraduzida
+  );
+
+  return;
+}
 
       setMensagem("Senha atualizada com sucesso.");
       setNovaSenha("");
