@@ -1,5 +1,12 @@
-import { useFocusEffect } from "expo-router";
-import React, { useCallback, useState } from "react";
+import {
+  useFocusEffect,
+  useLocalSearchParams,
+} from "expo-router";
+import React, {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -82,12 +89,21 @@ function traduzirErroAuth(message?: string) {
 export default function Conta() {
   const { width } = useWindowDimensions();
   const isMobile = width < 480;
+  const { modo } = useLocalSearchParams<{
+  modo?: string;
+}>();
   const {
   ocultarValores,
   setOcultarValores,
 } = usePrivacy();
 
   const [authMode, setAuthMode] = useState<AuthMode>("signup");
+  useEffect(() => {
+  if (modo === "login") {
+    setAuthMode("login");
+  }
+}, [modo]);
+
   const [usuarioLogado, setUsuarioLogado] = useState<any | null>(null);
 
   const [nome, setNome] = useState("");
@@ -100,8 +116,8 @@ export default function Conta() {
   const [mensagem, setMensagem] = useState("");
 const [carregando, setCarregando] = useState(false);
 const [enviandoRecuperacao, setEnviandoRecuperacao] = useState(false);
-  
-  
+
+
   const [totalRegistros, setTotalRegistros] = useState(0);
   const [categoriasUsadas, setCategoriasUsadas] = useState(0);
   const [totalGasto, setTotalGasto] = useState(0);
@@ -666,7 +682,7 @@ async function salvarNomeConta() {
             <Text style={styles.futureItem}>✅ Preparação para a sincronização total</Text>
           </View>
         </View>
-                
+
         <View style={styles.brandCard}>
           <Text style={styles.brandTitle}>💚 O que o Enxergaí defende</Text>
 

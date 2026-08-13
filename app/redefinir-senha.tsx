@@ -12,6 +12,22 @@ import {
 import { supabase } from "./lib/supabase";
 import { atualizarSenha } from "./services/authService";
 
+function mascararEmail(email?: string | null) {
+  if (!email || !email.includes("@")) {
+    return "";
+  }
+
+  const [usuario, dominio] = email.split("@");
+
+  if (usuario.length <= 2) {
+    return `${usuario.charAt(0)}*****@${dominio}`;
+  }
+
+  return `${usuario.charAt(0)}*****${usuario.charAt(
+    usuario.length - 1
+  )}@${dominio}`;
+}
+
 export default function RedefinirSenha() {
   const router = useRouter();
 
@@ -21,6 +37,7 @@ export default function RedefinirSenha() {
   const [salvando, setSalvando] = useState(false);
   const [linkValido, setLinkValido] = useState(false);
   const [mensagem, setMensagem] = useState("");
+  const [emailMascarado, setEmailMascarado] = useState("");
 
   useEffect(() => {
     let componenteAtivo = true;
@@ -59,51 +76,77 @@ export default function RedefinirSenha() {
   }, []);
 
   async function salvarNovaSenha() {
-    if (novaSenha.length < 6) {
-      alert("A nova senha precisa ter pelo menos 6 caracteres.");
+  if (novaSenha.length < 6) {
+    alert("A nova senha precisa ter pelo menos 6 caracteres.");
+    return;
+  }
+
+  if (novaSenha !== confirmarSenha) {
+    alert("As senhas informadas não são iguais.");
+    return;
+  }
+
+  setSalvando(true);
+
+  try {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      alert(
+        "Não foi possível identificar a conta deste link. Solicite uma nova recuperação de senha."
+      );
       return;
     }
 
-    if (novaSenha !== confirmarSenha) {
-      alert("As senhas informadas não são iguais.");
-      return;
-    }
+    const emailDaConta = mascararEmail(user.email);
 
-    setSalvando(true);
+    const { error } = await atualizarSenha(novaSenha);
 
-    try {
-      const { error } = await atualizarSenha(novaSenha);
+    if (error) {
+      const mensagemErro = (error.message || "").toLowerCase();
 
-      if (error) {
-  const mensagemErro = (error.message || "").toLowerCase();
-
-  const mensagemTraduzida =
-    mensagemErro.includes("new password should be different") ||
-    mensagemErro.includes("same_password")
-      ? "A nova senha precisa ser diferente da senha atual."
-      : "Tente solicitar um novo link de recuperação.";
-
-  alert(
-    "Não foi possível atualizar sua senha.\n\n" +
-      mensagemTraduzida
-  );
-
-  return;
-}
-
-      setMensagem("Senha atualizada com sucesso.");
-      setNovaSenha("");
-      setConfirmarSenha("");
-    } catch (error) {
-      console.error("Erro ao atualizar senha:", error);
+      const mensagemTraduzida =
+        mensagemErro.includes("new password should be different") ||
+        mensagemErro.includes("same_password")
+          ? "A nova senha precisa ser diferente da senha atual."
+          : "Tente solicitar um novo link de recuperação.";
 
       alert(
-        "Não foi possível atualizar sua senha. Verifique sua conexão e tente novamente."
+        "Não foi possível atualizar sua senha.\n\n" +
+          mensagemTraduzida
       );
-    } finally {
-      setSalvando(false);
+
+      return;
     }
+
+    const { error: signOutError } = await supabase.auth.signOut({
+      scope: "local",
+    });
+
+    if (signOutError) {
+      console.error(
+        "Erro ao encerrar a sessão de recuperação:",
+        signOutError
+      );
+    }
+
+    setEmailMascarado(emailDaConta);
+    setMensagem("Senha atualizada com sucesso.");
+    setNovaSenha("");
+    setConfirmarSenha("");
+  } catch (error) {
+    console.error("Erro ao atualizar senha:", error);
+
+    alert(
+      "Não foi possível atualizar sua senha. Verifique sua conexão e tente novamente."
+    );
+  } finally {
+    setSalvando(false);
   }
+}
 
   if (carregandoLink) {
     return (
@@ -145,20 +188,37 @@ export default function RedefinirSenha() {
           </>
         ) : mensagem ? (
           <>
-            <View style={styles.successBox}>
-              <Text style={styles.successText}>
-                ✅ {mensagem}
-              </Text>
-            </View>
+         <View style={styles.successBox}>
+  <Text style={styles.successText}>
+    ✅ {mensagem}
+  </Text>
 
-            <TouchableOpacity
-              style={styles.primaryButton}
-              onPress={() => router.replace("/conta")}
-            >
-              <Text style={styles.primaryButtonText}>
-                Ir para Minha Conta
-              </Text>
-            </TouchableOpacity>
+  {emailMascarado ? (
+    <Text style={styles.successAccountText}>
+      Senha atualizada para a conta:{"\n"}
+      <Text style={styles.successAccountEmail}>
+        {emailMascarado}
+      </Text>
+    </Text>
+  ) : null}
+</View>
+
+<TouchableOpacity
+  style={styles.primaryButton}
+  onPress={() =>
+    router.replace({
+      pathname: "/conta",
+      params: {
+        modo: "login",
+      },
+    } as any)
+  }
+>
+  <Text style={styles.primaryButtonText}>
+    Ir para Entrar
+  </Text>
+</TouchableOpacity>
+
           </>
         ) : (
           <>
@@ -351,4 +411,19 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     textAlign: "center",
   },
+
+successAccountText: {
+  color: "#555",
+  fontSize: 13,
+  lineHeight: 20,
+  textAlign: "center",
+  marginTop: 10,
+},
+
+successAccountEmail: {
+  color: "#0A8F55",
+  fontSize: 14,
+  fontWeight: "800",
+},
+
 });
