@@ -8,6 +8,7 @@ import React, {
   useState,
 } from "react";
 import {
+  Linking,
   ScrollView,
   StyleSheet,
   Text,
@@ -375,6 +376,12 @@ async function recuperarSenha() {
   limparMensagemDepois();
 }
 
+function abrirExclusaoConta() {
+  Linking.openURL(
+    "https://www.enxergai.com.br/excluir-conta"
+  );
+}
+
 function iniciarEdicaoNome() {
   setNomeEditado(nome || "");
   setEditandoNome(true);
@@ -521,6 +528,16 @@ async function salvarNomeConta() {
               <TouchableOpacity style={styles.logoutButton} onPress={sairConta}>
                 <Text style={styles.logoutButtonText}>🚪 Sair da conta</Text>
               </TouchableOpacity>
+
+             <TouchableOpacity
+  style={styles.deleteAccountButton}
+  onPress={abrirExclusaoConta}
+>
+  <Text style={styles.deleteAccountButtonText}>
+    🗑️ Solicitar exclusão da conta
+  </Text>
+</TouchableOpacity>
+
             </>
           ) : (
             <>
@@ -828,6 +845,23 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "800",
   },
+
+  deleteAccountButton: {
+  backgroundColor: "#FFF5F5",
+  borderWidth: 1,
+  borderColor: "#F3C2C2",
+  borderRadius: 10,
+  paddingVertical: 12,
+  paddingHorizontal: 14,
+  alignItems: "center",
+  marginTop: 8,
+},
+
+deleteAccountButtonText: {
+  color: "#C0392B",
+  fontSize: 13,
+  fontWeight: "800",
+},
 
   successText: {
     textAlign: "center",
