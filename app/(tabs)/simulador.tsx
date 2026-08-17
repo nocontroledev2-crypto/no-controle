@@ -165,7 +165,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
       return {
         titulo: "Informe sua renda mensal",
         detalhe:
-          "Com a renda mensal, o No Controle consegue simular seu fechamento do mês.",
+          "Com a renda mensal, o Enxergaí consegue simular seu fechamento do mês.",
         tipo: "neutro",
       };
     }
