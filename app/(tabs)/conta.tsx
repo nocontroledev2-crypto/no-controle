@@ -110,6 +110,7 @@ export default function Conta() {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [aceiteTermos, setAceiteTermos] = useState(false);
   const [editandoNome, setEditandoNome] = useState(false);
   const [nomeEditado, setNomeEditado] = useState("");
   const [salvandoNome, setSalvandoNome] = useState(false);
@@ -205,6 +206,17 @@ function zerarResumoDados() {
     : formatMoney(valor);
 }
 
+async function abrirTermosDeUso() {
+  await Linking.openURL(
+    "https://www.enxergai.com.br/termos-de-uso"
+  );
+}
+
+async function abrirPoliticaDePrivacidade() {
+  await Linking.openURL(
+    "https://www.enxergai.com.br/politica-de-privacidade"
+  );
+}
   async function criarConta() {
     if (!nome.trim()) {
       alert("Informe seu nome.");
@@ -220,6 +232,13 @@ function zerarResumoDados() {
       alert("Informe uma senha com pelo menos 6 caracteres.");
       return;
     }
+
+    if (!aceiteTermos) {
+  alert(
+    "Para criar sua conta, confirme que tem 18 anos ou mais e que leu e aceitou os Termos de Uso e a Política de Privacidade."
+  );
+  return;
+}
 
     setCarregando(true);
 
@@ -564,7 +583,10 @@ async function salvarNomeConta() {
                     styles.authModeButton,
                     authMode === "login" && styles.authModeButtonActive,
                   ]}
-                  onPress={() => setAuthMode("login")}
+                  onPress={() => {
+  setAuthMode("login");
+  setAceiteTermos(false);
+}}
                 >
                   <Text
                     style={[
@@ -607,6 +629,49 @@ async function salvarNomeConta() {
                 placeholder="Digite sua senha"
                 secureTextEntry
               />
+
+              {authMode === "signup" ? (
+  <View style={styles.legalConsentContainer}>
+    <TouchableOpacity
+      style={[
+        styles.legalCheckbox,
+        aceiteTermos && styles.legalCheckboxChecked,
+      ]}
+      onPress={() => setAceiteTermos((valorAtual) => !valorAtual)}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: aceiteTermos }}
+      accessibilityLabel="Confirmar maioridade e aceite dos documentos"
+    >
+      <Text style={styles.legalCheckboxSymbol}>
+        {aceiteTermos ? "✓" : ""}
+      </Text>
+    </TouchableOpacity>
+
+    <View style={styles.legalConsentContent}>
+      <Text style={styles.legalConsentText}>
+        Declaro que tenho 18 anos ou mais e que li e aceito os
+      </Text>
+
+      <View style={styles.legalLinksRow}>
+        <TouchableOpacity onPress={abrirTermosDeUso}>
+          <Text style={styles.legalLink}>
+            Termos de Uso
+          </Text>
+        </TouchableOpacity>
+
+        <Text style={styles.legalConsentText}> e a </Text>
+
+        <TouchableOpacity onPress={abrirPoliticaDePrivacidade}>
+          <Text style={styles.legalLink}>
+            Política de Privacidade
+          </Text>
+        </TouchableOpacity>
+
+        <Text style={styles.legalConsentText}>.</Text>
+      </View>
+    </View>
+  </View>
+) : null}
 
               <TouchableOpacity
                 style={styles.saveButton}
@@ -814,6 +879,62 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333",
   },
+
+  legalConsentContainer: {
+  flexDirection: "row",
+  alignItems: "flex-start",
+  marginBottom: 14,
+  paddingHorizontal: 2,
+},
+
+legalCheckbox: {
+  width: 22,
+  height: 22,
+  borderRadius: 5,
+  borderWidth: 1.5,
+  borderColor: "#9CA3AF",
+  backgroundColor: "#FFFFFF",
+  alignItems: "center",
+  justifyContent: "center",
+  marginRight: 10,
+  marginTop: 1,
+},
+
+legalCheckboxChecked: {
+  backgroundColor: "#0A8F55",
+  borderColor: "#0A8F55",
+},
+
+legalCheckboxSymbol: {
+  color: "#FFFFFF",
+  fontSize: 15,
+  fontWeight: "900",
+  lineHeight: 18,
+},
+
+legalConsentContent: {
+  flex: 1,
+},
+
+legalConsentText: {
+  color: "#555555",
+  fontSize: 12,
+  lineHeight: 18,
+},
+
+legalLinksRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  flexWrap: "wrap",
+},
+
+legalLink: {
+  color: "#0A8F55",
+  fontSize: 12,
+  lineHeight: 18,
+  fontWeight: "800",
+  textDecorationLine: "underline",
+},
 
   saveButton: {
     backgroundColor: "#0A8F55",
