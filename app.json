@@ -2,6 +2,7 @@
   "expo": {
     "name": "Enxergaí",
     "slug": "enxergai",
+    "owner": "enxergai",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -41,6 +42,11 @@
       ],
       "@react-native-community/datetimepicker"
     ],
+    "extra": {
+      "eas": {
+        "projectId": "a2bcf4b5-8252-4a61-9cdc-29e89e2d537f"
+    }
+   },
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
