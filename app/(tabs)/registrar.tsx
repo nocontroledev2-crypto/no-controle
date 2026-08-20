@@ -4,7 +4,9 @@ import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
+  FlatList,
   Keyboard,
+  Modal,
   Platform,
   ScrollView,
   StyleSheet,
@@ -407,7 +409,8 @@ if (usuarioLogado === false) {
 }
 
   return (
-    <ScrollView
+    <>
+      <ScrollView
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       keyboardShouldPersistTaps="handled"
@@ -546,38 +549,6 @@ if (usuarioLogado === false) {
     </Text>
   </TouchableOpacity>
 
-  {menuCategoriaAberto ? (
-    <View style={styles.categoryMenuFloating}>
-      <ScrollView
-        style={styles.categoryMenuScroll}
-        showsVerticalScrollIndicator={true}
-        nestedScrollEnabled
-      >
-        {MASTER_CATEGORIES.map((cat: string) => (
-          <TouchableOpacity
-            key={cat}
-            style={styles.categoryMenuItem}
-            onPress={() => selecionarCategoriaManual(cat)}
-            activeOpacity={0.8}
-          >
-            <Text
-              style={[
-                styles.categoryMenuItemText,
-                categoria === cat &&
-                  styles.categoryMenuItemTextActive,
-              ]}
-            >
-              {cat}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      <Text style={styles.categoryMenuHint}>
-        Role para ver mais categorias
-      </Text>
-    </View>
-  ) : null}
 </View>
 
             {categoria && subcategoriasDisponiveis.length > 0 ? (
@@ -614,38 +585,6 @@ if (usuarioLogado === false) {
     </Text>
   </TouchableOpacity>
 
-  {menuSubcategoriaAberto ? (
-    <View style={styles.categoryMenuFloating}>
-      <ScrollView
-        style={styles.categoryMenuScroll}
-        showsVerticalScrollIndicator={true}
-        nestedScrollEnabled
-      >
-        {subcategoriasDisponiveis.map((sub: string) => (
-          <TouchableOpacity
-            key={sub}
-            style={styles.categoryMenuItem}
-            onPress={() => selecionarSubcategoriaManual(sub)}
-            activeOpacity={0.8}
-          >
-            <Text
-              style={[
-                styles.categoryMenuItemText,
-                subcategoria === sub &&
-                  styles.categoryMenuItemTextActive,
-              ]}
-            >
-              {sub}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      <Text style={styles.categoryMenuHint}>
-        Role para ver mais opções
-      </Text>
-    </View>
-  ) : null}
 </View>
               </>
             ) : null}
@@ -702,6 +641,81 @@ if (usuarioLogado === false) {
         </>
       )}
     </ScrollView>
+
+    <Modal
+      visible={menuCategoriaAberto || menuSubcategoriaAberto}
+      transparent
+      animationType="fade"
+      onRequestClose={() => {
+        setMenuCategoriaAberto(false);
+        setMenuSubcategoriaAberto(false);
+      }}
+    >
+      <View style={styles.selectorModalOverlay}>
+        <View style={styles.selectorModalCard}>
+          <Text style={styles.selectorModalTitle}>
+            {menuCategoriaAberto
+              ? "Selecione a categoria"
+              : "Selecione a subcategoria"}
+          </Text>
+
+          <FlatList
+            style={styles.selectorModalList}
+            data={
+              menuCategoriaAberto
+                ? MASTER_CATEGORIES
+                : subcategoriasDisponiveis
+            }
+            keyExtractor={(item) => item}
+            showsVerticalScrollIndicator
+            keyboardShouldPersistTaps="handled"
+            renderItem={({ item }) => {
+              const itemSelecionado = menuCategoriaAberto
+                ? categoria === item
+                : subcategoria === item;
+
+              return (
+                <TouchableOpacity
+                  style={[
+                    styles.categoryMenuItem,
+                    itemSelecionado && styles.selectorModalItemActive,
+                  ]}
+                  onPress={() => {
+                    if (menuCategoriaAberto) {
+                      selecionarCategoriaManual(item);
+                    } else {
+                      selecionarSubcategoriaManual(item);
+                    }
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Text
+                    style={[
+                      styles.categoryMenuItemText,
+                      itemSelecionado &&
+                        styles.categoryMenuItemTextActive,
+                    ]}
+                  >
+                    {item}
+                  </Text>
+                </TouchableOpacity>
+              );
+            }}
+          />
+
+          <TouchableOpacity
+            style={styles.selectorModalCloseButton}
+            onPress={() => {
+              setMenuCategoriaAberto(false);
+              setMenuSubcategoriaAberto(false);
+            }}
+          >
+            <Text style={styles.selectorModalCloseText}>Fechar</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+    </>
   );
 }
 
@@ -951,5 +965,63 @@ categoryMenuHint: {
   backgroundColor: "#FAFAFA",
 },
 
+
+selectorModalOverlay: {
+  flex: 1,
+  backgroundColor: "rgba(0, 0, 0, 0.45)",
+  justifyContent: "center",
+  paddingHorizontal: 20,
+  paddingVertical: 40,
+},
+
+selectorModalCard: {
+  width: "100%",
+  maxHeight: "75%",
+  backgroundColor: "#FFFFFF",
+  borderRadius: 16,
+  padding: 16,
+  borderWidth: 1,
+  borderColor: "#DDE3EA",
+  elevation: 12,
+  shadowColor: "#000000",
+  shadowOffset: {
+    width: 0,
+    height: 5,
+  },
+  shadowOpacity: 0.2,
+  shadowRadius: 12,
+},
+
+selectorModalTitle: {
+  fontSize: 18,
+  fontWeight: "800",
+  color: "#333333",
+  textAlign: "center",
+  marginBottom: 12,
+},
+
+selectorModalList: {
+  flexGrow: 0,
+  maxHeight: 420,
+},
+
+selectorModalItemActive: {
+  backgroundColor: "#F0FAF5",
+  borderRadius: 8,
+},
+
+selectorModalCloseButton: {
+  backgroundColor: "#0A8F55",
+  borderRadius: 10,
+  paddingVertical: 12,
+  alignItems: "center",
+  marginTop: 14,
+},
+
+selectorModalCloseText: {
+  color: "#FFFFFF",
+  fontSize: 14,
+  fontWeight: "800",
+},
 
 });
