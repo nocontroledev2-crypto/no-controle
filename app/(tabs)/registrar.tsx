@@ -4,6 +4,8 @@ import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
+  Keyboard,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,6 +13,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import {
+  ExpoSpeechRecognitionModule,
+  useSpeechRecognitionEvent,
+} from "expo-speech-recognition";
 import AuthRequiredCard from "../components/AuthRequiredCard";
 import { MASTER_CATEGORIES } from "../constants/categories";
 import { getSubcategoriesByMaster } from "../constants/subcategories";
@@ -91,6 +97,38 @@ useFocusEffect(
     );
 
     return categoriaEncontrada ?? "";
+  }
+
+  function processarTextoInteligente(textoRecebido: string) {
+    const texto = textoRecebido.trim();
+
+    if (!texto) {
+      setState("idle");
+      return;
+    }
+
+    setTextoInteligente(texto);
+
+    const parsed = parseSpeech(texto);
+
+    if (parsed.valor !== null) {
+      const valorInterpretado = Number(parsed.valor);
+
+      if (Number.isFinite(valorInterpretado)) {
+        setValor(formatarValorParaCampo(valorInterpretado));
+      }
+    }
+
+    const categoriaDetectada = normalizarCategoriaDetectada(parsed.categoria);
+
+    setCategoria(categoriaDetectada);
+    setSubcategoria(categoriaDetectada ? parsed.subcategoria ?? "" : "");
+    setTermoEncontrado(categoriaDetectada ? parsed.termoEncontrado ?? "" : "");
+    setMenuCategoriaAberto(false);
+    setMenuSubcategoriaAberto(false);
+    setData(parsed.data);
+    setDataTexto(formatarData(parsed.data));
+    setState("confirm");
   }
 
   function selecionarCategoriaManual(categoriaSelecionada: string) {
@@ -192,31 +230,8 @@ useFocusEffect(
     recognition.onstart = () => setState("listening");
 
     recognition.onresult = (event: any) => {
-    const textoFalado = event.results[0][0].transcript;
-
-    setTextoInteligente(textoFalado);
-
-    const parsed = parseSpeech(textoFalado);
-
-            if (parsed.valor !== null) {
-        const valorVoz = Number(parsed.valor);
-
-        if (Number.isFinite(valorVoz)) {
-          setValor(formatarValorParaCampo(valorVoz));
-        }
-      }
-
-      const categoriaDetectada = normalizarCategoriaDetectada(parsed.categoria);
-
-      setCategoria(categoriaDetectada);
-      setSubcategoria(categoriaDetectada ? parsed.subcategoria ?? "" : "");
-      setTermoEncontrado(categoriaDetectada ? parsed.termoEncontrado ?? "" : "");
-      setMenuCategoriaAberto(false);
-      setMenuSubcategoriaAberto(false);
-      setData(parsed.data);
-      setDataTexto(formatarData(parsed.data));
-
-      setState("confirm");
+      const textoFalado = event.results[0][0].transcript;
+      processarTextoInteligente(textoFalado);
     };
 
     recognition.onerror = () => setState("idle");
@@ -238,24 +253,7 @@ useFocusEffect(
     }
 
     setState("processing");
-
-    const parsed = parseSpeech(texto);
-
-    if (parsed.valor !== null) {
-      setValor(formatarValorParaCampo(parsed.valor));
-    }
-
-    const categoriaDetectada = normalizarCategoriaDetectada(parsed.categoria);
-
-    setCategoria(categoriaDetectada);
-    setSubcategoria(categoriaDetectada ? parsed.subcategoria ?? "" : "");
-    setTermoEncontrado(categoriaDetectada ? parsed.termoEncontrado ?? "" : "");
-    setMenuCategoriaAberto(false);
-    setMenuSubcategoriaAberto(false);
-    setData(parsed.data);
-    setDataTexto(formatarData(parsed.data));
-
-    setState("confirm");
+    processarTextoInteligente(texto);
   }
 
   async function salvarDespesa() {
