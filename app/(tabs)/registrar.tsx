@@ -53,8 +53,49 @@ useFocusEffect(
 );
 
   const recognitionRef = useRef<any>(null);
+  const nativeResultReceivedRef = useRef(false);
   const valorInputRef = useRef<TextInput>(null);
   const micPulse = useRef(new Animated.Value(1)).current;
+
+  useSpeechRecognitionEvent("start", () => {
+    if (Platform.OS !== "web") {
+      nativeResultReceivedRef.current = false;
+      setState("listening");
+    }
+  });
+
+  useSpeechRecognitionEvent("result", (event) => {
+    if (Platform.OS === "web") return;
+
+    const textoFalado = event.results[0]?.transcript?.trim();
+
+    if (textoFalado) {
+      nativeResultReceivedRef.current = true;
+      processarTextoInteligente(textoFalado);
+    }
+  });
+
+  useSpeechRecognitionEvent("end", () => {
+    if (Platform.OS !== "web") {
+      if (!nativeResultReceivedRef.current) {
+        setState("idle");
+      }
+
+      nativeResultReceivedRef.current = false;
+    }
+  });
+
+  useSpeechRecognitionEvent("error", (event) => {
+    if (Platform.OS === "web") return;
+
+    setState("idle");
+
+    if (event.error !== "aborted") {
+      alert(
+        "Não foi possível reconhecer sua fala. Tente novamente em um ambiente mais silencioso."
+      );
+    }
+  });
 
   function formatarData(date: Date) {
     return date.toLocaleDateString("pt-BR");
@@ -210,7 +251,40 @@ useFocusEffect(
     }
   }, [state]);
 
-  function iniciarEscuta() {
+  async function iniciarEscuta() {
+    Keyboard.dismiss();
+
+    if (Platform.OS !== "web") {
+      nativeResultReceivedRef.current = false;
+
+      try {
+        const permissao =
+          await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+
+        if (!permissao.granted) {
+          alert(
+            "Para usar a Fala Inteligente, permita o acesso ao microfone nas configurações do aparelho."
+          );
+          setState("idle");
+          return;
+        }
+
+        ExpoSpeechRecognitionModule.start({
+          lang: "pt-BR",
+          interimResults: false,
+          continuous: false,
+          maxAlternatives: 1,
+        });
+      } catch (error) {
+        setState("idle");
+        alert(
+          "Não foi possível iniciar a Fala Inteligente. Tente novamente."
+        );
+      }
+
+      return;
+    }
+
     const SpeechRecognition =
       (window as any).SpeechRecognition ||
       (window as any).webkitSpeechRecognition;
@@ -235,12 +309,17 @@ useFocusEffect(
     };
 
     recognition.onerror = () => setState("idle");
-
     recognition.start();
   }
 
   function cancelarEscuta() {
-    recognitionRef.current?.stop();
+    if (Platform.OS === "web") {
+      recognitionRef.current?.stop();
+    } else {
+      nativeResultReceivedRef.current = false;
+      ExpoSpeechRecognitionModule.stop();
+    }
+
     setState("idle");
   }
 
