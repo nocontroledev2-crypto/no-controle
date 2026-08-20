@@ -525,6 +525,8 @@ if (usuarioLogado === false) {
   <TouchableOpacity
   style={styles.categorySelectButton}
   onPress={() => {
+    Keyboard.dismiss();
+    valorInputRef.current?.blur();
     setMenuCategoriaAberto(!menuCategoriaAberto);
     setMenuSubcategoriaAberto(false);
   }}
@@ -591,6 +593,8 @@ if (usuarioLogado === false) {
   <TouchableOpacity
   style={styles.categorySelectButton}
   onPress={() => {
+    Keyboard.dismiss();
+    valorInputRef.current?.blur();
     setMenuSubcategoriaAberto(!menuSubcategoriaAberto);
     setMenuCategoriaAberto(false);
   }}
