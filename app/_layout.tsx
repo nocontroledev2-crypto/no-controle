@@ -1,4 +1,5 @@
 // app/_layout.tsx
+import { PeriodProvider } from "./context/periodContext";
 import { PrivacyProvider } from "./context/privacyContext";
 import { Stack } from "expo-router";
 import { useEffect } from "react";
@@ -63,12 +64,14 @@ export default function RootLayout() {
 
   
   return (
-    <PrivacyProvider>
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    />
-    </PrivacyProvider>
+    <PeriodProvider>
+      <PrivacyProvider>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+          }}
+        />
+      </PrivacyProvider>
+    </PeriodProvider>
   );
 }
