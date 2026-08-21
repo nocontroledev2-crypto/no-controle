@@ -12,6 +12,7 @@ import {
   useWindowDimensions
 } from "react-native";
 import AuthRequiredCard from "../components/AuthRequiredCard";
+import { usePeriod } from "../context/periodContext";
 import { usePrivacy } from "../context/privacyContext";
 import { getCurrentUser } from "../services/authService";
 
@@ -50,7 +51,13 @@ const {
   } = usePrivacy();
 
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [period, setPeriod] = useState<Period>("all");
+  const {
+    period,
+    customStartDate,
+    customEndDate,
+    setPeriod,
+    setCustomPeriod,
+  } = usePeriod();
   const [viewMode, setViewMode] = useState<ViewMode>("lancamentos");
 
   const [menuPeriodoAberto, setMenuPeriodoAberto] = useState(false);
@@ -59,8 +66,12 @@ const {
   const [categoriaSelecionada, setCategoriaSelecionada] = useState("Todas");
 
   const [showCustomRangeBox, setShowCustomRangeBox] = useState(false);
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
+  const startDate = customStartDate
+    ? parseDateSafe(customStartDate)
+    : null;
+  const endDate = customEndDate
+    ? parseDateSafe(customEndDate)
+    : null;
 
   const [startDateInput, setStartDateInput] = useState("");
   const [endDateInput, setEndDateInput] = useState("");
@@ -571,8 +582,8 @@ useEffect(() => {
 
   function abrirPersonalizado() {
     setMenuPeriodoAberto(false);
-    setStartDateInput("");
-    setEndDateInput("");
+    setStartDateInput(customStartDate ?? "");
+    setEndDateInput(customEndDate ?? "");
     setShowCustomRangeBox(true);
   }
 
@@ -590,9 +601,7 @@ useEffect(() => {
       return;
     }
 
-    setStartDate(start);
-    setEndDate(end);
-    setPeriod("custom");
+    setCustomPeriod(startDateInput, endDateInput);
     setShowCustomRangeBox(false);
   }
 
