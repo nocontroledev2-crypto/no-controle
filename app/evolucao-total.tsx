@@ -1,9 +1,9 @@
 import {
   useFocusEffect,
-  useLocalSearchParams,
   useRouter,
 } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
+import { usePeriod, type Period } from "./context/periodContext";
 
 import {
   Modal,
@@ -22,11 +22,14 @@ import { getAllExpenses } from "./storage/expenseStorage";
 
 export default function EvolucaoTotal() {
   const router = useRouter();
-  const params = useLocalSearchParams();
 
-  const [period, setPeriod] = useState<string>(
-    (params.period as string) || "month"
-  );
+  const {
+    period,
+    customStartDate,
+    customEndDate,
+    setPeriod,
+    setCustomPeriod,
+  } = usePeriod();
 
   const [expenses, setExpenses] = useState<any[]>([]);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -42,8 +45,12 @@ export default function EvolucaoTotal() {
 } | null>(null);
 
   const [showCustomBox, setShowCustomBox] = useState(false);
-  const [startDateInput, setStartDateInput] = useState("");
-  const [endDateInput, setEndDateInput] = useState("");
+  const [startDateInput, setStartDateInput] = useState(
+    customStartDate ?? ""
+  );
+  const [endDateInput, setEndDateInput] = useState(
+    customEndDate ?? ""
+  );
 
  const now = new Date();
  const { width } = useWindowDimensions();
@@ -51,6 +58,11 @@ export default function EvolucaoTotal() {
  const isMobile = width < 480;
  const isTablet = width >= 480 && width < 900;
  const isDesktop = width >= 900;
+
+  useEffect(() => {
+    setStartDateInput(customStartDate ?? "");
+    setEndDateInput(customEndDate ?? "");
+  }, [customStartDate, customEndDate]);
 
   useFocusEffect(
     useCallback(() => {
@@ -3664,8 +3676,8 @@ function exportarInsightsTexto() {
 
   function abrirPersonalizado() {
     setMenuOpen(false);
-    setStartDateInput("");
-    setEndDateInput("");
+    setStartDateInput(customStartDate ?? "");
+    setEndDateInput(customEndDate ?? "");
     setShowCustomBox(true);
   }
 
@@ -3683,7 +3695,7 @@ function exportarInsightsTexto() {
       return;
     }
 
-    setPeriod("custom");
+    setCustomPeriod(startDateInput, endDateInput);
     setSelectedPoint(null);
     setShowCustomBox(false);
   }
@@ -3817,7 +3829,7 @@ function exportarInsightsTexto() {
                     return;
                   }
 
-                  setPeriod(value as string);
+                  setPeriod(value as Period);
                   setSelectedPoint(null);
                   setShowCustomBox(false);
                   setMenuOpen(false);
