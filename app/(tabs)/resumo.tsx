@@ -8,6 +8,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+import { usePeriod } from "../context/periodContext";
 import { usePrivacy } from "../context/privacyContext";
 
 import AuthRequiredCard from "../components/AuthRequiredCard";
@@ -66,7 +67,13 @@ export default function Resumo() {
   } = usePrivacy();
 
 
-  const [period, setPeriod] = useState<Period>("month");
+  const {
+    period,
+    customStartDate,
+    customEndDate,
+    setPeriod,
+    setCustomPeriod,
+  } = usePeriod();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [usuarioLogado, setUsuarioLogado] = useState<boolean | null>(null);
   const [menuAberto, setMenuAberto] = useState(false);
@@ -78,8 +85,12 @@ export default function Resumo() {
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-    const [startDate, setStartDate] = useState<Date | null>(null);
-    const [endDate, setEndDate] = useState<Date | null>(null);
+    const startDate = customStartDate
+      ? parseDateSafe(customStartDate)
+      : null;
+    const endDate = customEndDate
+      ? parseDateSafe(customEndDate)
+      : null;
     const [selectingStart, setSelectingStart] = useState(true);
     const [startDateInput, setStartDateInput] = useState("");
     const [endDateInput, setEndDateInput] = useState("");
@@ -370,9 +381,7 @@ function formatarValorVisivel(valor: number) {
     return;
   }
 
-  setStartDate(start);
-  setEndDate(end);
-  setPeriod("custom");
+  setCustomPeriod(startDateInput, endDateInput);
   setShowCalendar(false);
 }
 
@@ -470,10 +479,8 @@ if (usuarioLogado === false) {
   if (value === "custom") {
   setMenuAberto(false);
 
-  setStartDate(null);
-  setEndDate(null);
-  setStartDateInput("");
-  setEndDateInput("");
+  setStartDateInput(customStartDate ?? "");
+  setEndDateInput(customEndDate ?? "");
 
   setShowCalendar(true);
 }
