@@ -13,9 +13,11 @@ import {
   TouchableOpacity,
   View,
   useWindowDimensions,
+  Platform,
 } from "react-native";
 
 import { BarChart, LineChart } from "react-native-chart-kit";
+import { openAndroidCustomPeriod } from "./helpers/androidCustomPeriod";
 import { Text as SvgText } from "react-native-svg";
 import { getAllExpenses } from "./storage/expenseStorage";
 
@@ -3676,9 +3678,37 @@ function exportarInsightsTexto() {
 
   function abrirPersonalizado() {
     setMenuOpen(false);
+
+    if (Platform.OS === "android") {
+      void selecionarPeriodoPersonalizadoAndroid();
+      return;
+    }
+
     setStartDateInput(customStartDate ?? "");
     setEndDateInput(customEndDate ?? "");
     setShowCustomBox(true);
+  }
+
+  async function selecionarPeriodoPersonalizadoAndroid() {
+    const result = await openAndroidCustomPeriod(
+      customStartDate,
+      customEndDate
+    );
+
+    if (!result) {
+      return;
+    }
+
+    const start = parseDateSafe(result.startDate);
+    const end = parseDateSafe(result.endDate);
+
+    if (start.getTime() > end.getTime()) {
+      alert("A data inicial n\u00e3o pode ser maior que a data final.");
+      return;
+    }
+
+    setCustomPeriod(result.startDate, result.endDate);
+    setSelectedPoint(null);
   }
 
   function aplicarPersonalizado() {
@@ -3842,7 +3872,7 @@ function exportarInsightsTexto() {
         </View>
       )}
 
-      {showCustomBox && (
+      {Platform.OS === "web" && showCustomBox && (
         <View style={styles.customBox}>
           <Text style={styles.customTitle}>
             Selecione o intervalo personalizado
