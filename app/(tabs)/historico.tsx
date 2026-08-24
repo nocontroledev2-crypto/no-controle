@@ -2,7 +2,9 @@
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  FlatList,
   Modal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,12 +12,14 @@ import {
   TouchableOpacity,
   View,
   useWindowDimensions,
-  Platform,
 } from "react-native";
 import AuthRequiredCard from "../components/AuthRequiredCard";
 import { usePeriod } from "../context/periodContext";
-import { openAndroidCustomPeriod } from "../helpers/androidCustomPeriod";
 import { usePrivacy } from "../context/privacyContext";
+import {
+  openAndroidCustomPeriod,
+  openAndroidSingleDate,
+} from "../helpers/androidCustomPeriod";
 import { getCurrentUser } from "../services/authService";
 
 import { MASTER_CATEGORIES } from "../constants/categories";
@@ -86,6 +90,8 @@ const {
   const [editValor, setEditValor] = useState("");
   const [editCategoria, setEditCategoria] = useState("");
   const [editData, setEditData] = useState("");
+  const [showEditCategoryModal, setShowEditCategoryModal] =
+    useState(false);
   const [selectedCategoryDetail, setSelectedCategoryDetail] = useState<string | null>(
   null
 );
@@ -297,6 +303,17 @@ const now = new Date();
     setEditValor("");
     setEditCategoria("");
     setEditData("");
+    setShowEditCategoryModal(false);
+  }
+
+  async function selecionarDataEdicaoAndroid() {
+    const selectedDate = await openAndroidSingleDate(editData);
+
+    if (!selectedDate) {
+      return;
+    }
+
+    setEditData(selectedDate);
   }
 
   async function salvarEdicao(item: Expense) {
@@ -1265,44 +1282,61 @@ const selectedCategoryCountText =
                               />
 
                               <Text style={styles.editLabel}>Categoria</Text>
-                              <select
-                                value={editCategoria}
-                                onChange={(e: any) =>
-                                  setEditCategoria(e.target.value)
-                                }
-                                style={styles.editInput as any}
-                              >
-                                <option value="">Selecione a categoria</option>
-                                {CATEGORY_OPTIONS.filter(
-                                  (cat) => cat !== "Todas"
-                                ).map((cat) => (
-                                  <option key={cat} value={cat}>
-                                    {cat}
+
+                              {Platform.OS === "web" ? (
+                                <select
+                                  value={editCategoria}
+                                  onChange={(e: any) =>
+                                    setEditCategoria(e.target.value)
+                                  }
+                                  style={styles.editInput as any}
+                                >
+                                  <option value="">
+                                    Selecione a categoria
                                   </option>
-                                ))}
-                              </select>
+                                  {CATEGORY_OPTIONS.filter(
+                                    (cat) => cat !== "Todas"
+                                  ).map((cat) => (
+                                    <option key={cat} value={cat}>
+                                      {cat}
+                                    </option>
+                                  ))}
+                                </select>
+                              ) : (
+                                <TouchableOpacity
+                                  style={styles.editInput}
+                                  onPress={() =>
+                                    setShowEditCategoryModal(true)
+                                  }
+                                  activeOpacity={0.8}
+                                >
+                                  <Text>
+                                    {editCategoria ||
+                                      "Selecione a categoria"}
+                                  </Text>
+                                </TouchableOpacity>
+                              )}
 
                               <Text style={styles.editLabel}>Data</Text>
-                              <input
-                                type="date"
-                                value={editData}
-                                onChange={(e: any) =>
-                                  setEditData(e.target.value)
-                                }
-                                style={
-                                  {
-                                    width: "100%",
-                                    padding: "10px 12px",
-                                    borderRadius: 8,
-                                    border: "1px solid #D9DDE3",
-                                    backgroundColor: "#FFF",
-                                    color: "#333",
-                                    fontSize: "14px",
-                                    boxSizing: "border-box",
-                                    marginBottom: 10,
-                                  } as any
-                                }
-                              />
+
+                              {Platform.OS === "web" ? (
+                                <input
+                                  type="date"
+                                  value={editData}
+                                  onChange={(e: any) => setEditData(e.target.value)}
+                                  style={styles.editInput as any}
+                                />
+                              ) : (
+                                <TouchableOpacity
+                                  style={styles.editInput}
+                                  onPress={() => void selecionarDataEdicaoAndroid()}
+                                  activeOpacity={0.8}
+                                >
+                                  <Text>
+                                    {editData ? formatDateBR(editData) : "Selecione a data"}
+                                  </Text>
+                                </TouchableOpacity>
+                              )}
 
                               <View style={styles.editActionsRow}>
                                 <TouchableOpacity
@@ -1409,6 +1443,65 @@ const selectedCategoryCountText =
 ))}
         </ScrollView>
       )}
+         <Modal
+      visible={showEditCategoryModal}
+      transparent
+      animationType="fade"
+      onRequestClose={() => setShowEditCategoryModal(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.categoryDetailModal}>
+          <Text style={styles.modalTitle}>
+            Selecione a categoria
+          </Text>
+
+          <FlatList
+            data={MASTER_CATEGORIES}
+            keyExtractor={(item) => item}
+            showsVerticalScrollIndicator
+            renderItem={({ item }) => {
+              const selecionada = editCategoria === item;
+
+              return (
+                <TouchableOpacity
+                  style={[
+                    styles.editInput,
+                    selecionada && {
+                      backgroundColor: "#F0FAF5",
+                      borderColor: "#0A8F55",
+                    },
+                  ]}
+                  onPress={() => {
+                    setEditCategoria(item);
+                    setShowEditCategoryModal(false);
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Text
+                    style={{
+                      color: selecionada ? "#0A8F55" : "#333",
+                      fontWeight: selecionada ? "700" : "400",
+                    }}
+                  >
+                    {item}
+                  </Text>
+                </TouchableOpacity>
+              );
+            }}
+          />
+
+          <TouchableOpacity
+            style={styles.modalCloseButton}
+            onPress={() => setShowEditCategoryModal(false)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.modalCloseText}>
+              Fechar
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
     <Modal
   visible={showReportModal}
   transparent
