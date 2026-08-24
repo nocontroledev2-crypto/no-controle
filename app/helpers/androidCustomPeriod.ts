@@ -64,6 +64,29 @@ function openAndroidDatePicker(initialDate: Date): Promise<Date | null> {
   });
 }
 
+export async function openAndroidSingleDate(
+  currentDate?: string | null
+): Promise<string | null> {
+  if (Platform.OS !== "android") {
+    return null;
+  }
+
+  const initialDate = parseDateLocal(
+    currentDate,
+    new Date()
+  );
+
+  const selectedDate = await openAndroidDatePicker(
+    initialDate
+  );
+
+  if (!selectedDate) {
+    return null;
+  }
+
+  return formatDateLocal(selectedDate);
+}
+
 export async function openAndroidCustomPeriod(
   currentStartDate?: string | null,
   currentEndDate?: string | null
