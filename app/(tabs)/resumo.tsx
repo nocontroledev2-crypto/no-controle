@@ -7,8 +7,10 @@ import {
   TouchableOpacity,
   View,
   useWindowDimensions,
+  Platform,
 } from "react-native";
 import { usePeriod } from "../context/periodContext";
+import { openAndroidCustomPeriod } from "../helpers/androidCustomPeriod";
 import { usePrivacy } from "../context/privacyContext";
 
 import AuthRequiredCard from "../components/AuthRequiredCard";
@@ -391,6 +393,27 @@ function cancelarPeriodoPersonalizado() {
   setEndDateInput("");
 }
 
+async function selecionarPeriodoPersonalizadoAndroid() {
+  const result = await openAndroidCustomPeriod(
+    customStartDate,
+    customEndDate
+  );
+
+  if (!result) {
+    return;
+  }
+
+  const start = parseDateSafe(result.startDate);
+  const end = parseDateSafe(result.endDate);
+
+  if (start.getTime() > end.getTime()) {
+    alert("A data inicial n\u00e3o pode ser maior que a data final.");
+    return;
+  }
+
+  setCustomPeriod(result.startDate, result.endDate);
+}
+
   /* ============================ */
 if (usuarioLogado === false) {
   return (
@@ -477,13 +500,17 @@ if (usuarioLogado === false) {
              onPress={() => {
 
   if (value === "custom") {
-  setMenuAberto(false);
+    setMenuAberto(false);
 
-  setStartDateInput(customStartDate ?? "");
-  setEndDateInput(customEndDate ?? "");
+    if (Platform.OS === "android") {
+      void selecionarPeriodoPersonalizadoAndroid();
+      return;
+    }
 
-  setShowCalendar(true);
-}
+    setStartDateInput(customStartDate ?? "");
+    setEndDateInput(customEndDate ?? "");
+    setShowCalendar(true);
+  }
   
   
   else {
@@ -502,7 +529,7 @@ if (usuarioLogado === false) {
       )}
 
       {/* ✅ CALENDÁRIO */}
-      {showCalendar && (
+      {Platform.OS === "web" && showCalendar && (
         <View style={styles.calendarBox}>
           <Text style={styles.calendarTitle}>
             Selecione o intervalo personalizado
