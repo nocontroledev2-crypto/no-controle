@@ -2,6 +2,7 @@
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  Alert,
   FlatList,
   Modal,
   Platform,
@@ -277,19 +278,60 @@ const now = new Date();
      EXCLUIR / EDITAR
   =============================== */
 
-  async function excluirRegistro(item: Expense) {
-    const mensagem = `Deseja excluir este lançamento?\n\n${formatMoney(
-      item.valor
-    )} — ${item.categoria}\nData: ${formatDateBR(item.data)}`;
-
-    const confirmado =
-      typeof window !== "undefined" ? window.confirm(mensagem) : true;
-
-    if (!confirmado) return;
-
+  async function executarExclusaoRegistro(item: Expense) {
+  try {
     await deleteExpense(item.id);
     await loadExpenses();
+  } catch (error) {
+    console.error(error);
+
+    if (Platform.OS === "web") {
+      alert("Não foi possível excluir o lançamento.");
+      return;
+    }
+
+    Alert.alert(
+      "Erro",
+      "Não foi possível excluir o lançamento."
+    );
   }
+}
+
+function excluirRegistro(item: Expense) {
+  const mensagem = `${formatMoney(
+    item.valor
+  )} — ${item.categoria}\nData: ${formatDateBR(item.data)}`;
+
+  if (Platform.OS === "web") {
+    const confirmado = window.confirm(
+      `Deseja excluir este lançamento?\n\n${mensagem}`
+    );
+
+    if (confirmado) {
+      void executarExclusaoRegistro(item);
+    }
+
+    return;
+  }
+
+  Alert.alert(
+    "Excluir lançamento",
+    `Deseja excluir este lançamento?\n\n${mensagem}`,
+    [
+      {
+        text: "Cancelar",
+        style: "cancel",
+      },
+      {
+        text: "Excluir",
+        style: "destructive",
+        onPress: () => {
+          void executarExclusaoRegistro(item);
+        },
+      },
+    ]
+  );
+}
 
   function iniciarEdicao(item: Expense) {
     setEditingId(item.id);
