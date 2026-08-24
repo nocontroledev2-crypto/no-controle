@@ -7,6 +7,7 @@ import {
   Modal,
   Platform,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TextInput,
@@ -877,32 +878,44 @@ async function copiarRelatorio() {
       async function compartilharRelatorio() {
   const relatorio = gerarRelatorioTexto();
 
-  console.log(relatorio);
-
   try {
-    if (
-      typeof navigator !== "undefined" &&
-      navigator.share
-    ) {
-      await navigator.share({
-        title: "Relatório Financeiro - Enxergaí",
-        text: relatorio,
-      });
+    if (Platform.OS === "web") {
+      if (
+        typeof navigator !== "undefined" &&
+        navigator.share
+      ) {
+        await navigator.share({
+          title: "Relatório Financeiro - Enxergaí",
+          text: relatorio,
+        });
+
+        return;
+      }
+
+      await navigator.clipboard.writeText(relatorio);
+
+      alert(
+        "Relatório copiado para a área de transferência."
+      );
 
       return;
     }
 
-    await navigator.clipboard.writeText(relatorio);
-
-    alert(
-      "Relatório copiado para a área de transferência."
-    );
+    await Share.share({
+      title: "Relatório Financeiro - Enxergaí",
+      message: relatorio,
+    });
   } catch (error) {
     console.error(error);
 
-    alert(
-      "Erro ao gerar relatório.\n\n" +
-      String(error)
+    if (Platform.OS === "web") {
+      alert("Não foi possível compartilhar o relatório.");
+      return;
+    }
+
+    Alert.alert(
+      "Erro",
+      "Não foi possível compartilhar o relatório."
     );
   }
 }
