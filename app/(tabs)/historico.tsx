@@ -9,10 +9,12 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  useWindowDimensions
+  useWindowDimensions,
+  Platform,
 } from "react-native";
 import AuthRequiredCard from "../components/AuthRequiredCard";
 import { usePeriod } from "../context/periodContext";
+import { openAndroidCustomPeriod } from "../helpers/androidCustomPeriod";
 import { usePrivacy } from "../context/privacyContext";
 import { getCurrentUser } from "../services/authService";
 
@@ -582,9 +584,36 @@ useEffect(() => {
 
   function abrirPersonalizado() {
     setMenuPeriodoAberto(false);
+
+    if (Platform.OS === "android") {
+      void selecionarPeriodoPersonalizadoAndroid();
+      return;
+    }
+
     setStartDateInput(customStartDate ?? "");
     setEndDateInput(customEndDate ?? "");
     setShowCustomRangeBox(true);
+  }
+
+  async function selecionarPeriodoPersonalizadoAndroid() {
+    const result = await openAndroidCustomPeriod(
+      customStartDate,
+      customEndDate
+    );
+
+    if (!result) {
+      return;
+    }
+
+    const start = parseDateSafe(result.startDate);
+    const end = parseDateSafe(result.endDate);
+
+    if (start.getTime() > end.getTime()) {
+      alert("A data inicial n\u00e3o pode ser maior que a data final.");
+      return;
+    }
+
+    setCustomPeriod(result.startDate, result.endDate);
   }
 
   function aplicarPeriodoPersonalizado() {
@@ -1067,7 +1096,7 @@ const selectedCategoryCountText =
         </>
       )}
 
-      {showCustomRangeBox && (
+      {Platform.OS === "web" && showCustomRangeBox && (
         <View style={styles.calendarBox}>
           <Text style={styles.calendarLabel}>
             Selecione o intervalo personalizado
