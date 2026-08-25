@@ -10,6 +10,7 @@ import {
   Modal,
   Platform,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -3660,26 +3661,46 @@ function exportarInsightsTexto() {
  async function compartilharInsightsTexto() {
   const texto = getInsightsTextoCompleto();
 
-  if (
-    typeof navigator !== "undefined" &&
-    navigator.share
-  ) {
-    try {
-      await navigator.share({
-        title: "Insight Financeiro - Enxergaí",
-        text: texto,
-      });
+  try {
+    if (Platform.OS === "web") {
+      if (
+        typeof navigator !== "undefined" &&
+        navigator.share
+      ) {
+        await navigator.share({
+          title: "Insight Financeiro - Enxergaí",
+          text: texto,
+        });
 
-      return;
-    } catch (error) {
+        return;
+      }
+
+      alert(
+        "Compartilhamento não disponível neste dispositivo. Use Copiar ou Exportar."
+      );
+
       return;
     }
-  }
 
-  alert(
-    "Compartilhamento não disponível neste dispositivo. Use Copiar ou Exportar."
-  );
+    await Share.share({
+      title: "Insight Financeiro - Enxergaí",
+      message: texto,
+    });
+  } catch (error) {
+    console.error(error);
+
+    if (Platform.OS === "web") {
+      alert("Não foi possível compartilhar os Insights.");
+      return;
+    }
+
+    Alert.alert(
+      "Erro",
+      "Não foi possível compartilhar os Insights."
+    );
+  }
 }
+
   function formatShortMoney(valor: number) {
   if (valor >= 1000) {
     return `R$ ${(valor / 1000).toFixed(1)}k`;
