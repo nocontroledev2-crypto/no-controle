@@ -1,5 +1,6 @@
 // @ts-nocheck
 import * as Clipboard from "expo-clipboard";
+import * as Print from "expo-print";
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -936,6 +937,89 @@ async function copiarRelatorio() {
   }
 }
 
+function escaparHtml(texto: string) {
+  return texto
+    .replace(/\u0026/g, "\u0026amp;")
+    .replace(/\u003C/g, "\u0026lt;")
+    .replace(/\u003E/g, "\u0026gt;")
+    .replace(/\u0022/g, "\u0026quot;")
+    .replace(/\u0027/g, "\u0026#039;");
+}
+
+async function imprimirRelatorio() {
+  if (Platform.OS === "web") {
+    window.print();
+    return;
+  }
+
+  try {
+    const relatorio = gerarRelatorioTexto();
+    const relatorioSeguro = escaparHtml(relatorio);
+
+    await Print.printAsync({
+      html: `
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+          <head>
+            <meta charset="UTF-8" />
+            <meta
+              name="viewport"
+              content="width=device-width, initial-scale=1.0"
+            />
+            <title>Relatório Financeiro - Enxergaí</title>
+
+            <style>
+              body {
+                font-family: Arial, Helvetica, sans-serif;
+                color: #333333;
+                padding: 24px;
+              }
+
+              h1 {
+                color: #0A8F55;
+                font-size: 22px;
+                margin-bottom: 8px;
+              }
+
+              .periodo {
+                color: #666666;
+                font-size: 13px;
+                margin-bottom: 24px;
+              }
+
+              pre {
+                white-space: pre-wrap;
+                overflow-wrap: anywhere;
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 13px;
+                line-height: 1.55;
+              }
+            </style>
+          </head>
+
+          <body>
+            <h1>Relatório Financeiro - Enxergaí</h1>
+
+            <div class="periodo">
+              ${escaparHtml(labelPeriod(period))}
+            </div>
+
+            <pre>${relatorioSeguro}</pre>
+          </body>
+        </html>
+      `,
+    });
+  } catch (error) {
+    console.error(error);
+
+    Alert.alert(
+      "Erro",
+      "Não foi possível abrir a impressão do relatório."
+    );
+  }
+}
+
+
       const selectedCategoryItems = useMemo(() => {
   if (!selectedCategoryDetail) return [];
 
@@ -1620,17 +1704,13 @@ const selectedCategoryCountText =
     </TouchableOpacity>
 
     <TouchableOpacity
-      style={styles.reportActionButton}
-      onPress={() => {
-        if (typeof window !== "undefined") {
-          window.print();
-        }
-      }}
-    >
-      <Text style={styles.reportActionText}>
-        🖨️ Imprimir
-      </Text>
-    </TouchableOpacity>
+  style={styles.reportActionButton}
+  onPress={imprimirRelatorio}
+>
+  <Text style={styles.reportActionText}>
+    🖨️ Imprimir
+  </Text>
+</TouchableOpacity>
 
     <TouchableOpacity
       style={styles.modalCloseButton}
