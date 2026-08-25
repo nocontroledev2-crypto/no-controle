@@ -19,6 +19,8 @@ import {
 } from "react-native";
 
 import * as Clipboard from "expo-clipboard";
+import { File, Paths } from "expo-file-system";
+import * as Sharing from "expo-sharing";
 import { BarChart, LineChart } from "react-native-chart-kit";
 import { Text as SvgText } from "react-native-svg";
 import { openAndroidCustomPeriod } from "./helpers/androidCustomPeriod";
@@ -3633,29 +3635,68 @@ async function copiarInsightsTexto() {
   }
 }
 
-function exportarInsightsTexto() {
-  if (typeof document === "undefined") {
-    alert("Exportação disponível apenas na versão web.");
+async function exportarInsightsTexto() {
+  const texto = getInsightsTextoCompleto();
+  const nomeArquivo =
+    `insights-enxergai-${String(period)}.txt`;
+
+  if (Platform.OS === "web") {
+    const blob = new Blob([texto], {
+      type: "text/plain;charset=utf-8",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = nomeArquivo;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
     return;
   }
 
-  const texto = getInsightsTextoCompleto();
+  try {
+    const disponivel = await Sharing.isAvailableAsync();
 
-  const blob = new Blob([texto], {
-    type: "text/plain;charset=utf-8",
-  });
+    if (!disponivel) {
+      Alert.alert(
+        "Exportação indisponível",
+        "Este dispositivo não possui um aplicativo disponível para receber o arquivo."
+      );
+      return;
+    }
 
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
+    const arquivo = new File(
+      Paths.cache,
+      nomeArquivo
+    );
 
-  link.href = url;
-  link.download = `insights-enxergai-${String(period)}.txt`;
+    arquivo.create({
+      overwrite: true,
+    });
 
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+    arquivo.write(texto);
 
-  URL.revokeObjectURL(url);
+    await Sharing.shareAsync(
+      arquivo.uri,
+      {
+        mimeType: "text/plain",
+        dialogTitle: "Exportar Insights - Enxergaí",
+        UTI: "public.plain-text",
+      }
+    );
+  } catch (error) {
+    console.error(error);
+
+    Alert.alert(
+      "Erro",
+      "Não foi possível exportar os Insights."
+    );
+  }
 }
 
  async function compartilharInsightsTexto() {
