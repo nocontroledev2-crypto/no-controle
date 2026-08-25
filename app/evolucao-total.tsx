@@ -6,19 +6,21 @@ import { useCallback, useEffect, useState } from "react";
 import { usePeriod, type Period } from "./context/periodContext";
 
 import {
+  Alert,
   Modal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
   useWindowDimensions,
-  Platform,
 } from "react-native";
 
+import * as Clipboard from "expo-clipboard";
 import { BarChart, LineChart } from "react-native-chart-kit";
-import { openAndroidCustomPeriod } from "./helpers/androidCustomPeriod";
 import { Text as SvgText } from "react-native-svg";
+import { openAndroidCustomPeriod } from "./helpers/androidCustomPeriod";
 import { getAllExpenses } from "./storage/expenseStorage";
 
 
@@ -3597,27 +3599,37 @@ const renderInsightsContent = () => (
   </>
 );
 
-function copiarInsightsTexto() {
+async function copiarInsightsTexto() {
   const texto = getInsightsTextoCompleto();
 
-  if (
-    typeof navigator !== "undefined" &&
-    navigator.clipboard &&
-    navigator.clipboard.writeText
-  ) {
-    navigator.clipboard
-      .writeText(texto)
-      .then(() => {
-        alert("Insights copiados com sucesso.");
-      })
-      .catch(() => {
-        alert("Não foi possível copiar automaticamente. Tente novamente.");
-      });
+  try {
+    if (Platform.OS === "web") {
+      await navigator.clipboard.writeText(texto);
+      alert("Insights copiados com sucesso.");
+      return;
+    }
 
-    return;
+    await Clipboard.setStringAsync(texto);
+
+    Alert.alert(
+      "✅ Insights copiados",
+      "Os Insights foram copiados para a área de transferência."
+    );
+  } catch (error) {
+    console.error(error);
+
+    if (Platform.OS === "web") {
+      alert(
+        "Não foi possível copiar automaticamente. Tente novamente."
+      );
+      return;
+    }
+
+    Alert.alert(
+      "Erro",
+      "Não foi possível copiar os Insights."
+    );
   }
-
-  alert("Cópia automática não disponível neste dispositivo.");
 }
 
 function exportarInsightsTexto() {
