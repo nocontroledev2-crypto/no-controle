@@ -1,4 +1,5 @@
 // @ts-nocheck
+import * as Clipboard from "expo-clipboard";
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -859,7 +860,17 @@ async function copiarRelatorio() {
   try {
     const texto = gerarRelatorioTexto();
 
-    await navigator.clipboard.writeText(texto);
+    if (Platform.OS === "web") {
+      await navigator.clipboard.writeText(texto);
+
+      alert(
+        "O relatório foi copiado para a área de transferência."
+      );
+
+      return;
+    }
+
+    await Clipboard.setStringAsync(texto);
 
     Alert.alert(
       "✅ Relatório copiado",
@@ -867,6 +878,11 @@ async function copiarRelatorio() {
     );
   } catch (error) {
     console.error(error);
+
+    if (Platform.OS === "web") {
+      alert("Não foi possível copiar o relatório.");
+      return;
+    }
 
     Alert.alert(
       "Erro",
