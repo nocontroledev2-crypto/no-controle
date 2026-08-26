@@ -110,6 +110,10 @@ export async function openAndroidCustomPeriod(
     return null;
   }
 
+  await new Promise<void>((resolve) => {
+    setTimeout(resolve, 350);
+  });
+
   const initialEndDate = parseDateLocal(
     currentEndDate,
     selectedStartDate
