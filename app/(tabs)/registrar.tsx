@@ -385,10 +385,10 @@ useFocusEffect(
     setDataTexto(formatarData(hoje));
     setState("idle");
 
-    valorInputRef.current?.blur();
-    Keyboard.dismiss();
-
     setTimeout(() => {
+      valorInputRef.current?.blur();
+      Keyboard.dismiss();
+
       scrollViewRef.current?.scrollTo({
         y: 0,
         animated: true,
