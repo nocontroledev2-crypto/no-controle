@@ -3904,7 +3904,7 @@ async function exportarInsightsTexto() {
           {formatCustomDate(startDateInput)} até {formatCustomDate(endDateInput)}
         </Text>
       )}
-        {menuOpen && (
+        {Platform.OS === "web" && menuOpen && (
   <TouchableOpacity
     style={styles.menuOverlay}
     activeOpacity={1}
