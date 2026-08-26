@@ -386,10 +386,10 @@ useFocusEffect(
     setState("idle");
 
     setTimeout(() => {
-      valorInputRef.current?.blur();
-      Keyboard.dismiss();
+  valorInputRef.current?.blur();
+  Keyboard.dismiss();
 
-      scrollViewRef.current?.scrollTo({
+        scrollViewRef.current?.scrollTo({
         y: 0,
         animated: true,
       });
