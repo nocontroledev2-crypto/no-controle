@@ -57,6 +57,7 @@ useFocusEffect(
   const recognitionRef = useRef<any>(null);
   const nativeResultReceivedRef = useRef(false);
   const valorInputRef = useRef<TextInput>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
   const micPulse = useRef(new Animated.Value(1)).current;
 
   useSpeechRecognitionEvent("start", () => {
@@ -384,9 +385,15 @@ useFocusEffect(
     setDataTexto(formatarData(hoje));
     setState("idle");
 
+    valorInputRef.current?.blur();
+    Keyboard.dismiss();
+
     setTimeout(() => {
-      valorInputRef.current?.focus();
-    }, 100);
+      scrollViewRef.current?.scrollTo({
+        y: 0,
+        animated: true,
+      });
+    }, 150);
   }
 
   function alterarDados() {
@@ -411,6 +418,7 @@ if (usuarioLogado === false) {
   return (
     <>
       <ScrollView
+      ref={scrollViewRef}
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       keyboardShouldPersistTaps="handled"
