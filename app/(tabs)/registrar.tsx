@@ -42,6 +42,7 @@ export default function Registrar() {
   const [data, setData] = useState(new Date());
   const [dataTexto, setDataTexto] = useState(formatarData(new Date()));
   const [usuarioLogado, setUsuarioLogado] = useState<boolean | null>(null);
+  const [saveResetTick, setSaveResetTick] = useState(0);
 
 useFocusEffect(
   useCallback(() => {
@@ -59,6 +60,31 @@ useFocusEffect(
   const valorInputRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<ScrollView>(null);
   const micPulse = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (saveResetTick === 0) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      valorInputRef.current?.blur();
+      Keyboard.dismiss();
+
+      if (Platform.OS === "web") {
+        const activeElement =
+          document.activeElement as HTMLElement | null;
+
+        activeElement?.blur();
+      }
+
+      scrollViewRef.current?.scrollTo({
+        y: 0,
+        animated: true,
+      });
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [saveResetTick]);
 
   useSpeechRecognitionEvent("start", () => {
     if (Platform.OS !== "web") {
@@ -384,16 +410,7 @@ useFocusEffect(
     setData(hoje);
     setDataTexto(formatarData(hoje));
     setState("idle");
-
-    setTimeout(() => {
-  valorInputRef.current?.blur();
-  Keyboard.dismiss();
-
-        scrollViewRef.current?.scrollTo({
-        y: 0,
-        animated: true,
-      });
-    }, 150);
+    setSaveResetTick((current) => current + 1);
   }
 
   function alterarDados() {
