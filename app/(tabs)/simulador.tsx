@@ -10,9 +10,18 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+import {
+  getCurrentUser,
+  getProfile,
+  upsertProfile,
+} from "../services/authService";
 import { Expense, getAllExpenses } from "../storage/expenseStorage";
 
 const SIMULATOR_CONFIG_KEY = "@no-controle:simulator-config";
+
+function getSimulatorConfigKey(userId: string) {
+  return `${SIMULATOR_CONFIG_KEY}:${userId}`;
+}
 
 type SimulatorConfig = {
   rendaMensal: string;
@@ -75,7 +84,6 @@ export default function Simulador() {
     useCallback(() => {
       async function load() {
         const data = await getAllExpenses();
-        const savedConfig = await AsyncStorage.getItem(SIMULATOR_CONFIG_KEY);
 
         const normalizedData = (data || []).map((item: any) => {
           const safeValue = Number(item.valor);
@@ -88,10 +96,77 @@ export default function Simulador() {
 
         setExpenses(normalizedData);
 
+        const user = await getCurrentUser();
+
+        if (!user) {
+          setRendaMensal("");
+          setMetaEconomia("");
+          return;
+        }
+
+        const userConfigKey = getSimulatorConfigKey(user.id);
+        const savedConfig = await AsyncStorage.getItem(userConfigKey);
+
+        let localConfig: SimulatorConfig = {
+          rendaMensal: "",
+          metaEconomia: "",
+        };
+
         if (savedConfig) {
-          const parsed: SimulatorConfig = JSON.parse(savedConfig);
-          setRendaMensal(parsed.rendaMensal || "");
-          setMetaEconomia(parsed.metaEconomia || "");
+          try {
+            const parsed: SimulatorConfig = JSON.parse(savedConfig);
+
+            localConfig = {
+              rendaMensal: parsed.rendaMensal || "",
+              metaEconomia: parsed.metaEconomia || "",
+            };
+          } catch (error) {
+            console.error(
+              "Erro ao carregar configuracao local do Simulador:",
+              error
+            );
+          }
+        }
+
+        const { data: profile, error: profileError } =
+          await getProfile(user.id);
+
+        if (profileError) {
+          console.error(
+            "Erro ao carregar configuracao do Simulador na nuvem:",
+            profileError
+          );
+
+          setRendaMensal(localConfig.rendaMensal);
+          setMetaEconomia(localConfig.metaEconomia);
+          return;
+        }
+
+        const rendaNuvem =
+          profile?.renda_mensal !== null &&
+          profile?.renda_mensal !== undefined
+            ? String(profile.renda_mensal)
+            : "";
+
+        const metaNuvem =
+          profile?.meta_economia !== null &&
+          profile?.meta_economia !== undefined
+            ? String(profile.meta_economia)
+            : "";
+
+        const configFinal: SimulatorConfig = {
+          rendaMensal: rendaNuvem || localConfig.rendaMensal,
+          metaEconomia: metaNuvem || localConfig.metaEconomia,
+        };
+
+        setRendaMensal(configFinal.rendaMensal);
+        setMetaEconomia(configFinal.metaEconomia);
+
+        if (rendaNuvem || metaNuvem) {
+          await AsyncStorage.setItem(
+            userConfigKey,
+            JSON.stringify(configFinal)
+          );
         }
       }
 
@@ -217,9 +292,38 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
       metaEconomia: metaEconomia.trim(),
     };
 
-    await AsyncStorage.setItem(SIMULATOR_CONFIG_KEY, JSON.stringify(config));
+    const user = await getCurrentUser();
 
-    setMensagem("Simulação salva com sucesso.");
+    if (!user) {
+      alert("Entre na sua conta para salvar e sincronizar a simulação.");
+      return;
+    }
+
+    const { error } = await upsertProfile({
+      id: user.id,
+      email: user.email || "",
+      renda_mensal: config.rendaMensal,
+      meta_economia: config.metaEconomia,
+    });
+
+    if (error) {
+      console.error(
+        "Erro ao salvar configuracao do Simulador na nuvem:",
+        error
+      );
+
+      alert(
+        "Não foi possível salvar a simulação na nuvem. Verifique sua conexão e tente novamente."
+      );
+      return;
+    }
+
+    await AsyncStorage.setItem(
+      getSimulatorConfigKey(user.id),
+      JSON.stringify(config)
+    );
+
+    setMensagem("Simulação salva e sincronizada com sucesso.");
 
     setTimeout(() => {
       setMensagem("");
