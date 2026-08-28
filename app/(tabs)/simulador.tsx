@@ -221,6 +221,10 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
   const saldoProjetadoAposMeta =
     saldoProjetado - metaConsiderada;
 
+  const saldoAtualCentavos = Math.round(saldoAtual * 100);
+  const saldoAtualAposMetaCentavos =
+    Math.round(saldoAtualAposMeta * 100);
+
   const porCategoria = useMemo(() => {
     const map: Record<string, number> = {};
 
@@ -461,7 +465,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
                 </Text>
               </View>
 
-              {saldoAtual < 0 ? (
+              {saldoAtualCentavos < 0 ? (
                 <Text
                   style={[
                     styles.currentSituationMessage,
@@ -471,7 +475,17 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
                   ⚠️ Atenção: seus gastos registrados já superam sua renda em{" "}
                   {formatMoney(Math.abs(saldoAtual))}.
                 </Text>
-              ) : saldoAtualAposMeta < 0 ? (
+              ) : saldoAtualCentavos === 0 ? (
+                <Text
+                  style={[
+                    styles.currentSituationMessage,
+                    styles.currentSituationNeutral,
+                  ]}
+                >
+                  ℹ️ Seus gastos registrados chegaram ao valor da renda
+                  informada. No momento, não há saldo disponível.
+                </Text>
+              ) : saldoAtualAposMetaCentavos < 0 ? (
                 <Text
                   style={[
                     styles.currentSituationMessage,
@@ -481,6 +495,16 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
                   ⚠️ Seu saldo atual é positivo, mas faltam{" "}
                   {formatMoney(Math.abs(saldoAtualAposMeta))} para preservar
                   sua meta.
+                </Text>
+              ) : saldoAtualAposMetaCentavos === 0 ? (
+                <Text
+                  style={[
+                    styles.currentSituationMessage,
+                    styles.currentSituationNeutral,
+                  ]}
+                >
+                  ℹ️ Depois de separar sua meta, o saldo disponível fica em
+                  R$ 0,00.
                 </Text>
               ) : (
                 <View style={styles.currentSituationPositiveBox}>
@@ -784,6 +808,10 @@ const styles = StyleSheet.create({
 
   currentSituationAlert: {
     color: "#B76E00",
+  },
+
+  currentSituationNeutral: {
+    color: "#4B5563",
   },
 
   currentSituationPositiveBox: {
