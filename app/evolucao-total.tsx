@@ -3637,11 +3637,12 @@ async function copiarInsightsTexto() {
 
 async function exportarInsightsTexto() {
   const texto = getInsightsTextoCompleto();
+  const textoUtf8 = `\uFEFF${texto}`;
   const nomeArquivo =
     `insights-enxergai-${String(period)}.txt`;
 
   if (Platform.OS === "web") {
-    const blob = new Blob([texto], {
+    const blob = new Blob([textoUtf8], {
       type: "text/plain;charset=utf-8",
     });
 
@@ -3679,12 +3680,12 @@ async function exportarInsightsTexto() {
       overwrite: true,
     });
 
-    arquivo.write(texto);
+    arquivo.write(textoUtf8);
 
     await Sharing.shareAsync(
       arquivo.uri,
       {
-        mimeType: "text/plain",
+        mimeType: "text/plain;charset=utf-8",
         dialogTitle: "Exportar Insights - Enxergaí",
         UTI: "public.plain-text",
       }
