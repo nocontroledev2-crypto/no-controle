@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
     Linking,
     ScrollView,
@@ -8,13 +8,84 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import {
+  getCurrentUser,
+  getProfile,
+} from "./services/authService";
 
 const EMAIL_PRIVACIDADE = "enxergai.adm@gmail.com";
 
 export default function ExcluirConta() {
   const router = useRouter();
+  const [nomeConta, setNomeConta] = useState("");
+  const [emailConta, setEmailConta] = useState("");
+  const [carregandoConta, setCarregandoConta] = useState(true);
 
-  function solicitarExclusao() {
+  useEffect(() => {
+    let paginaAtiva = true;
+
+    async function carregarConta() {
+      try {
+        const user = await getCurrentUser();
+
+        if (!paginaAtiva) {
+          return;
+        }
+
+        if (!user) {
+          setNomeConta("");
+          setEmailConta("");
+          return;
+        }
+
+        const { data: profile } = await getProfile(user.id);
+
+        if (!paginaAtiva) {
+          return;
+        }
+
+        const nomeIdentificado =
+          profile?.nome ||
+          user.user_metadata?.nome ||
+          "";
+
+        setNomeConta(String(nomeIdentificado).trim());
+        setEmailConta(String(user.email || "").trim());
+      } catch (error) {
+        console.error(
+          "Erro ao carregar a conta para exclusão:",
+          error
+        );
+      } finally {
+        if (paginaAtiva) {
+          setCarregandoConta(false);
+        }
+      }
+    }
+
+    carregarConta();
+
+    return () => {
+      paginaAtiva = false;
+    };
+  }, []);
+
+  async function solicitarExclusao() {
+    if (carregandoConta) {
+      alert("Aguarde enquanto identificamos sua conta.");
+      return;
+    }
+
+    if (!emailConta) {
+      alert(
+        "Entre na sua conta do Enxergaí antes de solicitar a exclusão."
+      );
+      return;
+    }
+
+    const nomeExibido =
+      nomeConta || "Nome não informado";
+
     const assunto = encodeURIComponent(
       "Solicitação de exclusão de conta Enxergaí"
     );
@@ -25,17 +96,31 @@ export default function ExcluirConta() {
         "",
         "Solicito a exclusão da minha conta e dos dados pessoais e financeiros associados.",
         "",
-        "E-mail cadastrado no Enxergaí:",
+        `Nome cadastrado no Enxergaí: ${nomeExibido}`,
+        `E-mail cadastrado no Enxergaí: ${emailConta}`,
         "",
-        "Estou enviando esta solicitação pelo mesmo endereço de e-mail utilizado na minha conta.",
+        "Confirmo que a conta identificada acima é a conta que desejo excluir.",
         "",
         "Atenciosamente,",
+        nomeExibido,
       ].join("\n")
     );
 
-    Linking.openURL(
-      `mailto:${EMAIL_PRIVACIDADE}?subject=${assunto}&body=${corpo}`
-    );
+    const url =
+      `mailto:${EMAIL_PRIVACIDADE}?subject=${assunto}&body=${corpo}`;
+
+    try {
+      await Linking.openURL(url);
+    } catch (error) {
+      console.error(
+        "Erro ao abrir o aplicativo de e-mail:",
+        error
+      );
+
+      alert(
+        `Não foi possível abrir o aplicativo de e-mail. Envie sua solicitação para ${EMAIL_PRIVACIDADE}.`
+      );
+    }
   }
 
   return (

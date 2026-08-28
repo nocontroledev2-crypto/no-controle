@@ -1,6 +1,7 @@
 import {
   useFocusEffect,
   useLocalSearchParams,
+  useRouter,
 } from "expo-router";
 import React, {
   useCallback,
@@ -88,6 +89,7 @@ function traduzirErroAuth(message?: string) {
 }
 
 export default function Conta() {
+  const router = useRouter();
   const { width } = useWindowDimensions();
   const isMobile = width < 480;
   const { modo } = useLocalSearchParams<{
@@ -186,6 +188,8 @@ function zerarResumoDados() {
         await carregarResumoDados();
       } else {
         setUsuarioLogado(null);
+        setNome("");
+        setEmail("");
         zerarResumoDados();
       }
     }
@@ -312,32 +316,45 @@ if (
   }
 
   if (data?.user) {
+    const { data: profile, error: profileError } =
+      await getProfile(data.user.id);
+
+    if (profileError) {
+      console.error(
+        "Erro ao carregar perfil após login:",
+        profileError
+      );
+    }
+
     const nomePerfil =
-      nome.trim() ||
+      profile?.nome ||
       data.user.user_metadata?.nome ||
       "Usuário Enxergaí";
 
-    // Atualiza a tela imediatamente após login
+    const emailPerfil =
+      data.user.email || email.trim();
+
     setUsuarioLogado(data.user);
     setNome(nomePerfil);
-    setEmail(data.user.email || email.trim());
+    setEmail(emailPerfil);
     setSenha("");
 
     setMensagem("Login realizado com sucesso.");
     limparMensagemDepois();
 
-    // Carrega os dados da conta sem travar a mudança visual da tela
     await carregarResumoDados();
 
-    // Atualiza/cria perfil em segundo momento, sem impedir a tela de mudar
     try {
       await upsertProfile({
         id: data.user.id,
         nome: nomePerfil,
-        email: data.user.email || email.trim(),
+        email: emailPerfil,
       });
-    } catch (profileError) {
-      console.error("Erro ao atualizar perfil após login:", profileError);
+    } catch (upsertError) {
+      console.error(
+        "Erro ao atualizar perfil após login:",
+        upsertError
+      );
     }
   }
 }
@@ -388,6 +405,8 @@ async function recuperarSenha() {
   await signOut();
 
   setUsuarioLogado(null);
+  setNome("");
+  setEmail("");
   setSenha("");
   zerarResumoDados();
 
@@ -396,9 +415,7 @@ async function recuperarSenha() {
 }
 
 function abrirExclusaoConta() {
-  Linking.openURL(
-    "https://www.enxergai.com.br/excluir-conta"
-  );
+  router.push("/excluir-conta");
 }
 
 function iniciarEdicaoNome() {
