@@ -69,6 +69,33 @@ function formatMoney(valor: number | null | undefined) {
   });
 }
 
+function formatarEntradaMonetaria(valorDigitado: string) {
+  const somenteNumeros = valorDigitado.replace(/\D/g, "");
+  const centavos = Number(somenteNumeros || "0");
+
+  return formatMoney(centavos / 100);
+}
+
+function formatarValorCarregado(valorSalvo: string) {
+  if (!valorSalvo) {
+    return "";
+  }
+
+  const valorNumerico = parseValorMonetario(valorSalvo);
+
+  return Number.isFinite(valorNumerico)
+    ? formatMoney(valorNumerico)
+    : "";
+}
+
+function valorMonetarioParaPersistencia(valorFormatado: string) {
+  const valorNumerico = parseValorMonetario(valorFormatado);
+
+  return Number.isFinite(valorNumerico)
+    ? String(valorNumerico)
+    : "";
+}
+
 export default function Simulador() {
   const { width } = useWindowDimensions();
   const isMobile = width < 480;
@@ -137,8 +164,12 @@ export default function Simulador() {
             profileError
           );
 
-          setRendaMensal(localConfig.rendaMensal);
-          setMetaEconomia(localConfig.metaEconomia);
+          setRendaMensal(
+            formatarValorCarregado(localConfig.rendaMensal)
+          );
+          setMetaEconomia(
+            formatarValorCarregado(localConfig.metaEconomia)
+          );
           return;
         }
 
@@ -159,8 +190,12 @@ export default function Simulador() {
           metaEconomia: metaNuvem || localConfig.metaEconomia,
         };
 
-        setRendaMensal(configFinal.rendaMensal);
-        setMetaEconomia(configFinal.metaEconomia);
+        setRendaMensal(
+          formatarValorCarregado(configFinal.rendaMensal)
+        );
+        setMetaEconomia(
+          formatarValorCarregado(configFinal.metaEconomia)
+        );
 
         if (rendaNuvem || metaNuvem) {
           await AsyncStorage.setItem(
@@ -295,8 +330,10 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
     }
 
     const config: SimulatorConfig = {
-      rendaMensal: rendaMensal.trim(),
-      metaEconomia: metaEconomia.trim(),
+      rendaMensal:
+        valorMonetarioParaPersistencia(rendaMensal),
+      metaEconomia:
+        valorMonetarioParaPersistencia(metaEconomia),
     };
 
     const user = await getCurrentUser();
@@ -348,22 +385,30 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
         <View style={styles.card}>
           <Text style={styles.cardTitle}>🧮 Planeje seu mês</Text>
 
+          <Text style={styles.moneyInputHint}>
+            Digite apenas números. Os centavos são preenchidos automaticamente.
+          </Text>
+
           <Text style={styles.label}>Renda mensal</Text>
           <TextInput
             style={styles.input}
             value={rendaMensal}
-            onChangeText={setRendaMensal}
-            placeholder="Ex: 5000,00"
-            keyboardType="decimal-pad"
+            onChangeText={(valor) =>
+              setRendaMensal(formatarEntradaMonetaria(valor))
+            }
+            placeholder="R$ 0,00"
+            keyboardType="number-pad"
           />
 
           <Text style={styles.label}>Meta de economia</Text>
           <TextInput
             style={styles.input}
             value={metaEconomia}
-            onChangeText={setMetaEconomia}
-            placeholder="Ex: 500,00"
-            keyboardType="decimal-pad"
+            onChangeText={(valor) =>
+              setMetaEconomia(formatarEntradaMonetaria(valor))
+            }
+            placeholder="R$ 0,00"
+            keyboardType="number-pad"
           />
 
           <TouchableOpacity style={styles.saveButton} onPress={salvarConfiguracao}>
@@ -693,6 +738,13 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#333",
     marginBottom: 10,
+  },
+
+  moneyInputHint: {
+    fontSize: 12,
+    color: "#6B7280",
+    lineHeight: 18,
+    marginBottom: 12,
   },
 
   label: {
