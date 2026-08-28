@@ -215,8 +215,11 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
   const receitaConsiderada = rendaValida ? rendaNumerica : 0;
   const metaConsiderada = metaValida ? metaNumerica : 0;
 
-  const saldoPrevisto = receitaConsiderada - projecaoGastosMes;
-  const sobraAposMeta = saldoPrevisto - metaConsiderada;
+  const saldoAtual = receitaConsiderada - totalMesAtual;
+  const saldoAtualAposMeta = saldoAtual - metaConsiderada;
+  const saldoProjetado = receitaConsiderada - projecaoGastosMes;
+  const saldoProjetadoAposMeta =
+    saldoProjetado - metaConsiderada;
 
   const porCategoria = useMemo(() => {
     const map: Record<string, number> = {};
@@ -240,35 +243,35 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
       return {
         titulo: "Informe sua renda mensal",
         detalhe:
-          "Com a renda mensal, o Enxergaí consegue simular seu fechamento do mês.",
+          "Com a renda mensal, o Enxergaí consegue estimar como o mês pode terminar.",
         tipo: "neutro",
       };
     }
 
-    if (sobraAposMeta >= 0) {
+    if (saldoProjetadoAposMeta >= 0) {
       return {
-        titulo: "Você está no controle",
-        detalhe: `No ritmo atual, você pode fechar o mês mantendo sua meta de ${formatMoney(
+        titulo: "A projeção mantém sua meta",
+        detalhe: `Se o ritmo atual continuar, você pode fechar o mês mantendo sua meta de ${formatMoney(
           metaConsiderada
         )}.`,
         tipo: "positivo",
       };
     }
 
-    if (saldoPrevisto >= 0) {
+    if (saldoProjetado >= 0) {
       return {
-        titulo: "Atenção à sua meta",
-        detalhe: `Você deve fechar o mês no positivo, mas pode faltar ${formatMoney(
-          Math.abs(sobraAposMeta)
+        titulo: "A projeção pede atenção à meta",
+        detalhe: `Se o ritmo atual continuar, o mês pode terminar no positivo, mas podem faltar ${formatMoney(
+          Math.abs(saldoProjetadoAposMeta)
         )} para alcançar sua meta.`,
         tipo: "alerta",
       };
     }
 
     return {
-      titulo: "Risco de fechar negativo",
-      detalhe: `No ritmo atual, seus gastos podem ultrapassar sua renda em ${formatMoney(
-        Math.abs(saldoPrevisto)
+      titulo: "Risco projetado de fechar negativo",
+      detalhe: `Se o ritmo atual continuar, os gastos podem ultrapassar sua renda em ${formatMoney(
+        Math.abs(saldoProjetado)
       )}.`,
       tipo: "risco",
     };
@@ -399,6 +402,108 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
   </View>
 </View>
 
+        <View style={styles.resultCard}>
+          <Text style={styles.resultTitle}>
+            💰 Sua situação hoje
+          </Text>
+
+          <Text style={styles.resultDetail}>
+            Valores calculados somente com os gastos já registrados neste mês.
+          </Text>
+
+          {rendaValida && (
+            <>
+              <View style={styles.resultLine}>
+                <Text style={styles.resultLabel}>
+                  Renda mensal informada
+                </Text>
+                <Text style={styles.resultValue}>
+                  {formatMoney(receitaConsiderada)}
+                </Text>
+              </View>
+
+              <View style={styles.resultLine}>
+                <Text style={styles.resultLabel}>
+                  Gasto registrado até hoje
+                </Text>
+                <Text style={styles.resultValue}>
+                  {formatMoney(totalMesAtual)}
+                </Text>
+              </View>
+
+              <View style={styles.resultLine}>
+                <Text style={styles.resultLabel}>Saldo atual</Text>
+                <Text
+                  style={[
+                    styles.resultValue,
+                    saldoAtual >= 0
+                      ? styles.positiveText
+                      : styles.negativeText,
+                  ]}
+                >
+                  {formatMoney(saldoAtual)}
+                </Text>
+              </View>
+
+              <View style={styles.resultLine}>
+                <Text style={styles.resultLabel}>
+                  Saldo atual após a meta
+                </Text>
+                <Text
+                  style={[
+                    styles.resultValue,
+                    saldoAtualAposMeta >= 0
+                      ? styles.positiveText
+                      : styles.negativeText,
+                  ]}
+                >
+                  {formatMoney(saldoAtualAposMeta)}
+                </Text>
+              </View>
+
+              {saldoAtual < 0 ? (
+                <Text
+                  style={[
+                    styles.currentSituationMessage,
+                    styles.currentSituationRisk,
+                  ]}
+                >
+                  ⚠️ Atenção: seus gastos registrados já superam sua renda em{" "}
+                  {formatMoney(Math.abs(saldoAtual))}.
+                </Text>
+              ) : saldoAtualAposMeta < 0 ? (
+                <Text
+                  style={[
+                    styles.currentSituationMessage,
+                    styles.currentSituationAlert,
+                  ]}
+                >
+                  ⚠️ Seu saldo atual é positivo, mas faltam{" "}
+                  {formatMoney(Math.abs(saldoAtualAposMeta))} para preservar
+                  sua meta.
+                </Text>
+              ) : (
+                <View style={styles.currentSituationPositiveBox}>
+                  <Text
+                    style={[
+                      styles.currentSituationMessage,
+                      styles.currentSituationPositive,
+                    ]}
+                  >
+                    ✅ Depois dos gastos e da meta, ainda restam{" "}
+                    {formatMoney(saldoAtualAposMeta)}.
+                  </Text>
+
+                  <Text style={styles.currentSituationEducation}>
+                    Esse valor pode ajudar a fortalecer sua reserva de
+                    emergência. Você já tem uma?
+                  </Text>
+                </View>
+              )}
+            </>
+          )}
+        </View>
+
         <View
           style={[
             styles.resultCard,
@@ -408,6 +513,15 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
           ]}
         >
           <Text style={styles.resultTitle}>
+            🔮 Projeção até o fim do mês
+          </Text>
+
+          <Text style={styles.projectionNotice}>
+            Esta é apenas uma estimativa baseada no ritmo dos gastos
+            registrados até agora. Os valores podem mudar.
+          </Text>
+
+          <Text style={styles.resultProjectionTitle}>
             {status.tipo === "positivo"
               ? "✅ "
               : status.tipo === "alerta"
@@ -423,37 +537,43 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
           {rendaValida && (
             <>
               <View style={styles.resultLine}>
-                <Text style={styles.resultLabel}>Renda mensal informada</Text>
+                <Text style={styles.resultLabel}>
+                  Gasto projetado no mês
+                </Text>
                 <Text style={styles.resultValue}>
-                  {formatMoney(receitaConsiderada)}
+                  {formatMoney(projecaoGastosMes)}
                 </Text>
               </View>
 
               <View style={styles.resultLine}>
-                <Text style={styles.resultLabel}>Saldo previsto</Text>
+                <Text style={styles.resultLabel}>
+                  Saldo projetado
+                </Text>
                 <Text
                   style={[
                     styles.resultValue,
-                    saldoPrevisto >= 0
+                    saldoProjetado >= 0
                       ? styles.positiveText
                       : styles.negativeText,
                   ]}
                 >
-                  {formatMoney(saldoPrevisto)}
+                  {formatMoney(saldoProjetado)}
                 </Text>
               </View>
 
               <View style={styles.resultLine}>
-                <Text style={styles.resultLabel}>Saldo após meta</Text>
+                <Text style={styles.resultLabel}>
+                  Saldo projetado após a meta
+                </Text>
                 <Text
                   style={[
                     styles.resultValue,
-                    sobraAposMeta >= 0
+                    saldoProjetadoAposMeta >= 0
                       ? styles.positiveText
                       : styles.negativeText,
                   ]}
                 >
-                  {formatMoney(sobraAposMeta)}
+                  {formatMoney(saldoProjetadoAposMeta)}
                 </Text>
               </View>
             </>
@@ -648,6 +768,52 @@ const styles = StyleSheet.create({
     color: "#555",
     lineHeight: 18,
     marginBottom: 12,
+  },
+
+  currentSituationMessage: {
+    fontSize: 13,
+    fontWeight: "700",
+    lineHeight: 19,
+    marginTop: 14,
+    maxWidth: 520,
+  },
+
+  currentSituationRisk: {
+    color: "#C62828",
+  },
+
+  currentSituationAlert: {
+    color: "#B76E00",
+  },
+
+  currentSituationPositiveBox: {
+    marginTop: 2,
+    maxWidth: 520,
+  },
+
+  currentSituationPositive: {
+    color: "#0A8F55",
+  },
+
+  currentSituationEducation: {
+    fontSize: 12,
+    color: "#4B5563",
+    lineHeight: 18,
+    marginTop: 5,
+  },
+
+  projectionNotice: {
+    fontSize: 12,
+    color: "#6B7280",
+    lineHeight: 18,
+    marginBottom: 12,
+  },
+
+  resultProjectionTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#333",
+    marginBottom: 8,
   },
 
    resultLine: {
