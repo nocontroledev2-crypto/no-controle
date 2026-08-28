@@ -882,6 +882,7 @@ if (normalizedText.includes("semana passada")) {
 }
 
 if (
+  normalizedText.includes("proxima semana") ||
   normalizedText.includes("semana que vem")
 ) {
   const data = new Date(now);

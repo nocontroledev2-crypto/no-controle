@@ -9,6 +9,7 @@ export const SUBCATEGORIES_BY_MASTER: Record<string, string[]> = {
     "Seguro Residencial",
     "Móveis",
     "Eletrodomésticos",
+    "Material de Construção",
   ],
 
   "Contas da Casa": [
@@ -34,6 +35,8 @@ export const SUBCATEGORIES_BY_MASTER: Record<string, string[]> = {
     "Marmita",
     "Delivery",
     "Bebidas",
+    "Produtos Naturais",
+    "Sorvete / Açaí",
   ],
 
   "Transporte": [
@@ -63,6 +66,8 @@ export const SUBCATEGORIES_BY_MASTER: Record<string, string[]> = {
     "Academia",
     "Óculos",
     "Medicamentos",
+    "Fisioterapia",
+    "Nutricionista",
   ],
 
   "Educação": [
@@ -76,6 +81,7 @@ export const SUBCATEGORIES_BY_MASTER: Record<string, string[]> = {
     "Material Escolar",
     "Mensalidade",
     "Aulas Particulares",
+    "Formatura",
   ],
 
   "Lazer": [
@@ -101,6 +107,7 @@ export const SUBCATEGORIES_BY_MASTER: Record<string, string[]> = {
   "Casa",
   "Beleza",
   "Perfumaria",
+  "Higiene Pessoal",
 ],
 
 

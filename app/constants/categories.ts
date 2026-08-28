@@ -12,6 +12,5 @@ export const MASTER_CATEGORIES = [
   "Pets",
   "Família",
   "Financeiro",
-  "Receitas",
   "Outros",
 ];
