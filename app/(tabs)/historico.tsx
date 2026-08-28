@@ -226,6 +226,18 @@ const now = new Date();
     }
   }
 
+  function descricaoPeriodoRelatorio() {
+    if (
+      period === "custom" &&
+      startDate &&
+      endDate
+    ) {
+      return `${formatCustomDate(startDate)} a ${formatCustomDate(endDate)}`;
+    }
+
+    return labelPeriod(period);
+  }
+
   function toggleDateCollapse(date: string) {
     setCollapsedDates((prev) => ({
       ...prev,
@@ -834,7 +846,9 @@ ${subcategoriasTexto}`;
     })
     .join("\n\n--------------------------------\n\n");
 
-  return `💰 Total gasto: ${formatMoney(totalPeriodo)}
+  return `📅 Período: ${descricaoPeriodoRelatorio()}
+
+💰 Total gasto: ${formatMoney(totalPeriodo)}
 
 🏷️ Categorias: ${categoriasOrdenadas.length}
 
@@ -999,10 +1013,6 @@ async function imprimirRelatorio() {
 
           <body>
             <h1>Relatório Financeiro - Enxergaí</h1>
-
-            <div class="periodo">
-              ${escaparHtml(labelPeriod(period))}
-            </div>
 
             <pre>${relatorioSeguro}</pre>
           </body>
@@ -1678,7 +1688,7 @@ const selectedCategoryCountText =
     </Text>
 
     <Text style={styles.modalSubtitle}>
-      {labelPeriod(period)}
+      {descricaoPeriodoRelatorio()}
     </Text>
   </View>
 
@@ -1733,6 +1743,7 @@ const selectedCategoryCountText =
       >
         {gerarRelatorioTexto()
   .split("\n")
+  .slice(2)
   .map((linha, index) => {
     const ehCategoria =
       linha.includes("• R$") &&
