@@ -84,6 +84,7 @@ export default function EvolucaoTotal() {
 
 
     useEffect(() => {
+     if (Platform.OS !== "web") return;
      if (!menuOpen) return;
      if (typeof window === "undefined") return;
 
