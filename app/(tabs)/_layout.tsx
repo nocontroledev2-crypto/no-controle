@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
+import { Platform } from "react-native";
 
 export default function TabsLayout() {
   return (
@@ -13,10 +14,16 @@ export default function TabsLayout() {
           fontWeight: "600",
         },
         tabBarStyle: {
+          height: Platform.OS === "android" ? 82 : 62,
           paddingTop: 4,
+          paddingBottom: Platform.OS === "android" ? 20 : 4,
         },
         tabBarItemStyle: {
           paddingVertical: 0,
+          transform:
+            Platform.OS === "android"
+              ? [{ translateY: -6 }]
+              : undefined,
         },
       }}
     >
