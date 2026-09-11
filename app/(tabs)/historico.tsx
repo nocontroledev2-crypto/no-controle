@@ -57,7 +57,9 @@ export default function Historico() {
  
 const {
     ocultarValores,
-    setOcultarValores,
+    alternarPrivacidade,
+    formatarValorVisivel,
+    formatarPercentualVisivel,
   } = usePrivacy();
 
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -103,11 +105,6 @@ const {
   const [showReportModal, setShowReportModal] = useState(false);
 const [usuarioLogado, setUsuarioLogado] = useState<boolean | null>(null);
 
-function formatarValorVisivel(valor: number) {
-  return ocultarValores
-    ? "R$ ••••••"
-    : formatMoney(valor);
-}
 const now = new Date();
 
   /* ===============================
@@ -131,17 +128,6 @@ const now = new Date();
     );
   }
 
-    function formatPercentualRelatorio(percentual: number) {
-    if (!Number.isFinite(percentual) || percentual <= 0) {
-      return "0%";
-    }
-
-    if (percentual > 0 && percentual < 1) {
-      return "<1%";
-    }
-
-    return `${percentual.toFixed(0)}%`;
-  }
 
   function formatDateBR(dateStr: string) {
     const d = parseDateSafe(dateStr);
@@ -742,7 +728,7 @@ useEffect(() => {
       ? ` / ${item.subcategoria}`
       : "";
 
-    return `${formatDateBR(item.data)} • ${item.categoria}${detalhe} • ${formatMoney(
+    return `${formatDateBR(item.data)} • ${item.categoria}${detalhe} • ${formatarValorVisivel(
       item.valor
     )}`;
   });
@@ -807,16 +793,16 @@ const unicaSubcategoria =
 
       if (temSomenteUmaSubcategoria) {
   if (unicaSubcategoria === "Sem detalhe") {
-    return `${categoria} • ${formatMoney(
+    return `${categoria} • ${formatarValorVisivel(
       info.total
-    )} • ${formatPercentualRelatorio(
+    )} • ${formatarPercentualVisivel(
       percentualCategoria
     )} do período`;
   }
 
-  return `${categoria} • ${formatMoney(
+  return `${categoria} • ${formatarValorVisivel(
     info.total
-  )} • ${unicaSubcategoria} • ${formatPercentualRelatorio(
+  )} • ${unicaSubcategoria} • ${formatarPercentualVisivel(
     percentualCategoria
   )} do período`;
 }
@@ -828,17 +814,17 @@ const subcategoriasTexto = subcategoriasEntries
         ? (total / info.total) * 100
         : 0;
 
-    return `• ${subcategoria} • ${formatMoney(
+    return `• ${subcategoria} • ${formatarValorVisivel(
       total
-    )} • ${formatPercentualRelatorio(
+    )} • ${formatarPercentualVisivel(
       percentualSubcategoria
     )} da categoria`;
   })
   .join("\n");
 
-return `${categoria} • ${formatMoney(
+return `${categoria} • ${formatarValorVisivel(
   info.total
-)} • ${formatPercentualRelatorio(
+)} • ${formatarPercentualVisivel(
   percentualCategoria
 )} do período
 
@@ -848,7 +834,7 @@ ${subcategoriasTexto}`;
 
   return `📅 Período: ${descricaoPeriodoRelatorio()}
 
-💰 Total gasto: ${formatMoney(totalPeriodo)}
+💰 Total gasto: ${formatarValorVisivel(totalPeriodo)}
 
 🏷️ Categorias: ${categoriasOrdenadas.length}
 
@@ -1067,7 +1053,7 @@ const selectedCategoryCountText =
   <Text style={styles.title}>Histórico</Text>
 
   <TouchableOpacity
-    onPress={() => setOcultarValores(!ocultarValores)}
+    onPress={alternarPrivacidade}
   >
     <Text style={styles.eyeButton}>
       {ocultarValores ? "🙈" : "👁️"}
@@ -1093,7 +1079,7 @@ const selectedCategoryCountText =
   <Text style={styles.title}>Histórico</Text>
 
   <TouchableOpacity
-    onPress={() => setOcultarValores(!ocultarValores)}
+    onPress={alternarPrivacidade}
   >
     <Text style={styles.eyeButton}>
       {ocultarValores ? "🙈" : "👁️"}
@@ -1416,7 +1402,7 @@ const selectedCategoryCountText =
                     <View style={styles.groupHeaderRight}>
                       {mostrarResumoPorDia && (
                         <Text style={styles.groupMeta}>
-                          {formatMoney(group.totalDia)}
+                          {formatarValorVisivel(group.totalDia)}
                           {group.qtdLancamentos > 1
                             ? ` • ${group.qtdLancamentos} registros`
                             : ""}
@@ -1527,7 +1513,7 @@ const selectedCategoryCountText =
                             <View style={styles.cardHeaderRow}>
                               <View style={{ flex: 1 }}>
                                 <Text style={styles.value}>
-                                  {formatMoney(item.valor)}
+                                  {formatarValorVisivel(item.valor)}
                                 </Text>
 
          <Text style={styles.category}>
@@ -1600,9 +1586,9 @@ const selectedCategoryCountText =
   </View>
 
   <Text style={styles.categorySummary}>
-    {formatMoney(group.total)} •{" "}
+    {formatarValorVisivel(group.total)} •{" "}
     {group.qtd === 1 ? "1 registro" : `${group.qtd} registros`} •{" "}
-    {formatPercentualRelatorio(group.percentual)} do período
+    {formatarPercentualVisivel(group.percentual)} do período
   </Text>
 </TouchableOpacity>
 ))}
@@ -1803,7 +1789,7 @@ const selectedCategoryCountText =
         <Text style={styles.modalSummaryLabel}>Total da categoria</Text>
 
         <Text style={styles.modalSummaryValue}>
-          {formatMoney(selectedCategoryTotal)}
+          {formatarValorVisivel(selectedCategoryTotal)}
         </Text>
 
         <Text style={styles.modalSummaryMeta}>
@@ -1820,7 +1806,7 @@ const selectedCategoryCountText =
           <View key={item.id} style={styles.modalItem}>
             <View style={{ flex: 1 }}>
               <Text style={styles.modalItemValue}>
-                {formatMoney(item.valor)}
+                {formatarValorVisivel(item.valor)}
               </Text>
 
               <Text style={styles.modalItemDate}>

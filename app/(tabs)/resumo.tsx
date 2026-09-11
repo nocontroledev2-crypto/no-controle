@@ -65,7 +65,9 @@ export default function Resumo() {
   const router = useRouter();
   const {
     ocultarValores,
-    setOcultarValores,
+    alternarPrivacidade,
+    formatarValorVisivel: formatarValorGlobal,
+    formatarPercentualVisivel,
   } = usePrivacy();
 
 
@@ -137,21 +139,6 @@ setExpenses(normalizedData);
   const mostrarComparacao =
     period !== "custom" && period !== "all";
 
-  /* ✅ moeda */
-  function formatMoney(valor: number | null | undefined) {
-  const safeValue = Number(valor);
-
-  return (Number.isFinite(safeValue) ? safeValue : 0).toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  });
-}
-
-function formatarValorVisivel(valor: number) {
-  return ocultarValores
-    ? "R$ ••••••"
-    : formatMoney(valor);
-}
 
   /* ===========================
      FILTRO ATUAL
@@ -349,23 +336,23 @@ function formatarValorVisivel(valor: number) {
     return {
       principal: "Primeiro registro de hoje.",
       detalhe: categoriaPrincipal
-        ? `Você começou o dia com ${categoriaPrincipal}: ${formatMoney(total)}.`
-        : `Valor registrado: ${formatMoney(total)}.`,
+        ? `Você começou o dia com ${categoriaPrincipal}: ${formatarValorGlobal(total)}.`
+        : `Valor registrado: ${formatarValorGlobal(total)}.`,
     };
   }
 
   if (categoriaPrincipal && maiorGasto) {
     return {
       principal: `Hoje você registrou ${quantidade} gastos.`,
-      detalhe: `Categoria em destaque: ${categoriaPrincipal} (${formatMoney(
+      detalhe: `Categoria em destaque: ${categoriaPrincipal} (${formatarValorGlobal(
         valorCategoriaPrincipal
-      )}). Maior gasto: ${formatMoney(maiorGasto.valor)}.`,
+      )}). Maior gasto: ${formatarValorGlobal(maiorGasto.valor)}.`,
     };
   }
 
   return {
     principal: `Hoje você registrou ${quantidade} gastos.`,
-    detalhe: `Total do dia até agora: ${formatMoney(total)}.`,
+    detalhe: `Total do dia até agora: ${formatarValorGlobal(total)}.`,
   };
 }
 
@@ -422,7 +409,7 @@ if (usuarioLogado === false) {
   <Text style={styles.title}>Enxergaí</Text>
 
   <TouchableOpacity
-    onPress={() => setOcultarValores(!ocultarValores)}
+    onPress={alternarPrivacidade}
   >
     <Text style={styles.eyeButton}>
       {ocultarValores ? "🙈" : "👁️"}
@@ -441,7 +428,7 @@ if (usuarioLogado === false) {
   <Text style={styles.title}>Enxergaí</Text>
 
   <TouchableOpacity
-    onPress={() => setOcultarValores(!ocultarValores)}
+    onPress={alternarPrivacidade}
   >
     <Text style={styles.eyeButton}>
       {ocultarValores ? "🙈" : "👁️"}
@@ -608,7 +595,7 @@ if (usuarioLogado === false) {
       
       <Card
   title="💰Total gasto"
-  value={formatarValorVisivel(total)}
+  value={formatarValorGlobal(total)}
   style={styles.cardInRow}
   onPress={() =>
     router.push({
@@ -634,7 +621,7 @@ if (usuarioLogado === false) {
 ) : (
   <Card
   title="📊 Média diária"
-  value={formatMoney(media)}
+  value={formatarValorGlobal(media)}
   style={styles.cardInRow}
 />
 )}
@@ -661,15 +648,20 @@ if (usuarioLogado === false) {
         : diffTotal === 0
         ? "Mesmo valor do período anterior."
         : diffTotal > 0
-        ? `⚠️ Você gastou ${formatMoney(diffTotal)} a mais`
-        : `✅ Você gastou ${formatMoney(
+        ? `⚠️ Você gastou ${formatarValorGlobal(diffTotal)} a mais`
+        : `✅ Você gastou ${formatarValorGlobal(
             Math.abs(diffTotal)
           )} a menos`}
     </Text>
 
     {textoVariacao && (
       <Text style={styles.comparativoSecundario}>
-        {textoVariacao}
+        {ocultarValores
+          ? textoVariacao.replace(
+              /\d+(?:[.,]\d+)?%/g,
+              formatarPercentualVisivel(0)
+            )
+          : textoVariacao}
       </Text>
     )}
   </Card>
@@ -686,7 +678,7 @@ if (usuarioLogado === false) {
   ) : (
     topGastos.map((e, i) => (
       <Text key={e.id}>
-        {i + 1}. {formatMoney(e.valor)} — {e.categoria}
+        {i + 1}. {formatarValorGlobal(e.valor)} — {e.categoria}
       </Text>
     ))
   )}
@@ -705,8 +697,10 @@ if (usuarioLogado === false) {
   ) : (
     topCategorias.map(([cat, val]) => (
   <Text key={cat}>
-    • {cat} — {formatMoney(val)} (
-    {getPercentualCategoria(val).toFixed(0)}%)
+    • {cat} — {formatarValorGlobal(val)} (
+    {formatarPercentualVisivel(
+      getPercentualCategoria(val)
+    )})
   </Text>
 ))
   )}

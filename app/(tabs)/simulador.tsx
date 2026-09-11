@@ -10,6 +10,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+import { usePrivacy } from "../context/privacyContext";
 import {
   getCurrentUser,
   getProfile,
@@ -99,6 +100,12 @@ function valorMonetarioParaPersistencia(valorFormatado: string) {
 export default function Simulador() {
   const { width } = useWindowDimensions();
   const isMobile = width < 480;
+
+  const {
+    ocultarValores,
+    alternarPrivacidade,
+    formatarValorVisivel: formatarValorPrivado,
+  } = usePrivacy();
 
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [rendaMensal, setRendaMensal] = useState("");
@@ -290,7 +297,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
     if (saldoProjetadoAposMeta >= 0) {
       return {
         titulo: "A projeção mantém sua meta",
-        detalhe: `Se o ritmo atual continuar, você pode fechar o mês mantendo sua meta de ${formatMoney(
+        detalhe: `Se o ritmo atual continuar, você pode fechar o mês mantendo sua meta de ${formatarValorPrivado(
           metaConsiderada
         )}.`,
         tipo: "positivo",
@@ -300,7 +307,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
     if (saldoProjetado >= 0) {
       return {
         titulo: "A projeção pede atenção à meta",
-        detalhe: `Se o ritmo atual continuar, o mês pode terminar no positivo, mas podem faltar ${formatMoney(
+        detalhe: `Se o ritmo atual continuar, o mês pode terminar no positivo, mas podem faltar ${formatarValorPrivado(
           Math.abs(saldoProjetadoAposMeta)
         )} para alcançar sua meta.`,
         tipo: "alerta",
@@ -309,7 +316,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
 
     return {
       titulo: "Risco projetado de fechar negativo",
-      detalhe: `Se o ritmo atual continuar, os gastos podem ultrapassar sua renda em ${formatMoney(
+      detalhe: `Se o ritmo atual continuar, os gastos podem ultrapassar sua renda em ${formatarValorPrivado(
         Math.abs(saldoProjetado)
       )}.`,
       tipo: "risco",
@@ -380,7 +387,24 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Simulador</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.title}>Simulador</Text>
+
+          <TouchableOpacity
+            style={styles.eyeButtonContainer}
+            onPress={alternarPrivacidade}
+            accessibilityRole="button"
+            accessibilityLabel={
+              ocultarValores
+                ? "Mostrar dados financeiros"
+                : "Ocultar dados financeiros"
+            }
+          >
+            <Text style={styles.eyeButton}>
+              {ocultarValores ? "🙈" : "👁️"}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>🧮 Planeje seu mês</Text>
@@ -390,30 +414,70 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
           </Text>
 
           <Text style={styles.label}>Renda mensal</Text>
-          <TextInput
-            style={styles.input}
-            value={rendaMensal}
-            onChangeText={(valor) =>
-              setRendaMensal(formatarEntradaMonetaria(valor))
-            }
-            placeholder="R$ 0,00"
-            keyboardType="number-pad"
-          />
+          {ocultarValores ? (
+            <View style={[styles.input, styles.protectedInput]}>
+              <Text style={styles.protectedInputText}>
+                {formatarValorPrivado(0)}
+              </Text>
+            </View>
+          ) : (
+            <TextInput
+              style={styles.input}
+              value={rendaMensal}
+              onChangeText={(valor) =>
+                setRendaMensal(formatarEntradaMonetaria(valor))
+              }
+              placeholder="R$ 0,00"
+              keyboardType="number-pad"
+            />
+          )}
 
           <Text style={styles.label}>Meta de economia</Text>
-          <TextInput
-            style={styles.input}
-            value={metaEconomia}
-            onChangeText={(valor) =>
-              setMetaEconomia(formatarEntradaMonetaria(valor))
-            }
-            placeholder="R$ 0,00"
-            keyboardType="number-pad"
-          />
+          {ocultarValores ? (
+            <View style={[styles.input, styles.protectedInput]}>
+              <Text style={styles.protectedInputText}>
+                {formatarValorPrivado(0)}
+              </Text>
+            </View>
+          ) : (
+            <TextInput
+              style={styles.input}
+              value={metaEconomia}
+              onChangeText={(valor) =>
+                setMetaEconomia(formatarEntradaMonetaria(valor))
+              }
+              placeholder="R$ 0,00"
+              keyboardType="number-pad"
+            />
+          )}
 
-          <TouchableOpacity style={styles.saveButton} onPress={salvarConfiguracao}>
-            <Text style={styles.saveButtonText}>💾 Salvar simulação</Text>
-          </TouchableOpacity>
+          {ocultarValores ? (
+            <>
+              <Text style={styles.protectedInputHint}>
+                Mostre os dados para editar e salvar renda ou meta.
+              </Text>
+
+              <View
+                style={[
+                  styles.saveButton,
+                  styles.saveButtonDisabled,
+                ]}
+              >
+                <Text style={styles.saveButtonText}>
+                  💾 Salvar simulação
+                </Text>
+              </View>
+            </>
+          ) : (
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={salvarConfiguracao}
+            >
+              <Text style={styles.saveButtonText}>
+                💾 Salvar simulação
+              </Text>
+            </TouchableOpacity>
+          )}
 
           {mensagem ? <Text style={styles.successText}>{mensagem}</Text> : null}
         </View>
@@ -423,7 +487,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
     <Text style={styles.cardTitle}>💸 Gasto até hoje</Text>
 
     <Text style={styles.cardValue}>
-      {formatMoney(totalMesAtual)}
+      {formatarValorPrivado(totalMesAtual)}
     </Text>
 
     <Text style={styles.subText}>
@@ -435,7 +499,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
     <Text style={styles.cardTitle}>🔮 Gasto previsto no mês</Text>
 
     <Text style={[styles.cardValue, styles.forecastValue]}>
-      {formatMoney(projecaoGastosMes)}
+      {formatarValorPrivado(projecaoGastosMes)}
     </Text>
 
     <Text style={styles.subText}>
@@ -443,7 +507,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
     </Text>
 
     <Text style={styles.formulaText}>
-      Ritmo atual: {formatMoney(mediaDiariaAtual)} por dia
+      Ritmo atual: {formatarValorPrivado(mediaDiariaAtual)} por dia
       {diasRestantes === 0
         ? ". Hoje é o último dia do mês."
         : ` • faltam ${diasRestantes} dias.`}
@@ -467,7 +531,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
                   Renda mensal informada
                 </Text>
                 <Text style={styles.resultValue}>
-                  {formatMoney(receitaConsiderada)}
+                  {formatarValorPrivado(receitaConsiderada)}
                 </Text>
               </View>
 
@@ -476,7 +540,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
                   Gasto registrado até hoje
                 </Text>
                 <Text style={styles.resultValue}>
-                  {formatMoney(totalMesAtual)}
+                  {formatarValorPrivado(totalMesAtual)}
                 </Text>
               </View>
 
@@ -490,7 +554,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
                       : styles.negativeText,
                   ]}
                 >
-                  {formatMoney(saldoAtual)}
+                  {formatarValorPrivado(saldoAtual)}
                 </Text>
               </View>
 
@@ -506,7 +570,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
                       : styles.negativeText,
                   ]}
                 >
-                  {formatMoney(saldoAtualAposMeta)}
+                  {formatarValorPrivado(saldoAtualAposMeta)}
                 </Text>
               </View>
 
@@ -518,7 +582,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
                   ]}
                 >
                   ⚠️ Atenção: seus gastos registrados já superam sua renda em{" "}
-                  {formatMoney(Math.abs(saldoAtual))}.
+                  {formatarValorPrivado(Math.abs(saldoAtual))}.
                 </Text>
               ) : saldoAtualCentavos === 0 ? (
                 <Text
@@ -538,7 +602,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
                   ]}
                 >
                   ⚠️ Seu saldo atual é positivo, mas faltam{" "}
-                  {formatMoney(Math.abs(saldoAtualAposMeta))} para preservar
+                  {formatarValorPrivado(Math.abs(saldoAtualAposMeta))} para preservar
                   sua meta.
                 </Text>
               ) : saldoAtualAposMetaCentavos === 0 ? (
@@ -548,8 +612,8 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
                     styles.currentSituationNeutral,
                   ]}
                 >
-                  ℹ️ Depois de separar sua meta, o saldo disponível fica em
-                  R$ 0,00.
+                  ℹ️ Depois de separar sua meta, o saldo disponível fica em{" "}
+                  {formatarValorPrivado(0)}.
                 </Text>
               ) : (
                 <View style={styles.currentSituationPositiveBox}>
@@ -560,7 +624,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
                     ]}
                   >
                     ✅ Depois dos gastos e da meta, ainda restam{" "}
-                    {formatMoney(saldoAtualAposMeta)}.
+                    {formatarValorPrivado(saldoAtualAposMeta)}.
                   </Text>
 
                   <Text style={styles.currentSituationEducation}>
@@ -610,7 +674,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
                   Gasto projetado no mês
                 </Text>
                 <Text style={styles.resultValue}>
-                  {formatMoney(projecaoGastosMes)}
+                  {formatarValorPrivado(projecaoGastosMes)}
                 </Text>
               </View>
 
@@ -626,7 +690,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
                       : styles.negativeText,
                   ]}
                 >
-                  {formatMoney(saldoProjetado)}
+                  {formatarValorPrivado(saldoProjetado)}
                 </Text>
               </View>
 
@@ -642,7 +706,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
                       : styles.negativeText,
                   ]}
                 >
-                  {formatMoney(saldoProjetadoAposMeta)}
+                  {formatarValorPrivado(saldoProjetadoAposMeta)}
                 </Text>
               </View>
             </>
@@ -662,13 +726,13 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
               <Text style={styles.subText}>
                 Sua categoria com maior impacto neste mês é{" "}
                 <Text style={styles.boldText}>{categoriaMaisPesada[0]}</Text>,
-                com {formatMoney(categoriaMaisPesada[1])}.
+                com {formatarValorPrivado(categoriaMaisPesada[1])}.
               </Text>
 
               <Text style={styles.subText}>
                 Se reduzir 20% nessa categoria, você pode economizar cerca de{" "}
                 <Text style={styles.boldText}>
-                  {formatMoney(economiaSimuladaCategoria)}
+                  {formatarValorPrivado(economiaSimuladaCategoria)}
                 </Text>.
               </Text>
             </>
@@ -702,12 +766,32 @@ const styles = StyleSheet.create({
     paddingBottom: 90,
   },
 
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    marginBottom: 14,
+  },
+
   title: {
     fontSize: 22,
     fontWeight: "bold",
     color: "#0A8F55",
     textAlign: "center",
-    marginBottom: 14,
+  },
+
+  eyeButtonContainer: {
+    width: 36,
+    height: 36,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  eyeButton: {
+    fontSize: 22,
+    lineHeight: 28,
+    textAlign: "center",
   },
 
   card: {
@@ -766,6 +850,23 @@ const styles = StyleSheet.create({
     color: "#333",
   },
 
+  protectedInput: {
+    justifyContent: "center",
+    minHeight: 42,
+  },
+
+  protectedInputText: {
+    fontSize: 14,
+    color: "#333",
+  },
+
+  protectedInputHint: {
+    fontSize: 12,
+    color: "#6B7280",
+    lineHeight: 18,
+    marginBottom: 8,
+  },
+
   saveButton: {
     backgroundColor: "#0A8F55",
     borderRadius: 10,
@@ -773,6 +874,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     alignItems: "center",
     marginTop: 2,
+  },
+
+  saveButtonDisabled: {
+    opacity: 0.45,
   },
 
   saveButtonText: {
