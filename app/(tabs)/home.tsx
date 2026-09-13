@@ -14,8 +14,10 @@ export default function Home() {
   const router = useRouter();
 
   const {
-  ocultarValores,
-  setOcultarValores,
+    ocultarValores,
+    alternarPrivacidade,
+    formatarValorVisivel: formatarValorGlobal,
+    formatarPercentualVisivel,
   } = usePrivacy();
 
   const [totalHoje, setTotalHoje] = useState(0);
@@ -25,11 +27,6 @@ export default function Home() {
   const [categoriaInsight, setCategoriaInsight] = useState("");
   
 
-  function formatarValorVisivel(valor: number) {
-  return ocultarValores
-    ? "R$ ••••••"
-    : formatMoney(valor);
-}
 
   /* ✅ DATA SEGURA */
   function parseDateSafe(dateStr: string) {
@@ -164,7 +161,7 @@ export default function Home() {
   <Text style={styles.title}>Enxergaí</Text>
 
   <TouchableOpacity
-    onPress={() => setOcultarValores(!ocultarValores)}
+    onPress={alternarPrivacidade}
   >
     <Text style={styles.eyeButton}>
       {ocultarValores ? "🙈" : "👁️"}
@@ -187,12 +184,17 @@ export default function Home() {
         <Text style={styles.metricLabel}>Total do dia</Text>
 
         <Text style={styles.metricValue}>
-          {formatarValorVisivel(totalHoje)}
+          {formatarValorGlobal(totalHoje)}
         </Text>
 
         {comparacaoTexto !== "" && (
           <Text style={styles.compareInline}>
-            {comparacaoTexto}
+            {ocultarValores
+              ? comparacaoTexto.replace(
+                  /R\$\s?[\d.]+,\d{2}/g,
+                  formatarValorGlobal(0)
+                )
+              : comparacaoTexto}
           </Text>
         )}
       </View>
@@ -202,12 +204,17 @@ export default function Home() {
         <Text style={styles.metricLabel}>Total do mês</Text>
 
         <Text style={styles.metricValue}>
-          {formatarValorVisivel(totalMes)}
+          {formatarValorGlobal(totalMes)}
         </Text>
 
         {categoriaInsight !== "" && (
           <Text style={styles.compareInline}>
-            {categoriaInsight}
+            {ocultarValores
+              ? categoriaInsight.replace(
+                  /\d+(?:[.,]\d+)?%/g,
+                  formatarPercentualVisivel(0)
+                )
+              : categoriaInsight}
           </Text>
         )}
       </View>

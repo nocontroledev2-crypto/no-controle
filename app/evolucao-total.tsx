@@ -4,6 +4,7 @@ import {
 } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { usePeriod, type Period } from "./context/periodContext";
+import { usePrivacy } from "./context/privacyContext";
 
 import {
   Alert,
@@ -29,6 +30,13 @@ import { getAllExpenses } from "./storage/expenseStorage";
 
 export default function EvolucaoTotal() {
   const router = useRouter();
+
+  const {
+    ocultarValores,
+    alternarPrivacidade,
+    formatarValorVisivel: formatarValorPrivado,
+    formatarPercentualVisivel,
+  } = usePrivacy();
 
   const {
     period,
@@ -3562,6 +3570,22 @@ const getInsightsTextLines = () => {
   return linhas.filter(Boolean);
 };
 
+const protegerTextoFinanceiro = (texto: string) => {
+  if (!ocultarValores) {
+    return texto;
+  }
+
+  return texto
+    .replace(
+      /R\$\s*[\d.]+,\d{2}/g,
+      formatarValorPrivado(0)
+    )
+    .replace(
+      /\d+(?:[.,]\d+)?%/g,
+      formatarPercentualVisivel(0)
+    );
+};
+
 const getInsightsTextoCompleto = () => {
   const linhas =
   modoInsights === "essencial"
@@ -3576,7 +3600,7 @@ const getInsightsTextoCompleto = () => {
     "🔥 Insight Financeiro",
     `Período: ${labelPeriod(String(period))}`,
     "",
-    ...linhas,
+    ...linhas.map(protegerTextoFinanceiro),
     "",
     "Gerado pelo Enxergaí.",
   ].join("\n");
@@ -3597,7 +3621,7 @@ const renderInsightsContent = () => (
         key={`insight-popup-${index}`}
         style={styles.insightItem}
       >
-        {linha}
+        {protegerTextoFinanceiro(linha)}
       </Text>
     ))}
   </>
@@ -3842,9 +3866,44 @@ async function exportarInsightsTexto() {
     <Text style={styles.backText}>← Voltar</Text>
   </TouchableOpacity>
 
-  <Text style={styles.title}>
-    Evolução do Total Gasto
-  </Text>
+  <View
+    style={{
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+    }}
+  >
+    <Text style={styles.title}>
+      Evolução do Total Gasto
+    </Text>
+
+    <TouchableOpacity
+      onPress={alternarPrivacidade}
+      accessibilityRole="button"
+      accessibilityLabel={
+        ocultarValores
+          ? "Mostrar dados financeiros"
+          : "Ocultar dados financeiros"
+      }
+      style={{
+        width: 36,
+        height: 36,
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Text
+        style={{
+          fontSize: 22,
+          lineHeight: 28,
+          textAlign: "center",
+        }}
+      >
+        {ocultarValores ? "🙈" : "👁️"}
+      </Text>
+    </TouchableOpacity>
+  </View>
 </View>
 
   <View
@@ -3873,7 +3932,7 @@ async function exportarInsightsTexto() {
   </TouchableOpacity>
 
 <Text style={styles.totalText}>
-  💰 {formatMoney(
+  💰 {formatarValorPrivado(
     period === "today"
       ? todayValue
       : totalGrafico
@@ -4016,7 +4075,9 @@ async function exportarInsightsTexto() {
      
 {selectedPoint && (
   <Text style={styles.pointInfo}>
-    {selectedPoint.label}: {formatMoney(selectedPoint.value)}
+    {selectedPoint.label}: {formatarValorPrivado(
+      selectedPoint.value
+    )}
   </Text>
 )}
 
@@ -4041,6 +4102,7 @@ async function exportarInsightsTexto() {
     width={chartWidth}
     height={chartHeight}
     yAxisLabel="R$ "
+    withHorizontalLabels={!ocultarValores}
     chartConfig={{
       backgroundColor: "#FFFFFF",
       backgroundGradientFrom: "#FFFFFF",
@@ -4057,7 +4119,7 @@ async function exportarInsightsTexto() {
     renderDotContent={({ x, y, index, indexData }: any) => {
       const value = Number(indexData);
 
-      if (value <= 0) {
+      if (ocultarValores || value <= 0) {
         return null;
       }
 
@@ -4129,6 +4191,7 @@ const labelX = Math.min(
     height={chartHeight}
     yAxisLabel="R$ "
     yAxisSuffix=""
+    withHorizontalLabels={!ocultarValores}
     chartConfig={{
   backgroundColor: "#FAFAFA",
   backgroundGradientFrom: "#FAFAFA",
@@ -4147,7 +4210,9 @@ const labelX = Math.min(
   },
 }}
     fromZero
-    showValuesOnTopOfBars={showBarValuesOnTop}
+    showValuesOnTopOfBars={
+      !ocultarValores && showBarValuesOnTop
+    }
 
    
 
@@ -4182,7 +4247,9 @@ const labelX = Math.min(
       >
         
            {"*"}{" "}
-        {item.label} → {formatMoney(item.value)}
+        {item.label} → {formatarValorPrivado(
+          item.value
+        )}
       </Text>
     ))
   )}
@@ -4194,8 +4261,10 @@ const labelX = Math.min(
   </Text>
 
   <Text style={styles.insightSummaryText}>
-  {getInsightsTextLinesEssencial()[0] ||
-    "O Enxergaí encontrou informações relevantes neste período."}
+  {protegerTextoFinanceiro(
+    getInsightsTextLinesEssencial()[0] ||
+      "O Enxergaí encontrou informações relevantes neste período."
+  )}
 </Text>
 
   <TouchableOpacity
