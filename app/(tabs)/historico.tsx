@@ -116,18 +116,6 @@ const now = new Date();
     return new Date(Number(ano), Number(mes) - 1, Number(dia));
   }
 
-  function formatMoney(valor: number | null | undefined) {
-    const safeValue = Number(valor);
-
-    return (Number.isFinite(safeValue) ? safeValue : 0).toLocaleString(
-      "pt-BR",
-      {
-        style: "currency",
-        currency: "BRL",
-      }
-    );
-  }
-
 
   function formatDateBR(dateStr: string) {
     const d = parseDateSafe(dateStr);
@@ -299,7 +287,7 @@ const now = new Date();
 }
 
 function excluirRegistro(item: Expense) {
-  const mensagem = `${formatMoney(
+  const mensagem = `${formatarValorVisivel(
     item.valor
   )} — ${item.categoria}\nData: ${formatDateBR(item.data)}`;
 

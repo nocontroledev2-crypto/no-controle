@@ -1,13 +1,18 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
 
 export const MASCARA_VALOR_PRIVADO = "R$ ••••••";
 export const MASCARA_PERCENTUAL_PRIVADO = "••%";
+
+const PRIVACY_STORAGE_KEY =
+  "@enxergai:privacy-hidden";
 
 type PrivacyContextType = {
   ocultarValores: boolean;
@@ -48,6 +53,67 @@ export function PrivacyProvider({
 }) {
   const [ocultarValores, setOcultarValores] =
     useState(false);
+
+  const [preferenciaCarregada, setPreferenciaCarregada] =
+    useState(false);
+
+  useEffect(() => {
+    let providerAtivo = true;
+
+    async function carregarPreferencia() {
+      try {
+        const valorSalvo = await AsyncStorage.getItem(
+          PRIVACY_STORAGE_KEY
+        );
+
+        if (!providerAtivo) {
+          return;
+        }
+
+        setOcultarValores(valorSalvo === "true");
+      } catch (error) {
+        console.error(
+          "Erro ao carregar preferencia de privacidade:",
+          error
+        );
+      } finally {
+        if (providerAtivo) {
+          setPreferenciaCarregada(true);
+        }
+      }
+    }
+
+    void carregarPreferencia();
+
+    return () => {
+      providerAtivo = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!preferenciaCarregada) {
+      return;
+    }
+
+    async function salvarPreferencia() {
+      try {
+        await AsyncStorage.setItem(
+          PRIVACY_STORAGE_KEY,
+          String(ocultarValores)
+        );
+      } catch (error) {
+        console.error(
+          "Erro ao salvar preferencia de privacidade:",
+          error
+        );
+      }
+    }
+
+    void salvarPreferencia();
+  }, [
+    ocultarValores,
+    preferenciaCarregada,
+  ]);
 
   const alternarPrivacidade = useCallback(() => {
     setOcultarValores((estadoAtual) => !estadoAtual);
@@ -101,6 +167,10 @@ export function PrivacyProvider({
       formatarPercentualVisivel,
     ]
   );
+
+  if (!preferenciaCarregada) {
+    return null;
+  }
 
   return (
     <PrivacyContext.Provider value={valorContexto}>
