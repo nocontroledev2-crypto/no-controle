@@ -1,3 +1,7 @@
+import {
+  normalizePaymentMethod,
+  type PaymentMethod,
+} from "../constants/paymentMethods";
 import { supabase } from "../lib/supabase";
 import { getCurrentUser } from "../services/authService";
 
@@ -7,6 +11,7 @@ export type Expense = {
   categoria: string;
   subcategoria?: string;
   termoEncontrado?: string;
+  paymentMethod?: PaymentMethod | null;
   data: string;
   createdAt: string;
 };
@@ -25,6 +30,9 @@ function normalizeExpense(expense: Expense): Expense {
     valor: Number(safeValue.toFixed(2)),
     subcategoria: expense.subcategoria ?? "",
     termoEncontrado: expense.termoEncontrado ?? "",
+    paymentMethod: normalizePaymentMethod(
+      expense.paymentMethod
+    ),
   };
 }
 
@@ -35,6 +43,9 @@ function mapFromSupabase(row: any): Expense {
     categoria: row.categoria || "",
     subcategoria: row.subcategoria || "",
     termoEncontrado: row.termo_encontrado || "",
+    paymentMethod: normalizePaymentMethod(
+      row.payment_method
+    ),
     data: row.data,
     createdAt: row.created_at,
   };
@@ -92,6 +103,8 @@ export async function saveExpense(expense: Expense): Promise<void> {
       categoria: normalizedExpense.categoria,
       subcategoria: normalizedExpense.subcategoria ?? "",
       termo_encontrado: normalizedExpense.termoEncontrado ?? "",
+      payment_method:
+        normalizedExpense.paymentMethod ?? null,
       data: normalizedExpense.data,
       created_at: normalizedExpense.createdAt,
       updated_at: new Date().toISOString(),
@@ -115,6 +128,8 @@ export async function updateExpense(updatedExpense: Expense): Promise<void> {
       categoria: normalizedExpense.categoria,
       subcategoria: normalizedExpense.subcategoria ?? "",
       termo_encontrado: normalizedExpense.termoEncontrado ?? "",
+      payment_method:
+        normalizedExpense.paymentMethod ?? null,
       data: normalizedExpense.data,
       updated_at: new Date().toISOString(),
     })
