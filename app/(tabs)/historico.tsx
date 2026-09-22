@@ -27,6 +27,7 @@ import {
 import { getCurrentUser } from "../services/authService";
 
 import { MASTER_CATEGORIES } from "../constants/categories";
+import { getPaymentMethodLabel } from "../constants/paymentMethods";
 import {
   Expense,
   deleteExpense,
@@ -1537,6 +1538,12 @@ const selectedCategoryCountText =
          {item.subcategoria ? (
          <Text style={styles.subcategory}>
          Detalhe: {item.subcategoria}
+         </Text>
+         ) : null}
+
+         {item.paymentMethod ? (
+         <Text style={styles.subcategory}>
+         Pagamento: {getPaymentMethodLabel(item.paymentMethod)}
          </Text>
          ) : null}
                                 
