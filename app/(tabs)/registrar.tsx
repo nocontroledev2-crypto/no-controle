@@ -21,6 +21,11 @@ import {
 } from "expo-speech-recognition";
 import AuthRequiredCard from "../components/AuthRequiredCard";
 import { MASTER_CATEGORIES } from "../constants/categories";
+import {
+  PAYMENT_METHOD_OPTIONS,
+  getPaymentMethodLabel,
+  type PaymentMethod,
+} from "../constants/paymentMethods";
 import { getSubcategoriesByMaster } from "../constants/subcategories";
 import { parseSpeech } from "../helpers/speechParser";
 import { getCurrentUser } from "../services/authService";
@@ -39,6 +44,12 @@ export default function Registrar() {
   const [subcategoria, setSubcategoria] = useState("");
   const [menuSubcategoriaAberto, setMenuSubcategoriaAberto] = useState(false);
   const [termoEncontrado, setTermoEncontrado] = useState("");
+  const [paymentMethod, setPaymentMethod] =
+    useState<PaymentMethod | null>(null);
+  const [
+    menuPaymentMethodAberto,
+    setMenuPaymentMethodAberto,
+  ] = useState(false);
   const [data, setData] = useState(new Date());
   const [dataTexto, setDataTexto] = useState(formatarData(new Date()));
   const [usuarioLogado, setUsuarioLogado] = useState<boolean | null>(null);
@@ -389,6 +400,7 @@ useFocusEffect(
     categoria,
     subcategoria,
     termoEncontrado,
+    paymentMethod,
     data: dataFinal.toISOString().split("T")[0],
     createdAt: new Date().toISOString(),
   });
@@ -407,6 +419,8 @@ useFocusEffect(
     setCategoria("");
     setSubcategoria("");
     setTermoEncontrado("");
+    setPaymentMethod(null);
+    setMenuPaymentMethodAberto(false);
     setData(hoje);
     setDataTexto(formatarData(hoje));
     setState("idle");
@@ -517,7 +531,11 @@ if (usuarioLogado === false) {
           <View
   style={[
     styles.sectionCard,
-    (menuCategoriaAberto || menuSubcategoriaAberto) &&
+    (
+      menuCategoriaAberto ||
+      menuSubcategoriaAberto ||
+      menuPaymentMethodAberto
+    ) &&
       styles.sectionCardOnTop,
   ]}
 >
@@ -557,6 +575,7 @@ if (usuarioLogado === false) {
     valorInputRef.current?.blur();
     setMenuCategoriaAberto(!menuCategoriaAberto);
     setMenuSubcategoriaAberto(false);
+    setMenuPaymentMethodAberto(false);
   }}
   activeOpacity={0.85}
 >
@@ -593,6 +612,7 @@ if (usuarioLogado === false) {
     valorInputRef.current?.blur();
     setMenuSubcategoriaAberto(!menuSubcategoriaAberto);
     setMenuCategoriaAberto(false);
+    setMenuPaymentMethodAberto(false);
   }}
   activeOpacity={0.85}
 >
@@ -619,6 +639,40 @@ if (usuarioLogado === false) {
                 Detalhe identificado: {subcategoria}
               </Text>
             ) : null}
+
+            <Text style={styles.label}>
+              Forma de pagamento
+            </Text>
+
+            <View
+              style={[
+                styles.categoryDropdownWrapper,
+                menuPaymentMethodAberto &&
+                  styles.categoryDropdownWrapperOpen,
+              ]}
+            >
+              <TouchableOpacity
+                style={styles.categorySelectButton}
+                onPress={() => {
+                  Keyboard.dismiss();
+                  valorInputRef.current?.blur();
+                  setMenuPaymentMethodAberto(
+                    !menuPaymentMethodAberto
+                  );
+                  setMenuCategoriaAberto(false);
+                  setMenuSubcategoriaAberto(false);
+                }}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.categorySelectText}>
+                  {getPaymentMethodLabel(paymentMethod)}
+                </Text>
+
+                <Text style={styles.categorySelectArrow}>
+                  {menuPaymentMethodAberto ? "▲" : "▼"}
+                </Text>
+              </TouchableOpacity>
+            </View>
 
             <Text style={styles.label}>Data</Text>
             <TextInput
@@ -668,12 +722,17 @@ if (usuarioLogado === false) {
     </ScrollView>
 
     <Modal
-      visible={menuCategoriaAberto || menuSubcategoriaAberto}
+      visible={
+        menuCategoriaAberto ||
+        menuSubcategoriaAberto ||
+        menuPaymentMethodAberto
+      }
       transparent
       animationType="fade"
       onRequestClose={() => {
         setMenuCategoriaAberto(false);
         setMenuSubcategoriaAberto(false);
+        setMenuPaymentMethodAberto(false);
       }}
     >
       <View style={styles.selectorModalOverlay}>
@@ -681,7 +740,9 @@ if (usuarioLogado === false) {
           <Text style={styles.selectorModalTitle}>
             {menuCategoriaAberto
               ? "Selecione a categoria"
-              : "Selecione a subcategoria"}
+              : menuPaymentMethodAberto
+                ? "Selecione a forma de pagamento"
+                : "Selecione a subcategoria"}
           </Text>
 
           <FlatList
@@ -689,15 +750,27 @@ if (usuarioLogado === false) {
             data={
               menuCategoriaAberto
                 ? MASTER_CATEGORIES
-                : subcategoriasDisponiveis
+                : menuPaymentMethodAberto
+                  ? PAYMENT_METHOD_OPTIONS
+                  : subcategoriasDisponiveis
             }
-            keyExtractor={(item) => item}
+            keyExtractor={(item) =>
+              typeof item === "string" ? item : String(item.value)
+            }
             showsVerticalScrollIndicator
             keyboardShouldPersistTaps="handled"
             renderItem={({ item }) => {
+              const itemEhFormaPagamento = typeof item !== "string";
+
               const itemSelecionado = menuCategoriaAberto
                 ? categoria === item
-                : subcategoria === item;
+                : menuPaymentMethodAberto && itemEhFormaPagamento
+                  ? paymentMethod === item.value
+                  : subcategoria === item;
+
+              const itemLabel = itemEhFormaPagamento
+                ? item.label
+                : item;
 
               return (
                 <TouchableOpacity
@@ -706,9 +779,15 @@ if (usuarioLogado === false) {
                     itemSelecionado && styles.selectorModalItemActive,
                   ]}
                   onPress={() => {
-                    if (menuCategoriaAberto) {
+                    if (menuCategoriaAberto && typeof item === "string") {
                       selecionarCategoriaManual(item);
-                    } else {
+                    } else if (
+                      menuPaymentMethodAberto &&
+                      typeof item !== "string"
+                    ) {
+                      setPaymentMethod(item.value);
+                      setMenuPaymentMethodAberto(false);
+                    } else if (typeof item === "string") {
                       selecionarSubcategoriaManual(item);
                     }
                   }}
@@ -721,7 +800,7 @@ if (usuarioLogado === false) {
                         styles.categoryMenuItemTextActive,
                     ]}
                   >
-                    {item}
+                    {itemLabel}
                   </Text>
                 </TouchableOpacity>
               );
@@ -733,6 +812,7 @@ if (usuarioLogado === false) {
             onPress={() => {
               setMenuCategoriaAberto(false);
               setMenuSubcategoriaAberto(false);
+              setMenuPaymentMethodAberto(false);
             }}
           >
             <Text style={styles.selectorModalCloseText}>Fechar</Text>
