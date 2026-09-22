@@ -27,7 +27,11 @@ import {
 import { getCurrentUser } from "../services/authService";
 
 import { MASTER_CATEGORIES } from "../constants/categories";
-import { getPaymentMethodLabel } from "../constants/paymentMethods";
+import {
+  PAYMENT_METHOD_OPTIONS,
+  getPaymentMethodLabel,
+  type PaymentMethod,
+} from "../constants/paymentMethods";
 import {
   Expense,
   deleteExpense,
@@ -94,9 +98,15 @@ const {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValor, setEditValor] = useState("");
   const [editCategoria, setEditCategoria] = useState("");
+  const [editPaymentMethod, setEditPaymentMethod] =
+    useState<PaymentMethod | null>(null);
   const [editData, setEditData] = useState("");
   const [showEditCategoryModal, setShowEditCategoryModal] =
     useState(false);
+  const [
+    showEditPaymentMethodModal,
+    setShowEditPaymentMethodModal,
+  ] = useState(false);
   const [selectedCategoryDetail, setSelectedCategoryDetail] = useState<string | null>(
   null
 );
@@ -353,6 +363,8 @@ function excluirRegistro(item: Expense) {
     setEditingId(item.id);
     setEditValor(String(item.valor).replace(".", ","));
     setEditCategoria(item.categoria);
+    setEditPaymentMethod(item.paymentMethod ?? null);
+    setShowEditPaymentMethodModal(false);
     setEditData(item.data);
   }
 
@@ -360,8 +372,10 @@ function excluirRegistro(item: Expense) {
     setEditingId(null);
     setEditValor("");
     setEditCategoria("");
+    setEditPaymentMethod(null);
     setEditData("");
     setShowEditCategoryModal(false);
+    setShowEditPaymentMethodModal(false);
   }
 
   async function selecionarDataEdicaoAndroid() {
@@ -400,6 +414,7 @@ function excluirRegistro(item: Expense) {
     editCategoria === item.categoria ? item.subcategoria ?? "" : "",
   termoEncontrado:
     editCategoria === item.categoria ? item.termoEncontrado ?? "" : "",
+  paymentMethod: editPaymentMethod,
   data: editData,
 });
 
@@ -1471,9 +1486,10 @@ const selectedCategoryCountText =
                               ) : (
                                 <TouchableOpacity
                                   style={styles.editInput}
-                                  onPress={() =>
-                                    setShowEditCategoryModal(true)
-                                  }
+                                  onPress={() => {
+                                    setShowEditPaymentMethodModal(false);
+                                    setShowEditCategoryModal(true);
+                                  }}
                                   activeOpacity={0.8}
                                 >
                                   <Text>
@@ -1481,6 +1497,58 @@ const selectedCategoryCountText =
                                       "Selecione a categoria"}
                                   </Text>
                                 </TouchableOpacity>
+                              )}
+
+                              {Platform.OS === "web" ? (
+                                <>
+                                  <Text style={styles.editLabel}>
+                                    Forma de pagamento
+                                  </Text>
+
+                                  <select
+                                    value={editPaymentMethod ?? ""}
+                                    onChange={(e: any) => {
+                                      const value = e.target.value;
+
+                                      setEditPaymentMethod(
+                                        value === ""
+                                          ? null
+                                          : (value as PaymentMethod)
+                                      );
+                                    }}
+                                    style={styles.editInput as any}
+                                  >
+                                    {PAYMENT_METHOD_OPTIONS.map((option) => (
+                                      <option
+                                        key={option.value ?? "not-informed"}
+                                        value={option.value ?? ""}
+                                      >
+                                        {option.label}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </>
+                              ) : (
+                                <>
+                                  <Text style={styles.editLabel}>
+                                    Forma de pagamento
+                                  </Text>
+
+                                  <TouchableOpacity
+                                    style={styles.editInput}
+                                    onPress={() => {
+                                      setShowEditCategoryModal(false);
+                                      setShowEditPaymentMethodModal(true);
+                                    }}
+                                    activeOpacity={0.8}
+                                  >
+                                    <Text>
+                                      {getPaymentMethodLabel(
+                                        editPaymentMethod
+                                      )}
+                                    </Text>
+                                  </TouchableOpacity>
+                                </>
                               )}
 
                               <Text style={styles.editLabel}>Data</Text>
@@ -1674,6 +1742,74 @@ const selectedCategoryCountText =
         </View>
       </View>
     </Modal>
+
+    <Modal
+      visible={showEditPaymentMethodModal}
+      transparent
+      animationType="fade"
+      onRequestClose={() =>
+        setShowEditPaymentMethodModal(false)
+      }
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.categoryDetailModal}>
+          <Text style={styles.modalTitle}>
+            Selecione a forma de pagamento
+          </Text>
+
+          <FlatList
+            data={PAYMENT_METHOD_OPTIONS}
+            keyExtractor={(option) =>
+              String(option.value ?? "not-informed")
+            }
+            showsVerticalScrollIndicator
+            renderItem={({ item: option }) => {
+              const selecionada =
+                editPaymentMethod === option.value;
+
+              return (
+                <TouchableOpacity
+                  style={[
+                    styles.editInput,
+                    selecionada && {
+                      backgroundColor: "#F0FAF5",
+                      borderColor: "#0A8F55",
+                    },
+                  ]}
+                  onPress={() => {
+                    setEditPaymentMethod(option.value);
+                    setShowEditPaymentMethodModal(false);
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Text
+                    style={{
+                      color: selecionada ? "#0A8F55" : "#333",
+                      fontWeight: selecionada ? "700" : "400",
+                    }}
+                  >
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            }}
+          />
+
+          <TouchableOpacity
+            style={styles.modalCloseButton}
+            onPress={() =>
+              setShowEditPaymentMethodModal(false)
+            }
+            activeOpacity={0.8}
+          >
+            <Text style={styles.modalCloseText}>
+              Fechar
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+
     <Modal
   visible={showReportModal}
   transparent
