@@ -636,6 +636,7 @@ function fecharDetalheCategoria() {
 }
 
 useEffect(() => {
+  if (Platform.OS !== "web") return;
   if (!selectedCategoryDetail) return;
   if (typeof window === "undefined") return;
 
