@@ -205,6 +205,7 @@ useFocusEffect(
     setCategoria(categoriaDetectada);
     setSubcategoria(categoriaDetectada ? parsed.subcategoria ?? "" : "");
     setTermoEncontrado(categoriaDetectada ? parsed.termoEncontrado ?? "" : "");
+    setPaymentMethod(parsed.paymentMethod ?? null);
     setMenuCategoriaAberto(false);
     setMenuSubcategoriaAberto(false);
     setData(parsed.data);

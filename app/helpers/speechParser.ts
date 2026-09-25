@@ -1,5 +1,6 @@
 import { MASTER_CATEGORIES } from "../constants/categories";
 import { findCategoryByText } from "../constants/categoryDictionary";
+import type { PaymentMethod } from "../constants/paymentMethods";
 import { matchCategory } from "./categoryMatcher";
 
 const numberWords: Record<string, number> = {
@@ -79,6 +80,137 @@ function normalize(text: string): string {
     .replace(/[^\w\s/,.]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+type PaymentMethodDetection = {
+  paymentMethod: PaymentMethod | null;
+  cleanedText: string;
+};
+
+function cleanPaymentPhrase(
+  originalText: string,
+  normalizedPhrase: string
+) {
+  const variants: Record<string, string> = {
+    credito: "cr[eé]dito",
+    debito: "d[eé]bito",
+    cartao: "cart[aã]o",
+    transferencia: "transfer[eê]ncia",
+    bancaria: "banc[aá]ria",
+    especie: "esp[eé]cie",
+  };
+
+  const pattern = normalizedPhrase
+    .split(/\s+/)
+    .map((word) => variants[word] ?? word)
+    .join("\\s+");
+
+  return originalText
+    .replace(new RegExp(`\\b${pattern}\\b`, "i"), " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isCreditExpenseContext(normalizedText: string) {
+  return [
+    /\bfatura\s+(?:do|de|da)\s+cartao(?:\s+de\s+credito)?\b/,
+    /\bpaguei\s+(?:o|a)\s+cartao(?:\s+de\s+credito)?\b/,
+    /\bpagamento\s+(?:do|de|da)\s+cartao(?:\s+de\s+credito)?\b/,
+  ].some((pattern) => pattern.test(normalizedText));
+}
+
+function isBoletoExpenseContext(normalizedText: string) {
+  return [
+    /\bboleto\s+(?:do|de|da)\s+carro\b/,
+    /\bboleto\s+(?:do|de|da)\s+moto\b/,
+    /\bboleto\s+(?:do|de|da)\s+casa\b/,
+    /\bboleto\s+(?:do|de|da)\s+apartamento\b/,
+    /\bboleto\s+(?:do|de|da)\s+ipva\b/,
+    /\bboleto\s+(?:do|de|da)\s+financiamento\b/,
+  ].some((pattern) => pattern.test(normalizedText));
+}
+
+function parsePaymentMethod(
+  text: string
+): PaymentMethodDetection {
+  const normalizedText = normalize(text);
+
+  const rules: {
+    method: PaymentMethod;
+    patterns: RegExp[];
+    blocked?: (normalized: string) => boolean;
+  }[] = [
+    {
+      method: "debit",
+      patterns: [
+        /\b(?:no|pelo|via|com)\s+cartao\s+de\s+debito\b/,
+        /\b(?:no|pelo|via|com)\s+debito\b/,
+        /\busei\s+(?:o\s+)?cartao\s+de\s+debito\b/,
+        /\bpassei(?:\s+a\s+compra)?\s+no\s+debito\b/,
+      ],
+    },
+    {
+      method: "credit",
+      blocked: isCreditExpenseContext,
+      patterns: [
+        /\b(?:no|pelo|via|com)\s+cartao\s+de\s+credito\b/,
+        /\b(?:no|pelo|via|com)\s+credito\b/,
+        /\bparcelad[oa]\s+no\s+credito\b/,
+      ],
+    },
+    {
+      method: "pix",
+      patterns: [
+        /\b(?:no|pelo|por|via|com)\s+(?:o\s+)?pix\b/,
+        /\bfiz\s+(?:um\s+)?pix\b/,
+        /\bfoi\s+no\s+pix\b/,
+        /\busei\s+(?:o\s+)?pix\b/,
+        /\btransferi\s+(?:pelo|por|via)\s+pix\b/,
+      ],
+    },
+    {
+      method: "cash",
+      patterns: [
+        /\bem\s+dinheiro\b/,
+        /\bno\s+dinheiro\b/,
+        /\bem\s+especie\b/,
+        /\bdinheiro\s+vivo\b/,
+      ],
+    },
+    {
+      method: "boleto",
+      blocked: isBoletoExpenseContext,
+      patterns: [
+        /\b(?:no|por|via)\s+boleto\b/,
+      ],
+    },
+    {
+      method: "transfer",
+      patterns: [
+        /\b(?:por|via)\s+transferencia(?:\s+bancaria)?\b/,
+      ],
+    },
+  ];
+
+  for (const rule of rules) {
+    for (const pattern of rule.patterns) {
+      const match = normalizedText.match(pattern);
+
+      if (!match || rule.blocked?.(normalizedText)) {
+        continue;
+      }
+
+      return {
+        paymentMethod: rule.method,
+        cleanedText: cleanPaymentPhrase(text, match[0]),
+      };
+    }
+  }
+
+  return {
+    paymentMethod: null,
+    cleanedText: text,
+  };
 }
 
 function parseNumberWordsText(text: string): number {
@@ -1289,17 +1421,20 @@ function matchMasterCategory(text: string): string {
 }
 
 export function parseSpeech(textoFalado: string) {
-  const text = normalize(textoFalado);
+  const paymentDetection = parsePaymentMethod(textoFalado);
+  const textForCategory = paymentDetection.cleanedText;
+  const normalizedCategoryText = normalize(textForCategory);
 
-  const dictionaryMatch = findCategoryByText(textoFalado);
+  const dictionaryMatch = findCategoryByText(textForCategory);
 
   return {
     valor: parseValue(textoFalado),
     categoria: dictionaryMatch
       ? dictionaryMatch.categoria
-      : matchMasterCategory(text),
+      : matchMasterCategory(normalizedCategoryText),
     subcategoria: dictionaryMatch ? dictionaryMatch.subcategoria : "",
     termoEncontrado: dictionaryMatch ? dictionaryMatch.termoEncontrado : "",
+    paymentMethod: paymentDetection.paymentMethod,
     data: parseDateFromSpeech(textoFalado),
     raw: textoFalado,
   };
