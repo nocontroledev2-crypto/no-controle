@@ -161,11 +161,11 @@ function parsePaymentMethod(
     {
       method: "pix",
       patterns: [
-        /\b(?:no|pelo|por|via|com)\s+(?:o\s+)?pix\b/,
-        /\bfiz\s+(?:um\s+)?pix\b/,
-        /\bfoi\s+no\s+pix\b/,
-        /\busei\s+(?:o\s+)?pix\b/,
-        /\btransferi\s+(?:pelo|por|via)\s+pix\b/,
+        /\b(?:no|pelo|por|via|com)\s+(?:o\s+)?(?:pix|pics)\b/,
+        /\bfiz\s+(?:um\s+)?(?:pix|pics)\b/,
+        /\bfoi\s+no\s+(?:pix|pics)\b/,
+        /\busei\s+(?:o\s+)?(?:pix|pics)\b/,
+        /\btransferi\s+(?:pelo|por|via)\s+(?:pix|pics)\b/,
       ],
     },
     {
