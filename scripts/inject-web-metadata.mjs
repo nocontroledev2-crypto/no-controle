@@ -1,0 +1,11 @@
+import{readFile,writeFile}from"node:fs/promises";
+const p="dist/index.html",a="<!-- ENXERGAI_META_START -->",b="<!-- ENXERGAI_META_END -->";
+const j={"@context":"https://schema.org","@type":"SoftwareApplication",name:"Enxergaí",url:"https://www.enxergai.com.br/",applicationCategory:"FinanceApplication",operatingSystem:"Web",inLanguage:"pt-BR",description:"Organização financeira pessoal com registro por voz, digitação inteligente e preenchimento manual.",offers:{"@type":"Offer",price:"0",priceCurrency:"BRL"}};
+const m=`${a}<meta name="description" content="Registre despesas falando, digitando ou preenchendo manualmente. O Enxergaí organiza seus gastos em linguagem simples."><meta name="theme-color" content="#0A8F55"><meta name="google" content="notranslate"><meta http-equiv="Content-Language" content="pt-BR"><meta property="og:locale" content="pt_BR"><meta property="og:type" content="website"><meta property="og:site_name" content="Enxergaí"><meta property="og:title" content="Enxergaí | Controle financeiro simples"><meta property="og:description" content="Você fala e o Enxergaí organiza para você."><meta property="og:url" content="https://www.enxergai.com.br/"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Enxergaí | Controle financeiro simples"><meta name="twitter:description" content="Você fala e o Enxergaí organiza para você."><script type="application/ld+json">${JSON.stringify(j)}</script>${b}`;
+let h=await readFile(p,"utf8");
+h=h.replace(/<html[^>]*>/,'<html lang="pt-BR" translate="no" class="notranslate">').replace(/<title>[\s\S]*?<\/title>/,"<title>Enxergaí | Controle financeiro simples</title>");
+const x=h.indexOf(a),y=h.indexOf(b);
+if(x>=0&&y>x)h=h.slice(0,x)+m+h.slice(y+b.length);else h=h.replace("</head>",m+"</head>");
+await writeFile(p,h,"utf8");
+for(const z of['lang="pt-BR"','name="description"','property="og:title"','name="twitter:card"','type="application/ld+json"'])if(!h.includes(z))throw Error("FALHA_"+z);
+console.log("METADADOS_WEB_INJETADOS");
