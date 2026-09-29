@@ -10,6 +10,7 @@ import React, {
 } from "react";
 import {
   Linking,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -409,6 +410,11 @@ async function recuperarSenha() {
   setEmail("");
   setSenha("");
   zerarResumoDados();
+
+  if (Platform.OS === "web") {
+    router.replace("/");
+    return;
+  }
 
   setMensagem("Você saiu da sua conta.");
   limparMensagemDepois();
