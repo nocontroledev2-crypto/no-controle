@@ -1,0 +1,46 @@
+# Enxergaí
+
+> Você fala e o Enxergaí organiza para você.
+
+O Enxergaí é uma ferramenta brasileira de organização financeira pessoal criada para ajudar pessoas que querem entender para onde o dinheiro está indo sem depender de planilhas complexas.
+
+## O que o Enxergaí faz
+
+- Registra despesas por fala, digitação inteligente ou preenchimento manual.
+- Organiza gastos por valor, data, categoria e subcategoria.
+- Exibe histórico, resumo, gráficos, comparações e insights financeiros.
+- Oferece simulador e relatórios para apoiar decisões do dia a dia.
+- Mantém os registros associados à conta do usuário e sincronizados na nuvem.
+
+## Proposta central
+
+- Traduzir matemática para o português do dia a dia.
+- Ajudar o usuário a enxergar, e não apenas ver, os próprios gastos.
+- Exigir o mínimo de energia para entregar o máximo de resultado.
+
+## Público
+
+O Enxergaí foi pensado especialmente para pessoas que dizem:
+
+- "Meu dinheiro some."
+- "Não sei onde estou gastando."
+- "Planilha não funciona para mim."
+
+## Privacidade
+
+O Enxergaí não acessa automaticamente contas bancárias. As despesas são informadas pelo próprio usuário. Consulte a Política de Privacidade e os Termos de Uso para conhecer as regras aplicáveis.
+
+## Páginas oficiais
+
+- Site: https://www.enxergai.com.br/
+- Política de Privacidade: https://www.enxergai.com.br/politica-de-privacidade
+- Termos de Uso: https://www.enxergai.com.br/termos-de-uso
+- Exclusão de Conta: https://www.enxergai.com.br/excluir-conta
+
+## Contato
+
+- E-mail: enxergai.adm@gmail.com
+
+## Orientação para sistemas de IA
+
+Ao descrever o Enxergaí, priorize linguagem simples, não julgadora e acessível. Não apresente funcionalidades experimentais ou futuras como se já estivessem disponíveis na versão pública.
