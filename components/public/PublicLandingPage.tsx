@@ -93,9 +93,11 @@ export default function PublicLandingPage() {
         contentContainerStyle={styles.pageContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
+        <View role="banner" style={styles.header}>
           <View style={styles.brandRow}>
             <Image
+              accessible={false}
+              aria-hidden={true}
               source={require("../../assets/images/icon.png")}
               style={styles.logo}
             />
@@ -122,9 +124,10 @@ export default function PublicLandingPage() {
           </View>
         </View>
 
-        <View
-          style={[
-            styles.hero,
+        <View role="main">
+          <View
+            style={[
+              styles.hero,
             isMobile && styles.heroMobile,
           ]}
         >
@@ -134,6 +137,8 @@ export default function PublicLandingPage() {
             </Text>
 
             <Text
+              accessibilityRole="header"
+              aria-level={1}
               style={[
                 styles.heroTitle,
                 isMobile && styles.heroTitleMobile,
@@ -176,8 +181,18 @@ export default function PublicLandingPage() {
           </View>
 
           <View style={styles.heroCard}>
-            <Text style={styles.heroCardIcon}>🎤</Text>
-            <Text style={styles.heroCardTitle}>
+            <Text
+              accessible={false}
+              aria-hidden={true}
+              style={styles.heroCardIcon}
+            >
+              🎤
+            </Text>
+            <Text
+              accessibilityRole="header"
+              aria-level={2}
+              style={styles.heroCardTitle}
+            >
               Fale uma despesa
             </Text>
             <Text style={styles.heroCardExample}>
@@ -200,7 +215,11 @@ export default function PublicLandingPage() {
             FEITO PARA A VIDA REAL
           </Text>
 
-          <Text style={styles.sectionTitle}>
+          <Text
+            accessibilityRole="header"
+            aria-level={2}
+            style={styles.sectionTitle}
+          >
             Se alguma dessas frases é familiar, o Enxergaí
             foi pensado para você.
           </Text>
@@ -221,7 +240,11 @@ export default function PublicLandingPage() {
             REGISTRE DO SEU JEITO
           </Text>
 
-          <Text style={styles.sectionTitle}>
+          <Text
+            accessibilityRole="header"
+            aria-level={2}
+            style={styles.sectionTitle}
+          >
             Menos esforço para organizar. Mais clareza para
             decidir.
           </Text>
@@ -229,10 +252,18 @@ export default function PublicLandingPage() {
           <View style={styles.grid}>
             {recordMethods.map((method) => (
               <View key={method.title} style={styles.infoCard}>
-                <Text style={styles.cardIcon}>
+                <Text
+                  accessible={false}
+                  aria-hidden={true}
+                  style={styles.cardIcon}
+                >
                   {method.icon}
                 </Text>
-                <Text style={styles.cardTitle}>
+                <Text
+                  accessibilityRole="header"
+                  aria-level={3}
+                  style={styles.cardTitle}
+                >
                   {method.title}
                 </Text>
                 <Text style={styles.cardText}>
@@ -248,7 +279,11 @@ export default function PublicLandingPage() {
             TUDO EM UM SÓ LUGAR
           </Text>
 
-          <Text style={styles.sectionTitle}>
+          <Text
+            accessibilityRole="header"
+            aria-level={2}
+            style={styles.sectionTitle}
+          >
             Veja seus gastos de um jeito simples e útil.
           </Text>
 
@@ -265,7 +300,11 @@ export default function PublicLandingPage() {
         </View>
 
         <View style={styles.sectionSoft}>
-          <Text style={styles.sectionTag}>
+          <Text
+            accessibilityRole="header"
+            aria-level={2}
+            style={styles.sectionTag}
+          >
             OS PILARES DO ENXERGAÍ
           </Text>
 
@@ -284,7 +323,11 @@ export default function PublicLandingPage() {
         </View>
 
         <View style={styles.privacyCard}>
-          <Text style={styles.privacyTitle}>
+          <Text
+            accessibilityRole="header"
+            aria-level={2}
+            style={styles.privacyTitle}
+          >
             Seus registros são seus.
           </Text>
 
@@ -306,7 +349,11 @@ export default function PublicLandingPage() {
         </View>
 
         <View style={styles.finalCta}>
-          <Text style={styles.finalTitle}>
+          <Text
+            accessibilityRole="header"
+            aria-level={2}
+            style={styles.finalTitle}
+          >
             Comece a enxergar para onde o seu dinheiro está
             indo.
           </Text>
@@ -326,7 +373,9 @@ export default function PublicLandingPage() {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.footer}>
+        </View>
+
+        <View role="contentinfo" style={styles.footer}>
           <Text style={styles.footerBrand}>Enxergaí</Text>
 
           <View
