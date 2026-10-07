@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /home
+Disallow: /registrar
+Disallow: /resumo
+Disallow: /historico
+Disallow: /simulador
+Disallow: /conta
+Disallow: /evolucao-total
+Disallow: /redefinir-senha
+
+Sitemap: https://www.enxergai.com.br/sitemap.xml
