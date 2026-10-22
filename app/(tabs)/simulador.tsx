@@ -16,6 +16,8 @@ import {
   getProfile,
   upsertProfile,
 } from "../services/authService";
+import { MonthlyPlanPreview } from "../components/monthly-plan/MonthlyPlanPreview";
+import { MONTHLY_PLAN_PREVIEW_DATA } from "../components/monthly-plan/mockData";
 import { Expense, getAllExpenses } from "../storage/expenseStorage";
 
 const SIMULATOR_CONFIG_KEY = "@no-controle:simulator-config";
@@ -405,6 +407,11 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
             </Text>
           </TouchableOpacity>
         </View>
+
+        <MonthlyPlanPreview
+          data={MONTHLY_PLAN_PREVIEW_DATA}
+          formatMoney={formatMoney}
+        />
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>🧮 Planeje seu mês</Text>
