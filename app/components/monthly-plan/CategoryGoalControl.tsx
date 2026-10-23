@@ -195,6 +195,7 @@ const styles = StyleSheet.create({
     padding: 14,
     backgroundColor: MONTHLY_PLAN_COLORS.surface,
     gap: 9,
+    userSelect: "none",
   },
   valueRow: {
     flexDirection: "row",
@@ -224,6 +225,8 @@ const styles = StyleSheet.create({
   interactionArea: {
     minHeight: 44,
     justifyContent: "center",
+    cursor: "pointer",
+    userSelect: "none",
   },
   track: {
     height: 11,
