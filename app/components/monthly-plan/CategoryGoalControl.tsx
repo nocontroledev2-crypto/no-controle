@@ -120,7 +120,10 @@ export function CategoryGoalControl({
         style={styles.interactionArea}
         onLayout={handleLayout}
         onStartShouldSetResponder={() => true}
+        onStartShouldSetResponderCapture={() => true}
         onMoveShouldSetResponder={() => true}
+        onMoveShouldSetResponderCapture={() => true}
+        onResponderTerminationRequest={() => false}
         onResponderGrant={updateFromEvent}
         onResponderMove={updateFromEvent}
         accessibilityRole="adjustable"
@@ -147,7 +150,10 @@ export function CategoryGoalControl({
           )
         }
       >
-        <View style={styles.track}>
+        <View
+          style={styles.track}
+          pointerEvents="none"
+        >
           <View
             style={[
               styles.fill,

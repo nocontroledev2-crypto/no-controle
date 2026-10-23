@@ -62,6 +62,19 @@ export function CategoryPlanningModal({
       () => data.categories.map((item) => ({ ...item }))
     );
 
+  const [draftMaximums, setDraftMaximums] =
+    useState<Record<string, number>>(() =>
+      Object.fromEntries(
+        data.categories.map((item) => [
+          item.category,
+          getAdaptiveGoalScaleMax(
+            item.plannedAmount,
+            data.spendingLimit
+          ),
+        ])
+      )
+    );
+
   useEffect(() => {
     if (!visible) {
       return;
@@ -70,7 +83,23 @@ export function CategoryPlanningModal({
     setDraftCategories(
       data.categories.map((item) => ({ ...item }))
     );
-  }, [data.categories, visible]);
+
+    setDraftMaximums(
+      Object.fromEntries(
+        data.categories.map((item) => [
+          item.category,
+          getAdaptiveGoalScaleMax(
+            item.plannedAmount,
+            data.spendingLimit
+          ),
+        ])
+      )
+    );
+  }, [
+    data.categories,
+    data.spendingLimit,
+    visible,
+  ]);
 
   const draftData = useMemo(
     () => ({
@@ -233,6 +262,7 @@ export function CategoryPlanningModal({
                 item.plannedAmount ?? 0;
 
               const maximum =
+                draftMaximums[item.category] ??
                 getAdaptiveGoalScaleMax(
                   item.plannedAmount,
                   data.spendingLimit
