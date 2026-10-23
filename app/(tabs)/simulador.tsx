@@ -16,6 +16,7 @@ import {
   getProfile,
   upsertProfile,
 } from "../services/authService";
+import { CategoryPlanningModal } from "../components/monthly-plan/CategoryPlanningModal";
 import { MonthlyPlanPreview } from "../components/monthly-plan/MonthlyPlanPreview";
 import { MONTHLY_PLAN_PREVIEW_DATA } from "../components/monthly-plan/mockData";
 import { Expense, getAllExpenses } from "../storage/expenseStorage";
@@ -113,6 +114,8 @@ export default function Simulador() {
   const [rendaMensal, setRendaMensal] = useState("");
   const [metaEconomia, setMetaEconomia] = useState("");
   const [mensagem, setMensagem] = useState("");
+  const [showCategoryPlanningModal, setShowCategoryPlanningModal] =
+    useState(false);
 
   const now = new Date();
 
@@ -411,6 +414,21 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
         <MonthlyPlanPreview
           data={MONTHLY_PLAN_PREVIEW_DATA}
           formatMoney={formatMoney}
+          onPlanCategories={() =>
+            setShowCategoryPlanningModal(true)
+          }
+        />
+
+        <CategoryPlanningModal
+          visible={showCategoryPlanningModal}
+          data={MONTHLY_PLAN_PREVIEW_DATA}
+          formatMoney={formatMoney}
+          onClose={() =>
+            setShowCategoryPlanningModal(false)
+          }
+          onSave={() =>
+            setShowCategoryPlanningModal(false)
+          }
         />
 
         <View style={styles.card}>
