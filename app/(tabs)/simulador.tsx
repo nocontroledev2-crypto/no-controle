@@ -19,6 +19,10 @@ import {
 import { CategoryPlanningModal } from "../components/monthly-plan/CategoryPlanningModal";
 import { MonthlyPlanPreview } from "../components/monthly-plan/MonthlyPlanPreview";
 import { MONTHLY_PLAN_PREVIEW_DATA } from "../components/monthly-plan/mockData";
+import type {
+  MonthlyPlanCategory,
+  MonthlyPlanPreviewData,
+} from "../components/monthly-plan/types";
 import { Expense, getAllExpenses } from "../storage/expenseStorage";
 
 const SIMULATOR_CONFIG_KEY = "@no-controle:simulator-config";
@@ -116,6 +120,14 @@ export default function Simulador() {
   const [mensagem, setMensagem] = useState("");
   const [showCategoryPlanningModal, setShowCategoryPlanningModal] =
     useState(false);
+
+  const [monthlyPlanData, setMonthlyPlanData] =
+    useState<MonthlyPlanPreviewData>(() => ({
+      ...MONTHLY_PLAN_PREVIEW_DATA,
+      categories: MONTHLY_PLAN_PREVIEW_DATA.categories.map(
+        (item) => ({ ...item })
+      ),
+    }));
 
   const now = new Date();
 
@@ -412,7 +424,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
         </View>
 
         <MonthlyPlanPreview
-          data={MONTHLY_PLAN_PREVIEW_DATA}
+          data={monthlyPlanData}
           formatMoney={formatMoney}
           onPlanCategories={() =>
             setShowCategoryPlanningModal(true)
@@ -421,14 +433,23 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
 
         <CategoryPlanningModal
           visible={showCategoryPlanningModal}
-          data={MONTHLY_PLAN_PREVIEW_DATA}
+          data={monthlyPlanData}
           formatMoney={formatMoney}
           onClose={() =>
             setShowCategoryPlanningModal(false)
           }
-          onSave={() =>
-            setShowCategoryPlanningModal(false)
-          }
+          onSave={(
+            categories: MonthlyPlanCategory[]
+          ) => {
+            setMonthlyPlanData((current) => ({
+              ...current,
+              categories: categories.map(
+                (item) => ({ ...item })
+              ),
+            }));
+
+            setShowCategoryPlanningModal(false);
+          }}
         />
 
         <View style={styles.card}>
