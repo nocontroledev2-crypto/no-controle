@@ -1,5 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useMemo } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   Modal,
   ScrollView,
@@ -13,8 +17,12 @@ import {
   calculateMonthlyPlanSummary,
   sortCategoriesByImpact,
 } from "./calculations";
-import { getCategoryIconName } from "./categoryVisuals";
-import type { MonthlyPlanPreviewData } from "./types";
+import { CategoryGoalControl } from "./CategoryGoalControl";
+import { getAdaptiveGoalScaleMax } from "./goalScale";
+import type {
+  MonthlyPlanCategory,
+  MonthlyPlanPreviewData,
+} from "./types";
 import { MONTHLY_PLAN_COLORS } from "./visualTokens";
 
 type CategoryPlanningModalProps = {
@@ -22,7 +30,9 @@ type CategoryPlanningModalProps = {
   data: MonthlyPlanPreviewData;
   formatMoney: (value: number) => string;
   onClose: () => void;
-  onSave?: () => void;
+  onSave?: (
+    categories: MonthlyPlanCategory[]
+  ) => void;
 };
 
 const MONTH_NAMES = [
@@ -47,15 +57,60 @@ export function CategoryPlanningModal({
   onClose,
   onSave,
 }: CategoryPlanningModalProps) {
+  const [draftCategories, setDraftCategories] =
+    useState<MonthlyPlanCategory[]>(
+      () => data.categories.map((item) => ({ ...item }))
+    );
+
+  useEffect(() => {
+    if (!visible) {
+      return;
+    }
+
+    setDraftCategories(
+      data.categories.map((item) => ({ ...item }))
+    );
+  }, [data.categories, visible]);
+
+  const draftData = useMemo(
+    () => ({
+      ...data,
+      categories: draftCategories,
+    }),
+    [data, draftCategories]
+  );
+
   const summary = useMemo(
-    () => calculateMonthlyPlanSummary(data),
-    [data]
+    () => calculateMonthlyPlanSummary(draftData),
+    [draftData]
   );
 
   const categories = useMemo(
-    () => sortCategoriesByImpact(data.categories),
-    [data.categories]
+    () => sortCategoriesByImpact(draftCategories),
+    [draftCategories]
   );
+
+  function updateCategoryGoal(
+    category: string,
+    value: number
+  ) {
+    setDraftCategories((current) =>
+      current.map((item) =>
+        item.category === category
+          ? {
+              ...item,
+              plannedAmount: value,
+            }
+          : item
+      )
+    );
+  }
+
+  function saveDraft() {
+    onSave?.(
+      draftCategories.map((item) => ({ ...item }))
+    );
+  }
 
   const monthName =
     MONTH_NAMES[data.month - 1] ?? "Mês selecionado";
@@ -174,61 +229,29 @@ export function CategoryPlanningModal({
             showsVerticalScrollIndicator={false}
           >
             {categories.map((item) => {
-              const hasGoal =
-                item.plannedAmount !== null &&
-                item.plannedAmount > 0;
+              const currentValue =
+                item.plannedAmount ?? 0;
+
+              const maximum =
+                getAdaptiveGoalScaleMax(
+                  item.plannedAmount,
+                  data.spendingLimit
+                );
 
               return (
-                <View
+                <CategoryGoalControl
                   key={item.category}
-                  style={styles.categoryRow}
-                >
-                  <View style={styles.categoryIdentity}>
-                    <View style={styles.iconContainer}>
-                      <Ionicons
-                        name={getCategoryIconName(
-                          item.category
-                        )}
-                        size={20}
-                        color={MONTHLY_PLAN_COLORS.brand}
-                      />
-                    </View>
-
-                    <View style={styles.categoryText}>
-                      <Text style={styles.categoryName}>
-                        {item.category}
-                      </Text>
-
-                      <Text style={styles.categoryHint}>
-                        {hasGoal
-                          ? "Meta definida"
-                          : "Meta ainda não definida"}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.categoryValueBox}>
-                    <Text
-                      style={[
-                        styles.categoryValue,
-                        !hasGoal &&
-                          styles.categoryValueEmpty,
-                      ]}
-                    >
-                      {hasGoal
-                        ? formatMoney(
-                            item.plannedAmount ?? 0
-                          )
-                        : "Definir"}
-                    </Text>
-
-                    <Ionicons
-                      name="options-outline"
-                      size={17}
-                      color={MONTHLY_PLAN_COLORS.brand}
-                    />
-                  </View>
-                </View>
+                  category={item.category}
+                  value={currentValue}
+                  maximum={maximum}
+                  formatMoney={formatMoney}
+                  onChange={(value) =>
+                    updateCategoryGoal(
+                      item.category,
+                      value
+                    )
+                  }
+                />
               );
             })}
           </ScrollView>
@@ -252,7 +275,7 @@ export function CategoryPlanningModal({
 
               <TouchableOpacity
                 style={styles.saveButton}
-                onPress={onSave}
+                onPress={saveDraft}
                 activeOpacity={0.78}
                 accessibilityRole="button"
               >
