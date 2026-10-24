@@ -1,6 +1,7 @@
 import React, {
   useCallback,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {
@@ -25,6 +26,7 @@ type CategoryGoalControlProps = {
   maximum: number;
   formatMoney: (value: number) => string;
   onChange: (value: number) => void;
+  onRequestExpand?: () => void;
 };
 
 const THUMB_SIZE = 26;
@@ -35,8 +37,10 @@ export function CategoryGoalControl({
   maximum,
   formatMoney,
   onChange,
+  onRequestExpand,
 }: CategoryGoalControlProps) {
   const [trackWidth, setTrackWidth] = useState(0);
+  const gestureValueRef = useRef(value);
 
   const progress = useMemo(
     () => getGoalProgress(value, maximum),
@@ -70,9 +74,21 @@ export function CategoryGoalControl({
           maximum
         );
 
+      gestureValueRef.current = nextValue;
       onChange(nextValue);
     },
     [maximum, onChange, trackWidth]
+  );
+
+  const handleResponderRelease = useCallback(
+    () => {
+      if (
+        gestureValueRef.current >= maximum
+      ) {
+        onRequestExpand?.();
+      }
+    },
+    [maximum, onRequestExpand]
   );
 
   const handleAccessibilityAction = useCallback(
@@ -126,6 +142,7 @@ export function CategoryGoalControl({
         onResponderTerminationRequest={() => false}
         onResponderGrant={updateFromEvent}
         onResponderMove={updateFromEvent}
+        onResponderRelease={handleResponderRelease}
         accessibilityRole="adjustable"
         accessibilityLabel={`Meta de ${category}`}
         accessibilityValue={{

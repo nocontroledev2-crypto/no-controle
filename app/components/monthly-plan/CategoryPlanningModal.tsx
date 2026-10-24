@@ -18,7 +18,10 @@ import {
   sortCategoriesByImpact,
 } from "./calculations";
 import { CategoryGoalControl } from "./CategoryGoalControl";
-import { getAdaptiveGoalScaleMax } from "./goalScale";
+import {
+  getAdaptiveGoalScaleMax,
+  getExpandedGoalScaleMax,
+} from "./goalScale";
 import type {
   MonthlyPlanCategory,
   MonthlyPlanPreviewData,
@@ -133,6 +136,35 @@ export function CategoryPlanningModal({
           : item
       )
     );
+  }
+
+  function expandCategoryScale(
+    category: string
+  ) {
+    setDraftMaximums((current) => {
+      const currentMaximum =
+        current[category];
+
+      if (!currentMaximum) {
+        return current;
+      }
+
+      const expandedMaximum =
+        getExpandedGoalScaleMax(
+          currentMaximum
+        );
+
+      if (
+        expandedMaximum <= currentMaximum
+      ) {
+        return current;
+      }
+
+      return {
+        ...current,
+        [category]: expandedMaximum,
+      };
+    });
   }
 
   function saveDraft() {
@@ -279,6 +311,11 @@ export function CategoryPlanningModal({
                     updateCategoryGoal(
                       item.category,
                       value
+                    )
+                  }
+                  onRequestExpand={() =>
+                    expandCategoryScale(
+                      item.category
                     )
                   }
                 />
