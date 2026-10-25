@@ -217,6 +217,7 @@ export function MonthlyPlanPreview({
                 ? () => onCategoryPress(item.category)
                 : undefined
             }
+            onDefineGoal={onPlanCategories}
           />
         ))}
       </View>

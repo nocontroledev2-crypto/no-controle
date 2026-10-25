@@ -23,12 +23,14 @@ type MonthlyCategoryCardProps = {
   item: MonthlyPlanCategory;
   formatMoney: (value: number) => string;
   onPress?: () => void;
+  onDefineGoal?: () => void;
 };
 
 export function MonthlyCategoryCard({
   item,
   formatMoney,
   onPress,
+  onDefineGoal,
 }: MonthlyCategoryCardProps) {
   const hasGoal =
     item.plannedAmount !== null && item.plannedAmount > 0;
@@ -49,6 +51,10 @@ export function MonthlyCategoryCard({
     status !== null
       ? getConsumptionColor(status)
       : MONTHLY_PLAN_COLORS.textMuted;
+
+  const hasUnplannedActivity =
+    item.realizedAmount > 0 ||
+    item.scheduledAmount > 0;
 
   const content = (
     <>
@@ -112,18 +118,50 @@ export function MonthlyCategoryCard({
       ) : (
         <View style={styles.noGoalContainer}>
           <Text style={styles.valuePrimary}>
-            {formatMoney(item.realizedAmount)} gastos
+            {item.realizedAmount > 0
+              ? `${formatMoney(
+                  item.realizedAmount
+                )} gastos`
+              : "Nenhum gasto neste mês"}
           </Text>
 
-          <Text style={styles.noGoalTitle}>
-            Meta ainda não definida
-          </Text>
+          <View style={styles.noGoalStatus}>
+            <View style={styles.noGoalMessage}>
+              <Ionicons
+                name="alert-circle-outline"
+                size={18}
+                color={MONTHLY_PLAN_COLORS.yellow}
+              />
 
-          <Text style={styles.noGoalDescription}>
-            {item.scheduledAmount > 0
-              ? "Gastos e lançamentos não planejados"
-              : "Gasto não planejado"}
-          </Text>
+              <View style={styles.noGoalTextContainer}>
+                <Text style={styles.noGoalTitle}>
+                  {hasUnplannedActivity
+                    ? "Gasto não planejado"
+                    : "Meta ainda não definida"}
+                </Text>
+
+                <Text style={styles.noGoalDescription}>
+                  {hasUnplannedActivity
+                    ? "Defina uma meta para acompanhar o consumo."
+                    : "Defina uma meta para acompanhar esta categoria."}
+                </Text>
+              </View>
+            </View>
+
+            {onDefineGoal ? (
+              <TouchableOpacity
+                style={styles.defineGoalButton}
+                onPress={onDefineGoal}
+                activeOpacity={0.78}
+                accessibilityRole="button"
+                accessibilityLabel={`Definir meta para ${item.category}`}
+              >
+                <Text style={styles.defineGoalButtonText}>
+                  Definir meta
+                </Text>
+              </TouchableOpacity>
+            ) : null}
+          </View>
         </View>
       )}
     </>
@@ -208,16 +246,48 @@ const styles = StyleSheet.create({
     fontWeight: "900",
   },
   noGoalContainer: {
-    gap: 4,
+    gap: 8,
+  },
+  noGoalStatus: {
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: MONTHLY_PLAN_COLORS.yellow,
+    backgroundColor: MONTHLY_PLAN_COLORS.surfaceSoft,
+    padding: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  noGoalMessage: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  noGoalTextContainer: {
+    flex: 1,
   },
   noGoalTitle: {
     color: MONTHLY_PLAN_COLORS.text,
     fontSize: 13,
-    fontWeight: "700",
+    fontWeight: "800",
   },
   noGoalDescription: {
     color: MONTHLY_PLAN_COLORS.textMuted,
+    fontSize: 11,
+    lineHeight: 16,
+    marginTop: 1,
+  },
+  defineGoalButton: {
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: MONTHLY_PLAN_COLORS.brandSoft,
+  },
+  defineGoalButtonText: {
+    color: MONTHLY_PLAN_COLORS.brand,
     fontSize: 12,
-    lineHeight: 17,
+    fontWeight: "800",
   },
 });
