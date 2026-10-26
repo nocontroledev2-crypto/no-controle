@@ -143,16 +143,16 @@ export function MonthlyCategoryCard({
               />
 
               <View style={styles.noGoalTextContainer}>
-                <Text style={styles.noGoalTitle}>
-                  {hasUnplannedActivity
-                    ? "Gasto não planejado"
-                    : "Meta ainda não definida"}
-                </Text>
+                <Text style={styles.noGoalInlineText}>
+                  <Text style={styles.noGoalInlineTitle}>
+                    {hasUnplannedActivity
+                      ? "Gasto não planejado: "
+                      : "Meta ainda não definida: "}
+                  </Text>
 
-                <Text style={styles.noGoalDescription}>
                   {hasUnplannedActivity
-                    ? "Defina uma meta para acompanhar o consumo."
-                    : "Defina uma meta para acompanhar esta categoria."}
+                    ? "defina uma meta para acompanhar o consumo."
+                    : "defina uma meta para acompanhar esta categoria."}
                 </Text>
               </View>
             </View>
@@ -283,16 +283,14 @@ const styles = StyleSheet.create({
   noGoalTextContainer: {
     flex: 1,
   },
-  noGoalTitle: {
-    color: MONTHLY_PLAN_COLORS.text,
-    fontSize: 13,
-    fontWeight: "800",
-  },
-  noGoalDescription: {
+  noGoalInlineText: {
     color: MONTHLY_PLAN_COLORS.textMuted,
     fontSize: 11,
     lineHeight: 16,
-    marginTop: 1,
+  },
+  noGoalInlineTitle: {
+    color: MONTHLY_PLAN_COLORS.text,
+    fontWeight: "800",
   },
   defineGoalButton: {
     borderRadius: 999,
