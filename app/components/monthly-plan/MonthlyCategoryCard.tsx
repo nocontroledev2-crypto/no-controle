@@ -121,9 +121,18 @@ export function MonthlyCategoryCard({
             {item.realizedAmount > 0
               ? `${formatMoney(
                   item.realizedAmount
-                )} gastos`
+                )} gastos até agora`
               : "Nenhum gasto neste mês"}
           </Text>
+
+          {item.realizedAmount > 0 ? (
+            <View
+              style={styles.unplannedActivityLine}
+              accessibilityLabel={`${formatMoney(
+                item.realizedAmount
+              )} gastos até agora`}
+            />
+          ) : null}
 
           <View style={styles.noGoalStatus}>
             <View style={styles.noGoalMessage}>
@@ -247,6 +256,12 @@ const styles = StyleSheet.create({
   },
   noGoalContainer: {
     gap: 8,
+  },
+  unplannedActivityLine: {
+    width: 96,
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: MONTHLY_PLAN_COLORS.green,
   },
   noGoalStatus: {
     borderRadius: 12,
