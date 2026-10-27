@@ -15,6 +15,7 @@ import {
 
 import {
   calculateMonthlyPlanSummary,
+  completeCategoriesForPlanning,
   sortCategoriesByImpact,
 } from "./calculations";
 import { CategoryGoalControl } from "./CategoryGoalControl";
@@ -61,14 +62,18 @@ export function CategoryPlanningModal({
   onSave,
 }: CategoryPlanningModalProps) {
   const [draftCategories, setDraftCategories] =
-    useState<MonthlyPlanCategory[]>(
-      () => data.categories.map((item) => ({ ...item }))
+    useState<MonthlyPlanCategory[]>(() =>
+      completeCategoriesForPlanning(
+        data.categories
+      )
     );
 
   const [draftMaximums, setDraftMaximums] =
     useState<Record<string, number>>(() =>
       Object.fromEntries(
-        data.categories.map((item) => [
+        completeCategoriesForPlanning(
+          data.categories
+        ).map((item) => [
           item.category,
           getAdaptiveGoalScaleMax(
             item.plannedAmount,
@@ -83,13 +88,20 @@ export function CategoryPlanningModal({
       return;
     }
 
+    const planningCategories =
+      completeCategoriesForPlanning(
+        data.categories
+      );
+
     setDraftCategories(
-      data.categories.map((item) => ({ ...item }))
+      planningCategories.map(
+        (item) => ({ ...item })
+      )
     );
 
     setDraftMaximums(
       Object.fromEntries(
-        data.categories.map((item) => [
+        planningCategories.map((item) => [
           item.category,
           getAdaptiveGoalScaleMax(
             item.plannedAmount,

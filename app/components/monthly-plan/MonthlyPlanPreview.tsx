@@ -9,6 +9,7 @@ import {
 
 import {
   calculateMonthlyPlanSummary,
+  filterRelevantCategories,
   getConsumptionStatus,
   sortCategoriesByImpact,
 } from "./calculations";
@@ -54,7 +55,12 @@ export function MonthlyPlanPreview({
   );
 
   const orderedCategories = useMemo(
-    () => sortCategoriesByImpact(data.categories),
+    () =>
+      sortCategoriesByImpact(
+        filterRelevantCategories(
+          data.categories
+        )
+      ),
     [data.categories]
   );
 

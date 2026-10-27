@@ -88,6 +88,62 @@ export function calculateMonthlyPlanSummary(
   };
 }
 
+export function isRelevantMonthlyPlanCategory(
+  item: MonthlyPlanCategory
+): boolean {
+  return (
+    item.realizedAmount > 0 ||
+    item.scheduledAmount > 0 ||
+    (item.plannedAmount ?? 0) > 0
+  );
+}
+
+export function filterRelevantCategories(
+  categories: MonthlyPlanCategory[]
+): MonthlyPlanCategory[] {
+  return categories.filter(
+    isRelevantMonthlyPlanCategory
+  );
+}
+
+export function completeCategoriesForPlanning(
+  categories: MonthlyPlanCategory[]
+): MonthlyPlanCategory[] {
+  const categoriesByName = new Map(
+    categories.map((item) => [
+      item.category,
+      { ...item },
+    ])
+  );
+
+  const officialCategoryNames =
+    new Set<string>(MASTER_CATEGORIES);
+
+  const officialCategories =
+    MASTER_CATEGORIES.map(
+      (category) =>
+        categoriesByName.get(category) ?? {
+          category,
+          plannedAmount: null,
+          realizedAmount: 0,
+          scheduledAmount: 0,
+        }
+    );
+
+  const additionalCategories =
+    categories
+      .filter(
+        (item) =>
+          !officialCategoryNames.has(item.category)
+      )
+      .map((item) => ({ ...item }));
+
+  return [
+    ...officialCategories,
+    ...additionalCategories,
+  ];
+}
+
 export function sortCategoriesByImpact(
   categories: MonthlyPlanCategory[]
 ): MonthlyPlanCategory[] {
