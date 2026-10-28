@@ -16,7 +16,6 @@ import {
 import {
   calculateMonthlyPlanSummary,
   completeCategoriesForPlanning,
-  sortCategoriesByImpact,
 } from "./calculations";
 import { CategoryGoalControl } from "./CategoryGoalControl";
 import {
@@ -129,10 +128,6 @@ export function CategoryPlanningModal({
     [draftData]
   );
 
-  const categories = useMemo(
-    () => sortCategoriesByImpact(draftCategories),
-    [draftCategories]
-  );
 
   function updateCategoryGoal(
     category: string,
@@ -301,7 +296,7 @@ export function CategoryPlanningModal({
             contentContainerStyle={styles.categoryContent}
             showsVerticalScrollIndicator={false}
           >
-            {categories.map((item) => {
+            {draftCategories.map((item) => {
               const currentValue =
                 item.plannedAmount ?? 0;
 
