@@ -190,6 +190,7 @@ export function CategoryPlanningModal({
     distributedPercentage !== null;
 
   const isOverLimit =
+    hasSpendingLimit &&
     summary.undistributed < 0;
 
   return (
