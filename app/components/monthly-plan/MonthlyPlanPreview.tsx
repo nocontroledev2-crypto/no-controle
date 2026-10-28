@@ -1,5 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useMemo } from "react";
+import React, {
+  useMemo,
+  useState,
+} from "react";
 import {
   StyleSheet,
   Text,
@@ -15,6 +18,11 @@ import {
 } from "./calculations";
 import { MonthlyCategoryCard } from "./MonthlyCategoryCard";
 import { MonthlySpendingBar } from "./MonthlySpendingBar";
+import { MonthlySpendingLimitControl } from "./MonthlySpendingLimitControl";
+import {
+  getAdaptiveGoalScaleMax,
+  getExpandedGoalScaleMax,
+} from "./goalScale";
 import type { MonthlyPlanPreviewData } from "./types";
 import {
   getConsumptionColor,
@@ -26,6 +34,7 @@ type MonthlyPlanPreviewProps = {
   formatMoney: (value: number) => string;
   onPlanCategories?: () => void;
   onCategoryPress?: (category: string) => void;
+  onSpendingLimitChange?: (value: number) => void;
 };
 
 const MONTH_NAMES = [
@@ -48,6 +57,7 @@ export function MonthlyPlanPreview({
   formatMoney,
   onPlanCategories,
   onCategoryPress,
+  onSpendingLimitChange,
 }: MonthlyPlanPreviewProps) {
   const summary = useMemo(
     () => calculateMonthlyPlanSummary(data),
@@ -63,6 +73,14 @@ export function MonthlyPlanPreview({
       ),
     [data.categories]
   );
+
+  const [spendingLimitMaximum, setSpendingLimitMaximum] =
+    useState(() =>
+      getAdaptiveGoalScaleMax(
+        data.spendingLimit,
+        data.spendingLimit
+      )
+    );
 
   const percentage = summary.realizedPercentage ?? 0;
   const status = getConsumptionStatus(percentage);
@@ -121,6 +139,20 @@ export function MonthlyPlanPreview({
             />
           </View>
         </View>
+
+        {onSpendingLimitChange ? (
+          <MonthlySpendingLimitControl
+            value={data.spendingLimit}
+            maximum={spendingLimitMaximum}
+            formatMoney={formatMoney}
+            onChange={onSpendingLimitChange}
+            onRequestExpand={() =>
+              setSpendingLimitMaximum((current) =>
+                getExpandedGoalScaleMax(current)
+              )
+            }
+          />
+        ) : null}
 
         <View style={styles.realizedHeader}>
           <View>

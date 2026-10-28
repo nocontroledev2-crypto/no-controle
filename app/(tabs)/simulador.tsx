@@ -429,6 +429,12 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
           onPlanCategories={() =>
             setShowCategoryPlanningModal(true)
           }
+          onSpendingLimitChange={(value) =>
+            setMonthlyPlanData((current) => ({
+              ...current,
+              spendingLimit: value,
+            }))
+          }
         />
 
         <CategoryPlanningModal
