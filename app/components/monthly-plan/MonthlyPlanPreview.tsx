@@ -82,9 +82,15 @@ export function MonthlyPlanPreview({
       )
     );
 
-  const percentage = summary.realizedPercentage ?? 0;
-  const status = getConsumptionStatus(percentage);
-  const statusColor = getConsumptionColor(status);
+  const percentage = summary.realizedPercentage;
+  const hasSpendingLimit =
+    percentage !== null;
+
+  const status =
+    getConsumptionStatus(percentage ?? 0);
+
+  const statusColor =
+    getConsumptionColor(status);
 
   const monthName =
     MONTH_NAMES[data.month - 1] ?? "Mês selecionado";
@@ -165,14 +171,20 @@ export function MonthlyPlanPreview({
             </Text>
           </View>
 
-          <Text
-            style={[
-              styles.realizedPercentage,
-              { color: statusColor },
-            ]}
-          >
-            {percentage}%
-          </Text>
+          {hasSpendingLimit ? (
+            <Text
+              style={[
+                styles.realizedPercentage,
+                { color: statusColor },
+              ]}
+            >
+              {percentage}%
+            </Text>
+          ) : (
+            <Text style={styles.undefinedLimitText}>
+              Limite ainda não definido
+            </Text>
+          )}
         </View>
 
         <MonthlySpendingBar
@@ -349,6 +361,14 @@ const styles = StyleSheet.create({
   realizedPercentage: {
     fontSize: 20,
     fontWeight: "900",
+  },
+  undefinedLimitText: {
+    flexShrink: 1,
+    color: MONTHLY_PLAN_COLORS.textMuted,
+    fontSize: 12,
+    fontWeight: "800",
+    lineHeight: 17,
+    textAlign: "right",
   },
   metricsGrid: {
     flexDirection: "row",

@@ -184,9 +184,13 @@ export function CategoryPlanningModal({
     MONTH_NAMES[data.month - 1] ?? "Mês selecionado";
 
   const distributedPercentage =
-    summary.distributedPercentage ?? 0;
+    summary.distributedPercentage;
 
-  const isOverLimit = summary.undistributed < 0;
+  const hasSpendingLimit =
+    distributedPercentage !== null;
+
+  const isOverLimit =
+    summary.undistributed < 0;
 
   return (
     <Modal
@@ -267,7 +271,9 @@ export function CategoryPlanningModal({
                   isOverLimit && styles.dangerText,
                 ]}
               >
-                {distributedPercentage}% distribuído
+                {hasSpendingLimit
+                  ? `${distributedPercentage}% distribuído`
+                  : "Limite ainda não definido"}
               </Text>
 
               <Text
@@ -276,7 +282,11 @@ export function CategoryPlanningModal({
                   isOverLimit && styles.dangerText,
                 ]}
               >
-                {isOverLimit
+                {!hasSpendingLimit
+                  ? `${formatMoney(
+                      summary.totalPlanned
+                    )} em metas aguardando um limite mensal`
+                  : isOverLimit
                   ? `${formatMoney(
                       Math.abs(summary.undistributed)
                     )} acima do limite`
