@@ -19,7 +19,7 @@ import {
 import { CategoryPlanningModal } from "../components/monthly-plan/CategoryPlanningModal";
 import { MonthlyPlanPreview } from "../components/monthly-plan/MonthlyPlanPreview";
 import { aggregateMonthlyPlanExpenses } from "../components/monthly-plan/expenseAggregation";
-import { MONTHLY_PLAN_PREVIEW_DATA } from "../components/monthly-plan/mockData";
+import { MASTER_CATEGORIES } from "../constants/categories";
 import type {
   MonthlyPlanCategory,
   MonthlyPlanPreviewData,
@@ -123,12 +123,26 @@ export default function Simulador() {
     useState(false);
 
   const [monthlyPlanData, setMonthlyPlanData] =
-    useState<MonthlyPlanPreviewData>(() => ({
-      ...MONTHLY_PLAN_PREVIEW_DATA,
-      categories: MONTHLY_PLAN_PREVIEW_DATA.categories.map(
-        (item) => ({ ...item })
-      ),
-    }));
+    useState<MonthlyPlanPreviewData>(() => {
+      const currentDate = new Date();
+
+      return {
+        year: currentDate.getFullYear(),
+        month: currentDate.getMonth() + 1,
+        status: "draft",
+        spendingLimit: 0,
+        realizedAmount: 0,
+        scheduledAmount: 0,
+        categories: MASTER_CATEGORIES.map(
+          (category) => ({
+            category,
+            plannedAmount: null,
+            realizedAmount: 0,
+            scheduledAmount: 0,
+          })
+        ),
+      };
+    });
 
   const monthlyPlanPreviewData = useMemo(() => {
     const aggregation =
