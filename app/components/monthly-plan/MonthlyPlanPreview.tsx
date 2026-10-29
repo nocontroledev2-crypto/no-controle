@@ -137,13 +137,6 @@ export function MonthlyPlanPreview({
             </Text>
           </View>
 
-          <View style={styles.editBadge}>
-            <Ionicons
-              name="options-outline"
-              size={17}
-              color={MONTHLY_PLAN_COLORS.brand}
-            />
-          </View>
         </View>
 
         {onSpendingLimitChange ? (
@@ -337,14 +330,6 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: "900",
     marginTop: 4,
-  },
-  editBadge: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: MONTHLY_PLAN_COLORS.brandSoft,
   },
   realizedHeader: {
     flexDirection: "row",
