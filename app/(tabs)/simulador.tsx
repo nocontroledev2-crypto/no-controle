@@ -18,6 +18,7 @@ import {
 } from "../services/authService";
 import { CategoryPlanningModal } from "../components/monthly-plan/CategoryPlanningModal";
 import { MonthlyPlanPreview } from "../components/monthly-plan/MonthlyPlanPreview";
+import { aggregateMonthlyPlanExpenses } from "../components/monthly-plan/expenseAggregation";
 import { MONTHLY_PLAN_PREVIEW_DATA } from "../components/monthly-plan/mockData";
 import type {
   MonthlyPlanCategory,
@@ -128,6 +129,24 @@ export default function Simulador() {
         (item) => ({ ...item })
       ),
     }));
+
+  const monthlyPlanPreviewData = useMemo(() => {
+    const aggregation =
+      aggregateMonthlyPlanExpenses({
+        expenses,
+        year: monthlyPlanData.year,
+        month: monthlyPlanData.month,
+        today: new Date(),
+        categories: monthlyPlanData.categories,
+      });
+
+    return {
+      ...monthlyPlanData,
+      realizedAmount: aggregation.realizedAmount,
+      scheduledAmount: aggregation.scheduledAmount,
+      categories: aggregation.categories,
+    };
+  }, [expenses, monthlyPlanData]);
 
   const now = new Date();
 
@@ -424,7 +443,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
         </View>
 
         <MonthlyPlanPreview
-          data={monthlyPlanData}
+          data={monthlyPlanPreviewData}
           formatMoney={formatMoney}
           onPlanCategories={() =>
             setShowCategoryPlanningModal(true)
@@ -439,7 +458,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
 
         <CategoryPlanningModal
           visible={showCategoryPlanningModal}
-          data={monthlyPlanData}
+          data={monthlyPlanPreviewData}
           formatMoney={formatMoney}
           onClose={() =>
             setShowCategoryPlanningModal(false)
@@ -450,7 +469,12 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
             setMonthlyPlanData((current) => ({
               ...current,
               categories: categories.map(
-                (item) => ({ ...item })
+                (item) => ({
+                  category: item.category,
+                  plannedAmount: item.plannedAmount,
+                  realizedAmount: 0,
+                  scheduledAmount: 0,
+                })
               ),
             }));
 
