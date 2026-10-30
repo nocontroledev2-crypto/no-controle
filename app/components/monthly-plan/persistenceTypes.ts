@@ -56,3 +56,24 @@ export type MonthlyPlanLoadResult =
       status: "error";
       message: string;
     };
+
+export type MonthlyPlanUpsertPayload = {
+  user_id: string;
+  year: number;
+  month: number;
+  spending_limit: number;
+  status: MonthlyPlanStatus;
+  updated_at: string;
+};
+
+export type MonthlyPlanGoalUpsertPayload = {
+  plan_id: string;
+  category: string;
+  planned_amount: number;
+  updated_at: string;
+};
+
+export type MonthlyPlanPersistencePayload = {
+  plan: MonthlyPlanUpsertPayload;
+  goals: MonthlyPlanGoalUpsertPayload[];
+};
