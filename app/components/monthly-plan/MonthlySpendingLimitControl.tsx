@@ -26,6 +26,7 @@ type MonthlySpendingLimitControlProps = {
   formatMoney: (value: number) => string;
   onChange: (value: number) => void;
   onRequestExpand?: () => void;
+  readOnly?: boolean;
 };
 
 const THUMB_SIZE = 26;
@@ -36,6 +37,7 @@ export function MonthlySpendingLimitControl({
   formatMoney,
   onChange,
   onRequestExpand,
+  readOnly = false,
 }: MonthlySpendingLimitControlProps) {
   const [trackWidth, setTrackWidth] = useState(0);
   const gestureValueRef = useRef(value);
@@ -65,6 +67,10 @@ export function MonthlySpendingLimitControl({
 
   const updateFromEvent = useCallback(
     (event: GestureResponderEvent) => {
+      if (readOnly) {
+        return;
+      }
+
       const nextValue =
         getGoalAmountFromPosition(
           event.nativeEvent.locationX,
@@ -75,22 +81,30 @@ export function MonthlySpendingLimitControl({
       gestureValueRef.current = nextValue;
       onChange(nextValue);
     },
-    [maximum, onChange, trackWidth]
+    [maximum, onChange, readOnly, trackWidth]
   );
 
   const handleResponderRelease = useCallback(
     () => {
+      if (readOnly) {
+        return;
+      }
+
       if (
         gestureValueRef.current >= maximum
       ) {
         onRequestExpand?.();
       }
     },
-    [maximum, onRequestExpand]
+    [maximum, onRequestExpand, readOnly]
   );
 
   const handleAccessibilityAction = useCallback(
     (actionName: string) => {
+      if (readOnly) {
+        return;
+      }
+
       const direction =
         actionName === "increment"
           ? 1
@@ -109,40 +123,53 @@ export function MonthlySpendingLimitControl({
         )
       );
     },
-    [maximum, onChange, step, value]
+    [maximum, onChange, readOnly, step, value]
   );
 
   return (
     <View style={styles.container}>
       <View
-        style={styles.interactionArea}
+        style={[
+          styles.interactionArea,
+          readOnly && styles.interactionAreaReadOnly,
+        ]}
         onLayout={handleLayout}
-        onStartShouldSetResponder={() => true}
-        onStartShouldSetResponderCapture={() => true}
-        onMoveShouldSetResponder={() => true}
-        onMoveShouldSetResponderCapture={() => true}
+        onStartShouldSetResponder={() => !readOnly}
+        onStartShouldSetResponderCapture={() => !readOnly}
+        onMoveShouldSetResponder={() => !readOnly}
+        onMoveShouldSetResponderCapture={() => !readOnly}
         onResponderTerminationRequest={() => false}
         onResponderGrant={updateFromEvent}
         onResponderMove={updateFromEvent}
         onResponderRelease={handleResponderRelease}
-        accessibilityRole="adjustable"
-        accessibilityLabel="Limite global do mês"
+        accessibilityRole={
+          readOnly ? "text" : "adjustable"
+        }
+        accessibilityLabel={
+          readOnly
+            ? "Limite global do mês, somente leitura"
+            : "Limite global do mês"
+        }
         accessibilityValue={{
           min: 0,
           max: maximum,
           now: value,
           text: formatMoney(value),
         }}
-        accessibilityActions={[
-          {
-            name: "increment",
-            label: "Aumentar limite mensal",
-          },
-          {
-            name: "decrement",
-            label: "Diminuir limite mensal",
-          },
-        ]}
+        accessibilityActions={
+          readOnly
+            ? []
+            : [
+                {
+                  name: "increment",
+                  label: "Aumentar limite mensal",
+                },
+                {
+                  name: "decrement",
+                  label: "Diminuir limite mensal",
+                },
+              ]
+        }
         onAccessibilityAction={(event) =>
           handleAccessibilityAction(
             event.nativeEvent.actionName
@@ -196,6 +223,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     cursor: "pointer",
     userSelect: "none",
+  },
+  interactionAreaReadOnly: {
+    cursor: "auto",
   },
   track: {
     height: 11,

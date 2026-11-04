@@ -37,6 +37,7 @@ type MonthlyPlanPreviewProps = {
   onSpendingLimitChange?: (value: number) => void;
   onPreviousMonth?: () => void;
   onNextMonth?: () => void;
+  isSpendingLimitReadOnly?: boolean;
 };
 
 const MONTH_NAMES = [
@@ -62,6 +63,7 @@ export function MonthlyPlanPreview({
   onSpendingLimitChange,
   onPreviousMonth,
   onNextMonth,
+  isSpendingLimitReadOnly = false,
 }: MonthlyPlanPreviewProps) {
   const summary = useMemo(
     () => calculateMonthlyPlanSummary(data),
@@ -161,6 +163,7 @@ export function MonthlyPlanPreview({
             maximum={spendingLimitMaximum}
             formatMoney={formatMoney}
             onChange={onSpendingLimitChange}
+            readOnly={isSpendingLimitReadOnly}
             onRequestExpand={() =>
               setSpendingLimitMaximum((current) =>
                 getExpandedGoalScaleMax(current)

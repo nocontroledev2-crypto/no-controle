@@ -551,14 +551,14 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
           onNextMonth={() =>
             navigateMonthlyPlanPeriod(1)
           }
-          onSpendingLimitChange={
+          isSpendingLimitReadOnly={
             isPastMonthlyPlan
-              ? undefined
-              : (value) =>
-                  setMonthlyPlanData((current) => ({
-                    ...current,
-                    spendingLimit: value,
-                  }))
+          }
+          onSpendingLimitChange={(value) =>
+            setMonthlyPlanData((current) => ({
+              ...current,
+              spendingLimit: value,
+            }))
           }
         />
 
