@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "expo-router";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -19,7 +19,13 @@ import {
 import { CategoryPlanningModal } from "../components/monthly-plan/CategoryPlanningModal";
 import { MonthlyPlanPreview } from "../components/monthly-plan/MonthlyPlanPreview";
 import { aggregateMonthlyPlanExpenses } from "../components/monthly-plan/expenseAggregation";
-import { MASTER_CATEGORIES } from "../constants/categories";
+import {
+  createEmptyMonthlyPlanData,
+  getMonthlyPlanPeriodKey,
+} from "../components/monthly-plan/monthlyPlanState";
+import {
+  shiftMonthlyPlanPeriod,
+} from "../components/monthly-plan/periodNavigation";
 import type {
   MonthlyPlanCategory,
   MonthlyPlanPreviewData,
@@ -122,26 +128,26 @@ export default function Simulador() {
   const [showCategoryPlanningModal, setShowCategoryPlanningModal] =
     useState(false);
 
+  const monthlyPlanSessionRef = useRef<
+    Record<string, MonthlyPlanPreviewData>
+  >({});
+
   const [monthlyPlanData, setMonthlyPlanData] =
     useState<MonthlyPlanPreviewData>(() => {
       const currentDate = new Date();
+      const initialData = createEmptyMonthlyPlanData(
+        currentDate.getFullYear(),
+        currentDate.getMonth() + 1
+      );
 
-      return {
-        year: currentDate.getFullYear(),
-        month: currentDate.getMonth() + 1,
-        status: "draft",
-        spendingLimit: 0,
-        realizedAmount: 0,
-        scheduledAmount: 0,
-        categories: MASTER_CATEGORIES.map(
-          (category) => ({
-            category,
-            plannedAmount: null,
-            realizedAmount: 0,
-            scheduledAmount: 0,
-          })
-        ),
-      };
+      monthlyPlanSessionRef.current[
+        getMonthlyPlanPeriodKey(
+          initialData.year,
+          initialData.month
+        )
+      ] = initialData;
+
+      return initialData;
     });
 
   const monthlyPlanPreviewData = useMemo(() => {
@@ -163,6 +169,54 @@ export default function Simulador() {
   }, [expenses, monthlyPlanData]);
 
   const now = new Date();
+
+  function navigateMonthlyPlanPeriod(
+    offset: number
+  ) {
+    setMonthlyPlanData((current) => {
+      const currentKey =
+        getMonthlyPlanPeriodKey(
+          current.year,
+          current.month
+        );
+
+      monthlyPlanSessionRef.current[currentKey] =
+        current;
+
+      const nextPeriod =
+        shiftMonthlyPlanPeriod(
+          {
+            year: current.year,
+            month: current.month,
+          },
+          offset
+        );
+
+      const nextKey =
+        getMonthlyPlanPeriodKey(
+          nextPeriod.year,
+          nextPeriod.month
+        );
+
+      const savedPlan =
+        monthlyPlanSessionRef.current[nextKey];
+
+      if (savedPlan) {
+        return savedPlan;
+      }
+
+      const emptyPlan =
+        createEmptyMonthlyPlanData(
+          nextPeriod.year,
+          nextPeriod.month
+        );
+
+      monthlyPlanSessionRef.current[nextKey] =
+        emptyPlan;
+
+      return emptyPlan;
+    });
+  }
 
   useFocusEffect(
     useCallback(() => {
@@ -461,6 +515,12 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
           formatMoney={formatMoney}
           onPlanCategories={() =>
             setShowCategoryPlanningModal(true)
+          }
+          onPreviousMonth={() =>
+            navigateMonthlyPlanPeriod(-1)
+          }
+          onNextMonth={() =>
+            navigateMonthlyPlanPeriod(1)
           }
           onSpendingLimitChange={(value) =>
             setMonthlyPlanData((current) => ({
