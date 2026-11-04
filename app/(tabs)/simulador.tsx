@@ -26,6 +26,9 @@ import {
 import {
   shiftMonthlyPlanPeriod,
 } from "../components/monthly-plan/periodNavigation";
+import {
+  getMonthlyPlanPeriodRelation,
+} from "../components/monthly-plan/periodRelation";
 import type {
   MonthlyPlanCategory,
   MonthlyPlanPreviewData,
@@ -169,6 +172,32 @@ export default function Simulador() {
   }, [expenses, monthlyPlanData]);
 
   const now = new Date();
+
+  const monthlyPlanPeriodRelation =
+    getMonthlyPlanPeriodRelation(
+      {
+        year: monthlyPlanData.year,
+        month: monthlyPlanData.month,
+      },
+      {
+        year: now.getFullYear(),
+        month: now.getMonth() + 1,
+      }
+    );
+
+  const isPastMonthlyPlan =
+    monthlyPlanPeriodRelation === "past";
+
+  function openCategoryPlanning() {
+    if (isPastMonthlyPlan) {
+      alert(
+        "Planejamento bloqueado\n\nAs metas dos meses encerrados não podem ser alteradas.\n\nUse o mês atual ou os meses futuros para criar ou revisar seus planejamentos."
+      );
+      return;
+    }
+
+    setShowCategoryPlanningModal(true);
+  }
 
   function navigateMonthlyPlanPeriod(
     offset: number
@@ -513,8 +542,8 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
         <MonthlyPlanPreview
           data={monthlyPlanPreviewData}
           formatMoney={formatMoney}
-          onPlanCategories={() =>
-            setShowCategoryPlanningModal(true)
+          onPlanCategories={
+            openCategoryPlanning
           }
           onPreviousMonth={() =>
             navigateMonthlyPlanPeriod(-1)
@@ -522,11 +551,14 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
           onNextMonth={() =>
             navigateMonthlyPlanPeriod(1)
           }
-          onSpendingLimitChange={(value) =>
-            setMonthlyPlanData((current) => ({
-              ...current,
-              spendingLimit: value,
-            }))
+          onSpendingLimitChange={
+            isPastMonthlyPlan
+              ? undefined
+              : (value) =>
+                  setMonthlyPlanData((current) => ({
+                    ...current,
+                    spendingLimit: value,
+                  }))
           }
         />
 
