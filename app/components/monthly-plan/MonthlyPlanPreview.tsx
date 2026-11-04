@@ -35,6 +35,8 @@ type MonthlyPlanPreviewProps = {
   onPlanCategories?: () => void;
   onCategoryPress?: (category: string) => void;
   onSpendingLimitChange?: (value: number) => void;
+  onPreviousMonth?: () => void;
+  onNextMonth?: () => void;
 };
 
 const MONTH_NAMES = [
@@ -58,6 +60,8 @@ export function MonthlyPlanPreview({
   onPlanCategories,
   onCategoryPress,
   onSpendingLimitChange,
+  onPreviousMonth,
+  onNextMonth,
 }: MonthlyPlanPreviewProps) {
   const summary = useMemo(
     () => calculateMonthlyPlanSummary(data),
@@ -99,13 +103,19 @@ export function MonthlyPlanPreview({
     <View style={styles.container}>
       <View style={styles.hero}>
         <View style={styles.periodRow}>
-          <View style={styles.periodButton}>
+          <TouchableOpacity
+            style={styles.periodButton}
+            onPress={onPreviousMonth}
+            activeOpacity={0.78}
+            accessibilityRole="button"
+            accessibilityLabel="Ver mês anterior"
+          >
             <Ionicons
               name="chevron-back"
               size={19}
               color={MONTHLY_PLAN_COLORS.brand}
             />
-          </View>
+          </TouchableOpacity>
 
           <View style={styles.periodTextContainer}>
             <Text style={styles.eyebrow}>
@@ -117,13 +127,19 @@ export function MonthlyPlanPreview({
             </Text>
           </View>
 
-          <View style={styles.periodButton}>
+          <TouchableOpacity
+            style={styles.periodButton}
+            onPress={onNextMonth}
+            activeOpacity={0.78}
+            accessibilityRole="button"
+            accessibilityLabel="Ver mês seguinte"
+          >
             <Ionicons
               name="chevron-forward"
               size={19}
               color={MONTHLY_PLAN_COLORS.brand}
             />
-          </View>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.limitHeader}>
