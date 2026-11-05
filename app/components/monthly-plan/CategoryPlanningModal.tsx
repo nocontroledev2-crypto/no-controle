@@ -19,6 +19,9 @@ import {
 } from "./calculations";
 import { CategoryGoalControl } from "./CategoryGoalControl";
 import {
+  HistoricalPlanReference,
+} from "./HistoricalPlanReference";
+import {
   getAdaptiveGoalScaleMax,
   getExpandedGoalScaleMax,
 } from "./goalScale";
@@ -70,7 +73,6 @@ export function CategoryPlanningModal({
   onClose,
   onSave,
 }: CategoryPlanningModalProps) {
-  void expenses;
   const [draftCategories, setDraftCategories] =
     useState<MonthlyPlanCategory[]>(() =>
       completeCategoriesForPlanning(
@@ -199,6 +201,35 @@ export function CategoryPlanningModal({
     });
   }
 
+  function applyHistoricalPreview(
+    preview: MonthlyPlanPreviewData
+  ) {
+    const previewCategories =
+      completeCategoriesForPlanning(
+        preview.categories
+      ).map((item) => ({ ...item }));
+
+    setDraftSpendingLimit(
+      preview.spendingLimit
+    );
+
+    setDraftCategories(
+      previewCategories
+    );
+
+    setDraftMaximums(
+      Object.fromEntries(
+        previewCategories.map((item) => [
+          item.category,
+          getAdaptiveGoalScaleMax(
+            item.plannedAmount,
+            preview.spendingLimit
+          ),
+        ])
+      )
+    );
+  }
+
   function saveDraft() {
     onSave?.({
       spendingLimit: draftSpendingLimit,
@@ -325,6 +356,17 @@ export function CategoryPlanningModal({
               </Text>
             </View>
           </View>
+
+          {visible ? (
+            <HistoricalPlanReference
+              key={`${data.year}-${data.month}`}
+              year={data.year}
+              month={data.month}
+              expenses={expenses}
+              formatMoney={formatMoney}
+              onApply={applyHistoricalPreview}
+            />
+          ) : null}
 
           <Text style={styles.sectionTitle}>
             Metas das categorias
