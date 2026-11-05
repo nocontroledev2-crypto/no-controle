@@ -16,7 +16,10 @@ import {
   getProfile,
   upsertProfile,
 } from "../services/authService";
-import { CategoryPlanningModal } from "../components/monthly-plan/CategoryPlanningModal";
+import {
+  CategoryPlanningModal,
+  type CategoryPlanningSaveData,
+} from "../components/monthly-plan/CategoryPlanningModal";
 import { MonthlyPlanPreview } from "../components/monthly-plan/MonthlyPlanPreview";
 import { aggregateMonthlyPlanExpenses } from "../components/monthly-plan/expenseAggregation";
 import {
@@ -30,7 +33,6 @@ import {
   getMonthlyPlanPeriodRelation,
 } from "../components/monthly-plan/periodRelation";
 import type {
-  MonthlyPlanCategory,
   MonthlyPlanPreviewData,
 } from "../components/monthly-plan/types";
 import { Expense, getAllExpenses } from "../storage/expenseStorage";
@@ -570,11 +572,12 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
             setShowCategoryPlanningModal(false)
           }
           onSave={(
-            categories: MonthlyPlanCategory[]
+            value: CategoryPlanningSaveData
           ) => {
             setMonthlyPlanData((current) => ({
               ...current,
-              categories: categories.map(
+              spendingLimit: value.spendingLimit,
+              categories: value.categories.map(
                 (item) => ({
                   category: item.category,
                   plannedAmount: item.plannedAmount,

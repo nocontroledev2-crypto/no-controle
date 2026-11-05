@@ -28,13 +28,18 @@ import type {
 } from "./types";
 import { MONTHLY_PLAN_COLORS } from "./visualTokens";
 
+export type CategoryPlanningSaveData = {
+  spendingLimit: number;
+  categories: MonthlyPlanCategory[];
+};
+
 type CategoryPlanningModalProps = {
   visible: boolean;
   data: MonthlyPlanPreviewData;
   formatMoney: (value: number) => string;
   onClose: () => void;
   onSave?: (
-    categories: MonthlyPlanCategory[]
+    value: CategoryPlanningSaveData
   ) => void;
 };
 
@@ -67,6 +72,11 @@ export function CategoryPlanningModal({
       )
     );
 
+  const [
+    draftSpendingLimit,
+    setDraftSpendingLimit,
+  ] = useState(data.spendingLimit);
+
   const [draftMaximums, setDraftMaximums] =
     useState<Record<string, number>>(() =>
       Object.fromEntries(
@@ -98,6 +108,10 @@ export function CategoryPlanningModal({
       )
     );
 
+    setDraftSpendingLimit(
+      data.spendingLimit
+    );
+
     setDraftMaximums(
       Object.fromEntries(
         planningCategories.map((item) => [
@@ -118,9 +132,14 @@ export function CategoryPlanningModal({
   const draftData = useMemo(
     () => ({
       ...data,
+      spendingLimit: draftSpendingLimit,
       categories: draftCategories,
     }),
-    [data, draftCategories]
+    [
+      data,
+      draftCategories,
+      draftSpendingLimit,
+    ]
   );
 
   const summary = useMemo(
@@ -175,9 +194,12 @@ export function CategoryPlanningModal({
   }
 
   function saveDraft() {
-    onSave?.(
-      draftCategories.map((item) => ({ ...item }))
-    );
+    onSave?.({
+      spendingLimit: draftSpendingLimit,
+      categories: draftCategories.map(
+        (item) => ({ ...item })
+      ),
+    });
   }
 
   const monthName =
@@ -245,7 +267,7 @@ export function CategoryPlanningModal({
                 </Text>
 
                 <Text style={styles.summaryValue}>
-                  {formatMoney(data.spendingLimit)}
+                  {formatMoney(draftSpendingLimit)}
                 </Text>
               </View>
 
