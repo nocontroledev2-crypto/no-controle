@@ -23,6 +23,9 @@ import {
   getExpandedGoalScaleMax,
 } from "./goalScale";
 import type {
+  Expense,
+} from "../../storage/expenseStorage";
+import type {
   MonthlyPlanCategory,
   MonthlyPlanPreviewData,
 } from "./types";
@@ -36,6 +39,7 @@ export type CategoryPlanningSaveData = {
 type CategoryPlanningModalProps = {
   visible: boolean;
   data: MonthlyPlanPreviewData;
+  expenses: Expense[];
   formatMoney: (value: number) => string;
   onClose: () => void;
   onSave?: (
@@ -61,10 +65,12 @@ const MONTH_NAMES = [
 export function CategoryPlanningModal({
   visible,
   data,
+  expenses,
   formatMoney,
   onClose,
   onSave,
 }: CategoryPlanningModalProps) {
+  void expenses;
   const [draftCategories, setDraftCategories] =
     useState<MonthlyPlanCategory[]>(() =>
       completeCategoriesForPlanning(

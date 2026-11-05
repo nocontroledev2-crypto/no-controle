@@ -567,6 +567,7 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
         <CategoryPlanningModal
           visible={showCategoryPlanningModal}
           data={monthlyPlanPreviewData}
+          expenses={expenses}
           formatMoney={formatMoney}
           onClose={() =>
             setShowCategoryPlanningModal(false)
