@@ -138,7 +138,7 @@ export function HistoricalPlanReference({
           }
           activeOpacity={0.78}
           accessibilityRole="button"
-          accessibilityLabel="Criar planejamento do zero"
+          accessibilityLabel="Ajustar planejamento manualmente"
         >
           <Text
             style={[
@@ -147,7 +147,7 @@ export function HistoricalPlanReference({
                 styles.optionTextSelected,
             ]}
           >
-            Criar do zero
+            Ajustar manualmente
           </Text>
         </TouchableOpacity>
 
