@@ -44,6 +44,7 @@ import type {
 import { Expense, getAllExpenses } from "../storage/expenseStorage";
 import {
   loadMonthlyPlan,
+  saveMonthlyPlan,
 } from "../storage/monthlyPlanStorage";
 
 const SIMULATOR_CONFIG_KEY = "@no-controle:simulator-config";
@@ -705,23 +706,90 @@ const mediaDiariaAtual = diaAtual > 0 ? totalMesAtual / diaAtual : 0;
           onClose={() =>
             setShowCategoryPlanningModal(false)
           }
-          onSave={(
+          onSave={async (
             value: CategoryPlanningSaveData
           ) => {
-            setMonthlyPlanData((current) => ({
-              ...current,
-              spendingLimit: value.spendingLimit,
-              categories: value.categories.map(
-                (item) => ({
-                  category: item.category,
-                  plannedAmount: item.plannedAmount,
-                  realizedAmount: 0,
-                  scheduledAmount: 0,
-                })
-              ),
-            }));
+            const periodKey =
+              getMonthlyPlanPeriodKey(
+                monthlyPlanData.year,
+                monthlyPlanData.month
+              );
 
-            setShowCategoryPlanningModal(false);
+            const savedPlan =
+              await saveMonthlyPlan({
+                year: monthlyPlanData.year,
+                month: monthlyPlanData.month,
+                spendingLimit:
+                  value.spendingLimit,
+                status:
+                  monthlyPlanData.status,
+                goals: value.categories
+                  .filter(
+                    (item) =>
+                      item.plannedAmount !== null &&
+                      item.plannedAmount > 0
+                  )
+                  .map((item) => ({
+                    category:
+                      item.category,
+                    plannedAmount:
+                      item.plannedAmount as number,
+                  })),
+              });
+
+            const savedGoals = new Map(
+              savedPlan.goals.map(
+                (goal) => [
+                  goal.category,
+                  goal.plannedAmount,
+                ]
+              )
+            );
+
+            const persistedData =
+              createEmptyMonthlyPlanData(
+                savedPlan.year,
+                savedPlan.month
+              );
+
+            persistedData.status =
+              savedPlan.status;
+
+            persistedData.spendingLimit =
+              savedPlan.spendingLimit;
+
+            persistedData.categories =
+              persistedData.categories.map(
+                (category) => ({
+                  ...category,
+                  plannedAmount:
+                    savedGoals.get(
+                      category.category
+                    ) ?? null,
+                })
+              );
+
+            monthlyPlanSessionRef.current[
+              periodKey
+            ] = persistedData;
+
+            monthlyPlanLoadedPeriodsRef.current.add(
+              periodKey
+            );
+
+            setMonthlyPlanData((current) => {
+              const currentKey =
+                getMonthlyPlanPeriodKey(
+                  current.year,
+                  current.month
+                );
+
+              if (currentKey !== periodKey) {
+                return current;
+              }
+
+              return persistedData;
+            });
           }}
         />
 

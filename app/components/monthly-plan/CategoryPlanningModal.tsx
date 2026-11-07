@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React, {
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {
@@ -47,7 +48,7 @@ type CategoryPlanningModalProps = {
   onClose: () => void;
   onSave?: (
     value: CategoryPlanningSaveData
-  ) => void;
+  ) => Promise<void>;
 };
 
 const MONTH_NAMES = [
@@ -85,6 +86,15 @@ export function CategoryPlanningModal({
     setDraftSpendingLimit,
   ] = useState(data.spendingLimit);
 
+  const [isSaving, setIsSaving] =
+    useState(false);
+
+  const savingRef =
+    useRef(false);
+
+  const [saveError, setSaveError] =
+    useState("");
+
   const [draftMaximums, setDraftMaximums] =
     useState<Record<string, number>>(() =>
       Object.fromEntries(
@@ -104,6 +114,10 @@ export function CategoryPlanningModal({
     if (!visible) {
       return;
     }
+
+    savingRef.current = false;
+    setIsSaving(false);
+    setSaveError("");
 
     const planningCategories =
       completeCategoriesForPlanning(
@@ -230,13 +244,54 @@ export function CategoryPlanningModal({
     );
   }
 
-  function saveDraft() {
-    onSave?.({
-      spendingLimit: draftSpendingLimit,
-      categories: draftCategories.map(
-        (item) => ({ ...item })
-      ),
-    });
+  async function saveDraft() {
+    if (
+      savingRef.current ||
+      isSaving ||
+      !onSave
+    ) {
+      return;
+    }
+
+    savingRef.current = true;
+    setIsSaving(true);
+    setSaveError("");
+
+    try {
+      await onSave({
+        spendingLimit: draftSpendingLimit,
+        categories: draftCategories.map(
+          (item) => ({ ...item })
+        ),
+      });
+
+      onClose();
+    } catch (error) {
+      console.error(
+        "Erro ao salvar planejamento mensal:",
+        error
+      );
+
+      setSaveError(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível salvar as metas. Tente novamente."
+      );
+    } finally {
+      savingRef.current = false;
+      setIsSaving(false);
+    }
+  }
+
+  function closeModal() {
+    if (
+      savingRef.current ||
+      isSaving
+    ) {
+      return;
+    }
+
+    onClose();
   }
 
   const monthName =
@@ -257,7 +312,7 @@ export function CategoryPlanningModal({
       visible={visible}
       transparent
       animationType="fade"
-      onRequestClose={onClose}
+      onRequestClose={closeModal}
     >
       <View style={styles.overlay}>
         <View style={styles.modalBox}>
@@ -274,7 +329,8 @@ export function CategoryPlanningModal({
 
             <TouchableOpacity
               style={styles.closeButton}
-              onPress={onClose}
+              onPress={closeModal}
+              disabled={isSaving}
               activeOpacity={0.78}
               accessibilityRole="button"
               accessibilityLabel="Fechar planejamento por categoria"
@@ -416,10 +472,23 @@ export function CategoryPlanningModal({
               Ajuste as metas sem alterar seus lançamentos.
             </Text>
 
+            {saveError ? (
+              <Text
+                style={styles.saveErrorText}
+                accessibilityRole="alert"
+              >
+                {saveError}
+              </Text>
+            ) : null}
+
             <View style={styles.footerActions}>
               <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={onClose}
+                style={[
+                  styles.cancelButton,
+                  isSaving && styles.buttonDisabled,
+                ]}
+                onPress={closeModal}
+                disabled={isSaving}
                 activeOpacity={0.78}
                 accessibilityRole="button"
               >
@@ -429,13 +498,25 @@ export function CategoryPlanningModal({
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.saveButton}
-                onPress={saveDraft}
+                style={[
+                  styles.saveButton,
+                  isSaving && styles.buttonDisabled,
+                ]}
+                onPress={() => {
+                  void saveDraft();
+                }}
+                disabled={isSaving}
                 activeOpacity={0.78}
                 accessibilityRole="button"
+                accessibilityState={{
+                  disabled: isSaving,
+                  busy: isSaving,
+                }}
               >
                 <Text style={styles.saveButtonText}>
-                  Salvar metas
+                  {isSaving
+                    ? "Salvando..."
+                    : "Salvar metas"}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -655,5 +736,14 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 13,
     fontWeight: "900",
+  },
+  buttonDisabled: {
+    opacity: 0.58,
+  },
+  saveErrorText: {
+    color: MONTHLY_PLAN_COLORS.red,
+    fontSize: 12,
+    fontWeight: "700",
+    lineHeight: 17,
   },
 });
