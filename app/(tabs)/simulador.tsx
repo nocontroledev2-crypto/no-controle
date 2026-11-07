@@ -34,11 +34,26 @@ import {
 import type {
   MonthlyPlanPreviewData,
 } from "../components/monthly-plan/types";
+import {
+  getCurrentUser,
+} from "../services/authService";
+import { supabase } from "../lib/supabase";
 import { Expense, getAllExpenses } from "../storage/expenseStorage";
 import {
   loadMonthlyPlan,
   saveMonthlyPlan,
 } from "../storage/monthlyPlanStorage";
+
+function getUserMonthlyPlanPeriodKey(
+  userId: string,
+  year: number,
+  month: number
+) {
+  return `${userId}:${getMonthlyPlanPeriodKey(
+    year,
+    month
+  )}`;
+}
 
 function formatMoney(valor: number | null | undefined) {
   const safeValue = Number(valor);
@@ -75,30 +90,103 @@ export default function Simulador() {
   const monthlyPlanLoadRequestRef =
     useRef(0);
 
+  const activeUserIdRef =
+    useRef<string | null>(null);
+
+  const [activeUserId, setActiveUserId] =
+    useState<string | null>(null);
+
   const [monthlyPlanData, setMonthlyPlanData] =
     useState<MonthlyPlanPreviewData>(() => {
       const currentDate = new Date();
-      const initialData = createEmptyMonthlyPlanData(
+
+      return createEmptyMonthlyPlanData(
         currentDate.getFullYear(),
         currentDate.getMonth() + 1
       );
-
-      monthlyPlanSessionRef.current[
-        getMonthlyPlanPeriodKey(
-          initialData.year,
-          initialData.month
-        )
-      ] = initialData;
-
-      return initialData;
     });
 
   useEffect(() => {
+    let active = true;
+
+    function applyAuthenticatedUser(
+      nextUserId: string | null
+    ) {
+      if (
+        !active ||
+        activeUserIdRef.current === nextUserId
+      ) {
+        return;
+      }
+
+      activeUserIdRef.current =
+        nextUserId;
+
+      monthlyPlanLoadRequestRef.current += 1;
+      monthlyPlanSessionRef.current = {};
+      monthlyPlanLoadedPeriodsRef.current.clear();
+
+      setShowCategoryPlanningModal(false);
+      setExpenses([]);
+
+      const currentDate = new Date();
+      const emptyCurrentPlan =
+        createEmptyMonthlyPlanData(
+          currentDate.getFullYear(),
+          currentDate.getMonth() + 1
+        );
+
+      setMonthlyPlanData(
+        emptyCurrentPlan
+      );
+
+      setActiveUserId(
+        nextUserId
+      );
+    }
+
+    void getCurrentUser()
+      .then((user) => {
+        applyAuthenticatedUser(
+          user?.id ?? null
+        );
+      })
+      .catch((error) => {
+        console.error(
+          "Erro ao identificar usuario do planejamento:",
+          error
+        );
+
+        applyAuthenticatedUser(null);
+      });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        applyAuthenticatedUser(
+          session?.user?.id ?? null
+        );
+      }
+    );
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!activeUserId) {
+      return;
+    }
+
     const year = monthlyPlanData.year;
     const month = monthlyPlanData.month;
 
     const periodKey =
-      getMonthlyPlanPeriodKey(
+      getUserMonthlyPlanPeriodKey(
+        activeUserId,
         year,
         month
       );
@@ -129,7 +217,9 @@ export default function Simulador() {
       if (
         cancelled ||
         requestId !==
-          monthlyPlanLoadRequestRef.current
+          monthlyPlanLoadRequestRef.current ||
+        activeUserIdRef.current !==
+          activeUserId
       ) {
         return;
       }
@@ -207,6 +297,7 @@ export default function Simulador() {
       cancelled = true;
     };
   }, [
+    activeUserId,
     monthlyPlanData.year,
     monthlyPlanData.month,
   ]);
@@ -260,9 +351,14 @@ export default function Simulador() {
   function navigateMonthlyPlanPeriod(
     offset: number
   ) {
+    if (!activeUserId) {
+      return;
+    }
+
     setMonthlyPlanData((current) => {
       const currentKey =
-        getMonthlyPlanPeriodKey(
+        getUserMonthlyPlanPeriodKey(
+          activeUserId,
           current.year,
           current.month
         );
@@ -280,7 +376,8 @@ export default function Simulador() {
         );
 
       const nextKey =
-        getMonthlyPlanPeriodKey(
+        getUserMonthlyPlanPeriodKey(
+          activeUserId,
           nextPeriod.year,
           nextPeriod.month
         );
@@ -307,8 +404,23 @@ export default function Simulador() {
 
   useFocusEffect(
     useCallback(() => {
+      let active = true;
+
       async function load() {
+        if (!activeUserId) {
+          setExpenses([]);
+          return;
+        }
+
         const data = await getAllExpenses();
+
+        if (
+          !active ||
+          activeUserIdRef.current !==
+            activeUserId
+        ) {
+          return;
+        }
 
         const normalizedData = (data || []).map((item: any) => {
           const safeValue = Number(item.valor);
@@ -325,7 +437,11 @@ export default function Simulador() {
       }
 
       void load();
-    }, [])
+
+      return () => {
+        active = false;
+      };
+    }, [activeUserId])
   );
 
 
@@ -389,8 +505,18 @@ export default function Simulador() {
           onSave={async (
             value: CategoryPlanningSaveData
           ) => {
+            if (!activeUserId) {
+              throw new Error(
+                "Entre novamente na sua conta para salvar as metas."
+              );
+            }
+
+            const savingUserId =
+              activeUserId;
+
             const periodKey =
-              getMonthlyPlanPeriodKey(
+              getUserMonthlyPlanPeriodKey(
+                savingUserId,
                 monthlyPlanData.year,
                 monthlyPlanData.month
               );
@@ -416,6 +542,15 @@ export default function Simulador() {
                       item.plannedAmount as number,
                   })),
               });
+
+            if (
+              activeUserIdRef.current !==
+              savingUserId
+            ) {
+              throw new Error(
+                "A conta mudou durante o salvamento. Abra o planejamento novamente."
+              );
+            }
 
             const savedGoals = new Map(
               savedPlan.goals.map(
@@ -459,7 +594,8 @@ export default function Simulador() {
 
             setMonthlyPlanData((current) => {
               const currentKey =
-                getMonthlyPlanPeriodKey(
+                getUserMonthlyPlanPeriodKey(
+                  savingUserId,
                   current.year,
                   current.month
                 );
