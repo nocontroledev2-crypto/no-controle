@@ -162,152 +162,66 @@ export async function saveMonthlyPlan(
     );
   }
 
-  const updatedAt =
-    new Date().toISOString();
-
   const {
-    data: planData,
-    error: planError,
-  } = await dbClient
-    .from("monthly_plans")
-    .upsert(
-      {
-        user_id: user.id,
-        year: validated.year,
-        month: validated.month,
-        spending_limit:
-          validated.spendingLimit,
-        status: validated.status,
-        updated_at: updatedAt,
-      },
-      {
-        onConflict:
-          "user_id,year,month",
-      }
-    )
-    .select("*")
-    .single();
+    data: savedPlanId,
+    error: saveError,
+  } = await dbClient.rpc(
+    "save_monthly_plan",
+    {
+      target_year:
+        validated.year,
+      target_month:
+        validated.month,
+      target_spending_limit:
+        validated.spendingLimit,
+      target_status:
+        validated.status,
+      target_goals:
+        validated.goals.map(
+          (goal) => ({
+            category:
+              goal.category,
+            planned_amount:
+              goal.plannedAmount,
+          })
+        ),
+    }
+  );
 
-  if (planError || !planData) {
-    console.error(planError);
+  if (
+    saveError ||
+    typeof savedPlanId !== "string" ||
+    savedPlanId.trim().length === 0
+  ) {
+    console.error(saveError);
 
     throw new Error(
       "Não foi possível salvar o planejamento mensal."
     );
   }
 
-  const {
-    data: existingGoalsData,
-    error: existingGoalsError,
-  } = await dbClient
-    .from("monthly_plan_goals")
-    .select("*")
-    .eq("plan_id", planData.id);
+  const loaded = await loadMonthlyPlan(
+    validated.year,
+    validated.month
+  );
 
-  if (existingGoalsError) {
-    console.error(existingGoalsError);
+  if (loaded.status !== "found") {
+    if (loaded.status === "error") {
+      throw new Error(
+        loaded.message
+      );
+    }
 
     throw new Error(
-      "Não foi possível verificar as metas existentes."
+      "O planejamento foi salvo, mas não pôde ser carregado."
     );
   }
 
-  const existingGoals = (
-    Array.isArray(existingGoalsData)
-      ? existingGoalsData
-      : []
-  ) as MonthlyPlanGoalRecord[];
-
-  if (validated.goals.length > 0) {
-    const {
-      error: goalsUpsertError,
-    } = await dbClient
-      .from("monthly_plan_goals")
-      .upsert(
-        validated.goals.map(
-          (goal) => ({
-            plan_id: planData.id,
-            category: goal.category,
-            planned_amount:
-              goal.plannedAmount,
-            updated_at: updatedAt,
-          })
-        ),
-        {
-          onConflict:
-            "plan_id,category",
-        }
-      );
-
-    if (goalsUpsertError) {
-      console.error(goalsUpsertError);
-
-      throw new Error(
-        "Não foi possível salvar as metas do planejamento."
-      );
-    }
-  }
-
-  const desiredCategories = new Set(
-    validated.goals.map(
-      (goal) => goal.category
-    )
-  );
-
-  const removedCategories =
-    existingGoals
-      .map((goal) => goal.category)
-      .filter(
-        (category) =>
-          !desiredCategories.has(category)
-      );
-
-  if (removedCategories.length > 0) {
-    const {
-      error: goalsDeleteError,
-    } = await dbClient
-      .from("monthly_plan_goals")
-      .delete()
-      .eq("plan_id", planData.id)
-      .in(
-        "category",
-        removedCategories
-      );
-
-    if (goalsDeleteError) {
-      console.error(goalsDeleteError);
-
-      throw new Error(
-        "Não foi possível remover as metas desmarcadas."
-      );
-    }
-  }
-
-  const {
-    data: savedGoalsData,
-    error: savedGoalsError,
-  } = await dbClient
-    .from("monthly_plan_goals")
-    .select("*")
-    .eq("plan_id", planData.id)
-    .order("category", {
-      ascending: true,
-    });
-
-  if (savedGoalsError) {
-    console.error(savedGoalsError);
-
+  if (loaded.plan.id !== savedPlanId) {
     throw new Error(
-      "O planejamento foi salvo, mas não pôde ser conferido."
+      "O planejamento salvo não corresponde ao período carregado."
     );
   }
 
-  return mapMonthlyPlanRecords(
-    planData as MonthlyPlanRecord,
-    (
-      Array.isArray(savedGoalsData)
-        ? savedGoalsData
-        : []
-    ) as MonthlyPlanGoalRecord[]
-  );
+  return loaded.plan;
 }
