@@ -1,6 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "expo-router";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -36,6 +42,9 @@ import type {
   MonthlyPlanPreviewData,
 } from "../components/monthly-plan/types";
 import { Expense, getAllExpenses } from "../storage/expenseStorage";
+import {
+  loadMonthlyPlan,
+} from "../storage/monthlyPlanStorage";
 
 const SIMULATOR_CONFIG_KEY = "@no-controle:simulator-config";
 
@@ -137,6 +146,12 @@ export default function Simulador() {
     Record<string, MonthlyPlanPreviewData>
   >({});
 
+  const monthlyPlanLoadedPeriodsRef =
+    useRef<Set<string>>(new Set());
+
+  const monthlyPlanLoadRequestRef =
+    useRef(0);
+
   const [monthlyPlanData, setMonthlyPlanData] =
     useState<MonthlyPlanPreviewData>(() => {
       const currentDate = new Date();
@@ -154,6 +169,124 @@ export default function Simulador() {
 
       return initialData;
     });
+
+  useEffect(() => {
+    const year = monthlyPlanData.year;
+    const month = monthlyPlanData.month;
+
+    const periodKey =
+      getMonthlyPlanPeriodKey(
+        year,
+        month
+      );
+
+    if (
+      monthlyPlanLoadedPeriodsRef.current.has(
+        periodKey
+      )
+    ) {
+      return;
+    }
+
+    const requestId =
+      monthlyPlanLoadRequestRef.current + 1;
+
+    monthlyPlanLoadRequestRef.current =
+      requestId;
+
+    let cancelled = false;
+
+    async function loadPersistedPlan() {
+      const result =
+        await loadMonthlyPlan(
+          year,
+          month
+        );
+
+      if (
+        cancelled ||
+        requestId !==
+          monthlyPlanLoadRequestRef.current
+      ) {
+        return;
+      }
+
+      if (result.status === "error") {
+        console.error(
+          "Erro ao carregar planejamento mensal:",
+          result.message
+        );
+        return;
+      }
+
+      monthlyPlanLoadedPeriodsRef.current.add(
+        periodKey
+      );
+
+      if (result.status === "not-found") {
+        return;
+      }
+
+      const plannedAmounts = new Map(
+        result.plan.goals.map(
+          (goal) => [
+            goal.category,
+            goal.plannedAmount,
+          ]
+        )
+      );
+
+      const persistedData =
+        createEmptyMonthlyPlanData(
+          result.plan.year,
+          result.plan.month
+        );
+
+      persistedData.status =
+        result.plan.status;
+
+      persistedData.spendingLimit =
+        result.plan.spendingLimit;
+
+      persistedData.categories =
+        persistedData.categories.map(
+          (category) => ({
+            ...category,
+            plannedAmount:
+              plannedAmounts.get(
+                category.category
+              ) ?? null,
+          })
+        );
+
+      monthlyPlanSessionRef.current[
+        periodKey
+      ] = persistedData;
+
+      setMonthlyPlanData((current) => {
+        const currentKey =
+          getMonthlyPlanPeriodKey(
+            current.year,
+            current.month
+          );
+
+        if (currentKey !== periodKey) {
+          return current;
+        }
+
+        return persistedData;
+      });
+    }
+
+    void loadPersistedPlan();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    monthlyPlanData.year,
+    monthlyPlanData.month,
+  ]);
 
   const monthlyPlanPreviewData = useMemo(() => {
     const aggregation =
