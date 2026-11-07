@@ -356,6 +356,7 @@ export default function Simulador() {
         </View>
 
         <MonthlyPlanPreview
+          key={`${monthlyPlanPreviewData.year}-${monthlyPlanPreviewData.month}`}
           data={monthlyPlanPreviewData}
           formatMoney={formatMoney}
           onPlanCategories={
