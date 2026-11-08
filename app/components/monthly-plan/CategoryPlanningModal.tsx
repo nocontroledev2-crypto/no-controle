@@ -227,10 +227,6 @@ export function CategoryPlanningModal({
         preview.categories
       ).map((item) => ({ ...item }));
 
-    setDraftSpendingLimit(
-      preview.spendingLimit
-    );
-
     setDraftCategories(
       previewCategories
     );
@@ -241,7 +237,7 @@ export function CategoryPlanningModal({
           item.category,
           getAdaptiveGoalScaleMax(
             item.plannedAmount,
-            preview.spendingLimit
+            draftSpendingLimit
           ),
         ])
       )
