@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, {
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -87,6 +88,25 @@ export function MonthlyPlanPreview({
         data.spendingLimit
       )
     );
+
+  useEffect(() => {
+    if (
+      data.spendingLimit <=
+      spendingLimitMaximum
+    ) {
+      return;
+    }
+
+    setSpendingLimitMaximum(
+      getAdaptiveGoalScaleMax(
+        data.spendingLimit,
+        data.spendingLimit
+      )
+    );
+  }, [
+    data.spendingLimit,
+    spendingLimitMaximum,
+  ]);
 
   const percentage = summary.realizedPercentage;
   const hasSpendingLimit =
