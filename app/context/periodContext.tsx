@@ -1,4 +1,12 @@
-import React, { createContext, useContext, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
+import { supabase } from "../lib/supabase";
 
 export type Period =
   | "today"
@@ -31,6 +39,49 @@ export function PeriodProvider({
     useState<string | null>(null);
   const [customEndDate, setCustomEndDate] =
     useState<string | null>(null);
+
+  const activeUserIdRef =
+    useRef<string | null | undefined>(
+      undefined
+    );
+
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        const nextUserId =
+          session?.user?.id ?? null;
+
+        if (
+          activeUserIdRef.current ===
+          undefined
+        ) {
+          activeUserIdRef.current =
+            nextUserId;
+          return;
+        }
+
+        if (
+          activeUserIdRef.current ===
+          nextUserId
+        ) {
+          return;
+        }
+
+        activeUserIdRef.current =
+          nextUserId;
+
+        setPeriodState("month");
+        setCustomStartDate(null);
+        setCustomEndDate(null);
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   function setPeriod(nextPeriod: Period) {
     setPeriodState(nextPeriod);
