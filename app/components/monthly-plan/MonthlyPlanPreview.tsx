@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React, {
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {
@@ -89,24 +90,45 @@ export function MonthlyPlanPreview({
       )
     );
 
+  const interactiveLimitRef =
+    useRef<number | null>(null);
+
   useEffect(() => {
     if (
-      data.spendingLimit <=
+      interactiveLimitRef.current ===
+      data.spendingLimit
+    ) {
+      interactiveLimitRef.current = null;
+      return;
+    }
+
+    const adaptiveMaximum =
+      getAdaptiveGoalScaleMax(
+        data.spendingLimit,
+        data.spendingLimit
+      );
+
+    if (
+      adaptiveMaximum <=
       spendingLimitMaximum
     ) {
       return;
     }
 
     setSpendingLimitMaximum(
-      getAdaptiveGoalScaleMax(
-        data.spendingLimit,
-        data.spendingLimit
-      )
+      adaptiveMaximum
     );
   }, [
     data.spendingLimit,
     spendingLimitMaximum,
   ]);
+
+  function handleSpendingLimitChange(
+    value: number
+  ) {
+    interactiveLimitRef.current = value;
+    onSpendingLimitChange?.(value);
+  }
 
   const percentage = summary.realizedPercentage;
   const hasSpendingLimit =
@@ -182,7 +204,7 @@ export function MonthlyPlanPreview({
             value={data.spendingLimit}
             maximum={spendingLimitMaximum}
             formatMoney={formatMoney}
-            onChange={onSpendingLimitChange}
+            onChange={handleSpendingLimitChange}
             readOnly={isSpendingLimitReadOnly}
             onRequestExpand={() =>
               setSpendingLimitMaximum((current) =>
