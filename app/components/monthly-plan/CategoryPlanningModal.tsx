@@ -12,6 +12,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 
 import {
@@ -74,6 +75,9 @@ export function CategoryPlanningModal({
   onClose,
   onSave,
 }: CategoryPlanningModalProps) {
+  const { width } = useWindowDimensions();
+  const isWideModal = width >= 760;
+
   const [draftCategories, setDraftCategories] =
     useState<MonthlyPlanCategory[]>(() =>
       completeCategoriesForPlanning(
@@ -315,7 +319,12 @@ export function CategoryPlanningModal({
       onRequestClose={closeModal}
     >
       <View style={styles.overlay}>
-        <View style={styles.modalBox}>
+        <View
+          style={[
+            styles.modalBox,
+            isWideModal && styles.modalBoxWide,
+          ]}
+        >
           <View style={styles.header}>
             <View style={styles.headerText}>
               <Text style={styles.title}>
@@ -413,58 +422,68 @@ export function CategoryPlanningModal({
             </View>
           </View>
 
-          {visible ? (
-            <HistoricalPlanReference
-              key={`${data.year}-${data.month}`}
-              year={data.year}
-              month={data.month}
-              expenses={expenses}
-              formatMoney={formatMoney}
-              onApply={applyHistoricalPreview}
-            />
-          ) : null}
-
-          <Text style={styles.sectionTitle}>
-            Metas das categorias
-          </Text>
-
           <ScrollView
-            style={styles.categoryScroll}
-            contentContainerStyle={styles.categoryContent}
-            showsVerticalScrollIndicator={false}
+            style={styles.bodyScroll}
+            contentContainerStyle={styles.bodyContent}
+            showsVerticalScrollIndicator
           >
-            {draftCategories.map((item) => {
-              const currentValue =
-                item.plannedAmount ?? 0;
+            {visible ? (
+              <HistoricalPlanReference
+                key={`${data.year}-${data.month}`}
+                year={data.year}
+                month={data.month}
+                expenses={expenses}
+                formatMoney={formatMoney}
+                onApply={applyHistoricalPreview}
+              />
+            ) : null}
 
-              const maximum =
-                draftMaximums[item.category] ??
-                getAdaptiveGoalScaleMax(
-                  item.plannedAmount,
-                  data.spendingLimit
+            <Text style={styles.sectionTitle}>
+              Metas das categorias
+            </Text>
+
+            <View style={styles.categoryGrid}>
+              {draftCategories.map((item) => {
+                const currentValue =
+                  item.plannedAmount ?? 0;
+
+                const maximum =
+                  draftMaximums[item.category] ??
+                  getAdaptiveGoalScaleMax(
+                    item.plannedAmount,
+                    data.spendingLimit
+                  );
+
+                return (
+                  <View
+                    key={item.category}
+                    style={[
+                      styles.categoryItem,
+                      isWideModal &&
+                        styles.categoryItemWide,
+                    ]}
+                  >
+                    <CategoryGoalControl
+                      category={item.category}
+                      value={currentValue}
+                      maximum={maximum}
+                      formatMoney={formatMoney}
+                      onChange={(value) =>
+                        updateCategoryGoal(
+                          item.category,
+                          value
+                        )
+                      }
+                      onRequestExpand={() =>
+                        expandCategoryScale(
+                          item.category
+                        )
+                      }
+                    />
+                  </View>
                 );
-
-              return (
-                <CategoryGoalControl
-                  key={item.category}
-                  category={item.category}
-                  value={currentValue}
-                  maximum={maximum}
-                  formatMoney={formatMoney}
-                  onChange={(value) =>
-                    updateCategoryGoal(
-                      item.category,
-                      value
-                    )
-                  }
-                  onRequestExpand={() =>
-                    expandCategoryScale(
-                      item.category
-                    )
-                  }
-                />
-              );
-            })}
+              })}
+            </View>
           </ScrollView>
 
           <View style={styles.footer}>
@@ -544,6 +563,10 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderColor: MONTHLY_PLAN_COLORS.border,
+    overflow: "hidden",
+  },
+  modalBoxWide: {
+    maxWidth: 920,
   },
   header: {
     flexDirection: "row",
@@ -631,15 +654,27 @@ const styles = StyleSheet.create({
     color: MONTHLY_PLAN_COLORS.text,
     fontSize: 14,
     fontWeight: "900",
-    marginTop: 17,
     marginBottom: 9,
   },
-  categoryScroll: {
+  bodyScroll: {
     flex: 1,
+    minHeight: 0,
   },
-  categoryContent: {
-    gap: 9,
+  bodyContent: {
+    paddingTop: 14,
     paddingBottom: 8,
+  },
+  categoryGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  categoryItem: {
+    width: "100%",
+  },
+  categoryItemWide: {
+    width: "49%",
+    flexGrow: 1,
   },
   categoryRow: {
     flexDirection: "row",
