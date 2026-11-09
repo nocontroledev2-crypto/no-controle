@@ -181,12 +181,15 @@ export default function Simulador() {
       return;
     }
 
+    const loadingUserId =
+      activeUserId;
+
     const year = monthlyPlanData.year;
     const month = monthlyPlanData.month;
 
     const periodKey =
       getUserMonthlyPlanPeriodKey(
-        activeUserId,
+        loadingUserId,
         year,
         month
       );
@@ -219,7 +222,7 @@ export default function Simulador() {
         requestId !==
           monthlyPlanLoadRequestRef.current ||
         activeUserIdRef.current !==
-          activeUserId
+          loadingUserId
       ) {
         return;
       }
@@ -278,7 +281,8 @@ export default function Simulador() {
 
       setMonthlyPlanData((current) => {
         const currentKey =
-          getMonthlyPlanPeriodKey(
+          getUserMonthlyPlanPeriodKey(
+            loadingUserId,
             current.year,
             current.month
           );
