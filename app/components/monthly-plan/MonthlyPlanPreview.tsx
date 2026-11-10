@@ -358,12 +358,12 @@ export function MonthlyPlanPreview({
           >
             <Ionicons
               name="options-outline"
-              size={16}
-              color={MONTHLY_PLAN_COLORS.brand}
+              size={17}
+              color={MONTHLY_PLAN_COLORS.surface}
             />
 
             <Text style={styles.planButtonText}>
-              Planejar
+              Planejar categorias
             </Text>
           </TouchableOpacity>
         ) : null}
@@ -534,12 +534,14 @@ const styles = StyleSheet.create({
   },
   categoriesHeader: {
     flexDirection: "row",
+    flexWrap: "wrap",
     alignItems: "center",
     justifyContent: "space-between",
     gap: 12,
   },
   categoriesTitleContainer: {
     flex: 1,
+    minWidth: 210,
   },
   categoriesTitle: {
     color: MONTHLY_PLAN_COLORS.text,
@@ -552,18 +554,30 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
   planButton: {
+    minHeight: 40,
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    justifyContent: "center",
+    alignSelf: "flex-end",
+    marginLeft: "auto",
+    gap: 7,
     borderRadius: 999,
-    paddingVertical: 9,
-    paddingHorizontal: 12,
-    backgroundColor: MONTHLY_PLAN_COLORS.brandSoft,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    backgroundColor: MONTHLY_PLAN_COLORS.brand,
+    shadowColor: MONTHLY_PLAN_COLORS.brand,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    elevation: 2,
   },
   planButtonText: {
-    color: MONTHLY_PLAN_COLORS.brand,
-    fontSize: 12,
-    fontWeight: "800",
+    color: MONTHLY_PLAN_COLORS.surface,
+    fontSize: 13,
+    fontWeight: "900",
   },
   categoryList: {
     gap: 10,
