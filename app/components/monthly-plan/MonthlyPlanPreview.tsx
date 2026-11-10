@@ -98,12 +98,7 @@ export function MonthlyPlanPreview({
     () =>
       orderedCategories.reduce(
         (maximum, item) => {
-          const hasGoal =
-            item.plannedAmount !== null &&
-            item.plannedAmount > 0;
-
           if (
-            hasGoal ||
             item.realizedAmount <= 0
           ) {
             return maximum;
