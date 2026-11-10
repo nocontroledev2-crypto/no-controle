@@ -31,12 +31,20 @@ import {
   MONTHLY_PLAN_COLORS,
 } from "./visualTokens";
 
+export type SpendingLimitSaveStatus =
+  | "idle"
+  | "saving"
+  | "saved"
+  | "error";
+
 type MonthlyPlanPreviewProps = {
   data: MonthlyPlanPreviewData;
   formatMoney: (value: number) => string;
   onPlanCategories?: () => void;
   onCategoryPress?: (category: string) => void;
   onSpendingLimitChange?: (value: number) => void;
+  onSpendingLimitChangeComplete?: (value: number) => void;
+  spendingLimitSaveStatus?: SpendingLimitSaveStatus;
   onPreviousMonth?: () => void;
   onNextMonth?: () => void;
   isSpendingLimitReadOnly?: boolean;
@@ -63,6 +71,8 @@ export function MonthlyPlanPreview({
   onPlanCategories,
   onCategoryPress,
   onSpendingLimitChange,
+  onSpendingLimitChangeComplete,
+  spendingLimitSaveStatus = "idle",
   onPreviousMonth,
   onNextMonth,
   isSpendingLimitReadOnly = false,
@@ -130,6 +140,15 @@ export function MonthlyPlanPreview({
     onSpendingLimitChange?.(value);
   }
 
+  const spendingLimitSaveText =
+    spendingLimitSaveStatus === "saving"
+      ? "Salvando..."
+      : spendingLimitSaveStatus === "saved"
+      ? "Salvo"
+      : spendingLimitSaveStatus === "error"
+      ? "Não foi possível salvar"
+      : "";
+
   const percentage = summary.realizedPercentage;
   const hasSpendingLimit =
     percentage !== null;
@@ -195,6 +214,19 @@ export function MonthlyPlanPreview({
             <Text style={styles.limitValue}>
               {formatMoney(data.spendingLimit)}
             </Text>
+
+            {spendingLimitSaveText ? (
+              <Text
+                style={[
+                  styles.limitSaveStatus,
+                  spendingLimitSaveStatus === "error" &&
+                    styles.limitSaveStatusError,
+                ]}
+                accessibilityLiveRegion="polite"
+              >
+                {spendingLimitSaveText}
+              </Text>
+            ) : null}
           </View>
 
         </View>
@@ -205,6 +237,9 @@ export function MonthlyPlanPreview({
             maximum={spendingLimitMaximum}
             formatMoney={formatMoney}
             onChange={handleSpendingLimitChange}
+            onChangeComplete={
+              onSpendingLimitChangeComplete
+            }
             readOnly={isSpendingLimitReadOnly}
             onRequestExpand={() =>
               setSpendingLimitMaximum((current) =>
@@ -391,6 +426,15 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: "900",
     marginTop: 4,
+  },
+  limitSaveStatus: {
+    color: MONTHLY_PLAN_COLORS.brand,
+    fontSize: 11,
+    fontWeight: "800",
+    marginTop: 3,
+  },
+  limitSaveStatusError: {
+    color: "#C62828",
   },
   realizedHeader: {
     flexDirection: "row",

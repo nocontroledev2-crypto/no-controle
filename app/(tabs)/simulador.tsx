@@ -19,7 +19,10 @@ import {
   CategoryPlanningModal,
   type CategoryPlanningSaveData,
 } from "../components/monthly-plan/CategoryPlanningModal";
-import { MonthlyPlanPreview } from "../components/monthly-plan/MonthlyPlanPreview";
+import {
+  MonthlyPlanPreview,
+  type SpendingLimitSaveStatus,
+} from "../components/monthly-plan/MonthlyPlanPreview";
 import { aggregateMonthlyPlanExpenses } from "../components/monthly-plan/expenseAggregation";
 import {
   createEmptyMonthlyPlanData,
@@ -90,6 +93,20 @@ export default function Simulador() {
   const monthlyPlanLoadRequestRef =
     useRef(0);
 
+  const spendingLimitSaveRequestRef =
+    useRef(0);
+
+  const spendingLimitSavingRef =
+    useRef(false);
+
+  const spendingLimitSavedTimerRef =
+    useRef<ReturnType<typeof setTimeout> | null>(
+      null
+    );
+
+  const [spendingLimitSaveStatus, setSpendingLimitSaveStatus] =
+    useState<SpendingLimitSaveStatus>("idle");
+
   const activeUserIdRef =
     useRef<string | null>(null);
 
@@ -105,6 +122,18 @@ export default function Simulador() {
         currentDate.getMonth() + 1
       );
     });
+
+  useEffect(() => {
+    return () => {
+      if (
+        spendingLimitSavedTimerRef.current
+      ) {
+        clearTimeout(
+          spendingLimitSavedTimerRef.current
+        );
+      }
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -123,9 +152,21 @@ export default function Simulador() {
         nextUserId;
 
       monthlyPlanLoadRequestRef.current += 1;
+      spendingLimitSaveRequestRef.current += 1;
       monthlyPlanSessionRef.current = {};
       monthlyPlanLoadedPeriodsRef.current.clear();
 
+      if (
+        spendingLimitSavedTimerRef.current
+      ) {
+        clearTimeout(
+          spendingLimitSavedTimerRef.current
+        );
+        spendingLimitSavedTimerRef.current =
+          null;
+      }
+
+      setSpendingLimitSaveStatus("idle");
       setShowCategoryPlanningModal(false);
       setExpenses([]);
 
@@ -359,6 +400,20 @@ export default function Simulador() {
       return;
     }
 
+    spendingLimitSaveRequestRef.current += 1;
+
+    if (
+      spendingLimitSavedTimerRef.current
+    ) {
+      clearTimeout(
+        spendingLimitSavedTimerRef.current
+      );
+      spendingLimitSavedTimerRef.current =
+        null;
+    }
+
+    setSpendingLimitSaveStatus("idle");
+
     setMonthlyPlanData((current) => {
       const currentKey =
         getUserMonthlyPlanPeriodKey(
@@ -404,6 +459,206 @@ export default function Simulador() {
 
       return emptyPlan;
     });
+  }
+
+  async function saveSpendingLimit(
+    completedValue: number
+  ) {
+    if (
+      !activeUserId ||
+      isPastMonthlyPlan ||
+      spendingLimitSavingRef.current
+    ) {
+      return;
+    }
+
+    const savingUserId =
+      activeUserId;
+
+    const sourcePlan = {
+      ...monthlyPlanData,
+      spendingLimit: completedValue,
+      categories:
+        monthlyPlanData.categories.map(
+          (category) => ({
+            ...category,
+          })
+        ),
+    };
+
+    const periodKey =
+      getUserMonthlyPlanPeriodKey(
+        savingUserId,
+        sourcePlan.year,
+        sourcePlan.month
+      );
+
+    const confirmedPlan =
+      monthlyPlanSessionRef.current[
+        periodKey
+      ];
+
+    const requestId =
+      spendingLimitSaveRequestRef.current + 1;
+
+    spendingLimitSaveRequestRef.current =
+      requestId;
+
+    spendingLimitSavingRef.current =
+      true;
+
+    if (
+      spendingLimitSavedTimerRef.current
+    ) {
+      clearTimeout(
+        spendingLimitSavedTimerRef.current
+      );
+      spendingLimitSavedTimerRef.current =
+        null;
+    }
+
+    setSpendingLimitSaveStatus(
+      "saving"
+    );
+
+    try {
+      const savedPlan =
+        await saveMonthlyPlan({
+          year: sourcePlan.year,
+          month: sourcePlan.month,
+          spendingLimit:
+            completedValue,
+          status:
+            sourcePlan.status,
+          goals: sourcePlan.categories
+            .filter(
+              (item) =>
+                item.plannedAmount !== null &&
+                item.plannedAmount > 0
+            )
+            .map((item) => ({
+              category:
+                item.category,
+              plannedAmount:
+                item.plannedAmount as number,
+            })),
+        });
+
+      if (
+        requestId !==
+          spendingLimitSaveRequestRef.current ||
+        activeUserIdRef.current !==
+          savingUserId
+      ) {
+        return;
+      }
+
+      const currentPeriodKey =
+        getUserMonthlyPlanPeriodKey(
+          savingUserId,
+          monthlyPlanData.year,
+          monthlyPlanData.month
+        );
+
+      if (
+        currentPeriodKey !==
+        periodKey
+      ) {
+        return;
+      }
+
+      const savedGoals = new Map(
+        savedPlan.goals.map(
+          (goal) => [
+            goal.category,
+            goal.plannedAmount,
+          ]
+        )
+      );
+
+      const persistedData =
+        createEmptyMonthlyPlanData(
+          savedPlan.year,
+          savedPlan.month
+        );
+
+      persistedData.status =
+        savedPlan.status;
+
+      persistedData.spendingLimit =
+        savedPlan.spendingLimit;
+
+      persistedData.categories =
+        persistedData.categories.map(
+          (category) => ({
+            ...category,
+            plannedAmount:
+              savedGoals.get(
+                category.category
+              ) ?? null,
+          })
+        );
+
+      monthlyPlanSessionRef.current[
+        periodKey
+      ] = persistedData;
+
+      monthlyPlanLoadedPeriodsRef.current.add(
+        periodKey
+      );
+
+      setMonthlyPlanData(
+        persistedData
+      );
+
+      setSpendingLimitSaveStatus(
+        "saved"
+      );
+
+      spendingLimitSavedTimerRef.current =
+        setTimeout(() => {
+          setSpendingLimitSaveStatus(
+            "idle"
+          );
+
+          spendingLimitSavedTimerRef.current =
+            null;
+        }, 2000);
+    } catch (error) {
+      console.error(
+        "Erro ao salvar limite global:",
+        error
+      );
+
+      if (
+        requestId !==
+          spendingLimitSaveRequestRef.current ||
+        activeUserIdRef.current !==
+          savingUserId
+      ) {
+        return;
+      }
+
+      if (confirmedPlan) {
+        setMonthlyPlanData(
+          confirmedPlan
+        );
+      } else {
+        setMonthlyPlanData(
+          (current) => ({
+            ...current,
+            spendingLimit: 0,
+          })
+        );
+      }
+
+      setSpendingLimitSaveStatus(
+        "error"
+      );
+    } finally {
+      spendingLimitSavingRef.current =
+        false;
+    }
   }
 
   useFocusEffect(
@@ -489,13 +744,25 @@ export default function Simulador() {
             navigateMonthlyPlanPeriod(1)
           }
           isSpendingLimitReadOnly={
-            isPastMonthlyPlan
+            isPastMonthlyPlan ||
+            spendingLimitSaveStatus ===
+              "saving"
           }
-          onSpendingLimitChange={(value) =>
+          spendingLimitSaveStatus={
+            spendingLimitSaveStatus
+          }
+          onSpendingLimitChange={(value) => {
+            setSpendingLimitSaveStatus(
+              "idle"
+            );
+
             setMonthlyPlanData((current) => ({
               ...current,
               spendingLimit: value,
-            }))
+            }));
+          }}
+          onSpendingLimitChangeComplete={
+            saveSpendingLimit
           }
         />
 

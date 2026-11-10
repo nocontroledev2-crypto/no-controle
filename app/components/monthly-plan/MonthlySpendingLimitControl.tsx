@@ -25,6 +25,7 @@ type MonthlySpendingLimitControlProps = {
   maximum: number;
   formatMoney: (value: number) => string;
   onChange: (value: number) => void;
+  onChangeComplete?: (value: number) => void;
   onRequestExpand?: () => void;
   readOnly?: boolean;
 };
@@ -36,6 +37,7 @@ export function MonthlySpendingLimitControl({
   maximum,
   formatMoney,
   onChange,
+  onChangeComplete,
   onRequestExpand,
   readOnly = false,
 }: MonthlySpendingLimitControlProps) {
@@ -90,13 +92,25 @@ export function MonthlySpendingLimitControl({
         return;
       }
 
+      const completedValue =
+        gestureValueRef.current;
+
       if (
-        gestureValueRef.current >= maximum
+        completedValue >= maximum
       ) {
         onRequestExpand?.();
       }
+
+      onChangeComplete?.(
+        completedValue
+      );
     },
-    [maximum, onRequestExpand, readOnly]
+    [
+      maximum,
+      onChangeComplete,
+      onRequestExpand,
+      readOnly,
+    ]
   );
 
   const handleAccessibilityAction = useCallback(
@@ -116,14 +130,28 @@ export function MonthlySpendingLimitControl({
         return;
       }
 
-      onChange(
+      const nextValue =
         snapGoalAmount(
           value + step * direction,
           maximum
-        )
+        );
+
+      gestureValueRef.current =
+        nextValue;
+
+      onChange(nextValue);
+      onChangeComplete?.(
+        nextValue
       );
     },
-    [maximum, onChange, readOnly, step, value]
+    [
+      maximum,
+      onChange,
+      onChangeComplete,
+      readOnly,
+      step,
+      value,
+    ]
   );
 
   return (
