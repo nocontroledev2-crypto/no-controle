@@ -99,11 +99,13 @@ export function MonthlyCategoryCard({
           </View>
         </View>
 
-        <Ionicons
-          name="chevron-forward"
-          size={19}
-          color={MONTHLY_PLAN_COLORS.textMuted}
-        />
+        {onPress ? (
+          <Ionicons
+            name="chevron-forward"
+            size={19}
+            color={MONTHLY_PLAN_COLORS.textMuted}
+          />
+        ) : null}
       </View>
 
       {hasGoal ? (
