@@ -45,6 +45,7 @@ type MonthlyPlanPreviewProps = {
   onSpendingLimitChange?: (value: number) => void;
   onSpendingLimitChangeComplete?: (value: number) => void;
   spendingLimitSaveStatus?: SpendingLimitSaveStatus;
+  isHistoricalPeriod?: boolean;
   onPreviousMonth?: () => void;
   onNextMonth?: () => void;
   isSpendingLimitReadOnly?: boolean;
@@ -73,6 +74,7 @@ export function MonthlyPlanPreview({
   onSpendingLimitChange,
   onSpendingLimitChangeComplete,
   spendingLimitSaveStatus = "idle",
+  isHistoricalPeriod = false,
   onPreviousMonth,
   onNextMonth,
   isSpendingLimitReadOnly = false,
@@ -326,23 +328,25 @@ export function MonthlyPlanPreview({
           </Text>
         </View>
 
-        <TouchableOpacity
-          style={styles.planButton}
-          onPress={onPlanCategories}
-          activeOpacity={0.78}
-          accessibilityRole="button"
-          accessibilityLabel="Planejar metas por categoria"
-        >
-          <Ionicons
-            name="options-outline"
-            size={16}
-            color={MONTHLY_PLAN_COLORS.brand}
-          />
+        {!isHistoricalPeriod ? (
+          <TouchableOpacity
+            style={styles.planButton}
+            onPress={onPlanCategories}
+            activeOpacity={0.78}
+            accessibilityRole="button"
+            accessibilityLabel="Planejar metas por categoria"
+          >
+            <Ionicons
+              name="options-outline"
+              size={16}
+              color={MONTHLY_PLAN_COLORS.brand}
+            />
 
-          <Text style={styles.planButtonText}>
-            Planejar
-          </Text>
-        </TouchableOpacity>
+            <Text style={styles.planButtonText}>
+              Planejar
+            </Text>
+          </TouchableOpacity>
+        ) : null}
       </View>
 
       <View style={styles.categoryList}>
@@ -356,7 +360,14 @@ export function MonthlyPlanPreview({
                 ? () => onCategoryPress(item.category)
                 : undefined
             }
-            onDefineGoal={onPlanCategories}
+            onDefineGoal={
+              isHistoricalPeriod
+                ? undefined
+                : onPlanCategories
+            }
+            isHistoricalPeriod={
+              isHistoricalPeriod
+            }
           />
         ))}
       </View>

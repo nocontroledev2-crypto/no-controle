@@ -24,6 +24,7 @@ type MonthlyCategoryCardProps = {
   formatMoney: (value: number) => string;
   onPress?: () => void;
   onDefineGoal?: () => void;
+  isHistoricalPeriod?: boolean;
 };
 
 export function MonthlyCategoryCard({
@@ -31,6 +32,7 @@ export function MonthlyCategoryCard({
   formatMoney,
   onPress,
   onDefineGoal,
+  isHistoricalPeriod = false,
 }: MonthlyCategoryCardProps) {
   const hasGoal =
     item.plannedAmount !== null && item.plannedAmount > 0;
@@ -134,30 +136,53 @@ export function MonthlyCategoryCard({
             />
           ) : null}
 
-          <View style={styles.noGoalStatus}>
+          <View
+            style={[
+              styles.noGoalStatus,
+              isHistoricalPeriod &&
+                styles.noGoalStatusHistorical,
+            ]}
+          >
             <View style={styles.noGoalMessage}>
               <Ionicons
-                name="alert-circle-outline"
+                name={
+                  isHistoricalPeriod
+                    ? "time-outline"
+                    : "alert-circle-outline"
+                }
                 size={18}
-                color={MONTHLY_PLAN_COLORS.yellow}
+                color={
+                  isHistoricalPeriod
+                    ? MONTHLY_PLAN_COLORS.textMuted
+                    : MONTHLY_PLAN_COLORS.yellow
+                }
               />
 
               <View style={styles.noGoalTextContainer}>
-                <Text style={styles.noGoalInlineText}>
-                  <Text style={styles.noGoalInlineTitle}>
-                    {hasUnplannedActivity
-                      ? "Gasto não planejado: "
-                      : "Meta ainda não definida: "}
+                {isHistoricalPeriod ? (
+                  <Text style={styles.noGoalInlineText}>
+                    <Text style={styles.noGoalInlineTitle}>
+                      Sem meta definida neste mês.
+                    </Text>
                   </Text>
+                ) : (
+                  <Text style={styles.noGoalInlineText}>
+                    <Text style={styles.noGoalInlineTitle}>
+                      {hasUnplannedActivity
+                        ? "Gasto não planejado: "
+                        : "Meta ainda não definida: "}
+                    </Text>
 
-                  {hasUnplannedActivity
-                    ? "defina uma meta para acompanhar o consumo."
-                    : "defina uma meta para acompanhar esta categoria."}
-                </Text>
+                    {hasUnplannedActivity
+                      ? "defina uma meta para acompanhar o consumo."
+                      : "defina uma meta para acompanhar esta categoria."}
+                  </Text>
+                )}
               </View>
             </View>
 
-            {onDefineGoal ? (
+            {onDefineGoal &&
+            !isHistoricalPeriod ? (
               <TouchableOpacity
                 style={styles.defineGoalButton}
                 onPress={onDefineGoal}
@@ -273,6 +298,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: 12,
+  },
+  noGoalStatusHistorical: {
+    borderColor: MONTHLY_PLAN_COLORS.border,
   },
   noGoalMessage: {
     flex: 1,

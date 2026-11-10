@@ -748,6 +748,9 @@ export default function Simulador() {
             spendingLimitSaveStatus ===
               "saving"
           }
+          isHistoricalPeriod={
+            isPastMonthlyPlan
+          }
           spendingLimitSaveStatus={
             spendingLimitSaveStatus
           }
