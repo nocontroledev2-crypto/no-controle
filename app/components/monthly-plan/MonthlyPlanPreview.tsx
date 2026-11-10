@@ -94,6 +94,31 @@ export function MonthlyPlanPreview({
     [data.categories]
   );
 
+  const unplannedComparisonMaximum = useMemo(
+    () =>
+      orderedCategories.reduce(
+        (maximum, item) => {
+          const hasGoal =
+            item.plannedAmount !== null &&
+            item.plannedAmount > 0;
+
+          if (
+            hasGoal ||
+            item.realizedAmount <= 0
+          ) {
+            return maximum;
+          }
+
+          return Math.max(
+            maximum,
+            item.realizedAmount
+          );
+        },
+        0
+      ),
+    [orderedCategories]
+  );
+
   const [spendingLimitMaximum, setSpendingLimitMaximum] =
     useState(() =>
       getAdaptiveGoalScaleMax(
@@ -367,6 +392,9 @@ export function MonthlyPlanPreview({
             }
             isHistoricalPeriod={
               isHistoricalPeriod
+            }
+            unplannedComparisonMaximum={
+              unplannedComparisonMaximum
             }
           />
         ))}
