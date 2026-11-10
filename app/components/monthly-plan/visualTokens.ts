@@ -3,6 +3,7 @@ import type { ConsumptionStatus } from "./calculations";
 export const MONTHLY_PLAN_COLORS = {
   brand: "#0A8F55",
   brandSoft: "#E8F5EE",
+  brandBorder: "#B9E5D0",
   green: "#18A566",
   yellow: "#D6A415",
   orange: "#E47A1F",

@@ -405,10 +405,18 @@ const styles = StyleSheet.create({
   hero: {
     backgroundColor: MONTHLY_PLAN_COLORS.surface,
     borderRadius: 24,
-    borderWidth: 1,
-    borderColor: MONTHLY_PLAN_COLORS.border,
+    borderWidth: 2,
+    borderColor: MONTHLY_PLAN_COLORS.brandBorder,
     padding: 18,
     gap: 17,
+    shadowColor: MONTHLY_PLAN_COLORS.brand,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 1,
   },
   periodRow: {
     flexDirection: "row",
