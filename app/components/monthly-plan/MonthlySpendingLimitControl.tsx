@@ -13,9 +13,11 @@ import {
 } from "react-native";
 
 import {
+  GOAL_EXPANSION_ZONE_RATIO,
   getGoalAmountFromPosition,
   getGoalProgress,
   getGoalStep,
+  isGoalExpansionPosition,
   snapGoalAmount,
 } from "./goalControlMath";
 import { MONTHLY_PLAN_COLORS } from "./visualTokens";
@@ -43,6 +45,9 @@ export function MonthlySpendingLimitControl({
 }: MonthlySpendingLimitControlProps) {
   const [trackWidth, setTrackWidth] = useState(0);
   const gestureValueRef = useRef(value);
+  const gesturePositionRef = useRef(0);
+  const expansionRequestedInGestureRef =
+    useRef(false);
 
   const progress = useMemo(
     () => getGoalProgress(value, maximum),
@@ -73,17 +78,40 @@ export function MonthlySpendingLimitControl({
         return;
       }
 
+      const gesturePosition =
+        event.nativeEvent.locationX;
+
       const nextValue =
         getGoalAmountFromPosition(
-          event.nativeEvent.locationX,
+          gesturePosition,
           trackWidth,
           maximum
         );
+
+      gesturePositionRef.current =
+        gesturePosition;
 
       gestureValueRef.current = nextValue;
       onChange(nextValue);
     },
     [maximum, onChange, readOnly, trackWidth]
+  );
+
+  const handleResponderGrant = useCallback(
+    (event: GestureResponderEvent) => {
+      if (readOnly) {
+        return;
+      }
+
+      expansionRequestedInGestureRef.current =
+        false;
+
+      updateFromEvent(event);
+    },
+    [
+      readOnly,
+      updateFromEvent,
+    ]
   );
 
   const handleResponderRelease = useCallback(
@@ -95,9 +123,19 @@ export function MonthlySpendingLimitControl({
       const completedValue =
         gestureValueRef.current;
 
+      const shouldExpand =
+        isGoalExpansionPosition(
+          gesturePositionRef.current,
+          trackWidth
+        );
+
       if (
-        completedValue >= maximum
+        shouldExpand &&
+        !expansionRequestedInGestureRef.current
       ) {
+        expansionRequestedInGestureRef.current =
+          true;
+
         onRequestExpand?.();
       }
 
@@ -106,11 +144,19 @@ export function MonthlySpendingLimitControl({
       );
     },
     [
-      maximum,
       onChangeComplete,
       onRequestExpand,
       readOnly,
+      trackWidth,
     ]
+  );
+
+  const handleResponderTerminate = useCallback(
+    () => {
+      expansionRequestedInGestureRef.current =
+        false;
+    },
+    []
   );
 
   const handleAccessibilityAction = useCallback(
@@ -167,9 +213,12 @@ export function MonthlySpendingLimitControl({
         onMoveShouldSetResponder={() => !readOnly}
         onMoveShouldSetResponderCapture={() => !readOnly}
         onResponderTerminationRequest={() => false}
-        onResponderGrant={updateFromEvent}
+        onResponderGrant={handleResponderGrant}
         onResponderMove={updateFromEvent}
         onResponderRelease={handleResponderRelease}
+        onResponderTerminate={
+          handleResponderTerminate
+        }
         accessibilityRole={
           readOnly ? "text" : "adjustable"
         }
@@ -208,6 +257,28 @@ export function MonthlySpendingLimitControl({
           style={styles.track}
           pointerEvents="none"
         >
+          {!readOnly ? (
+            <View
+              style={[
+                styles.expansionZone,
+                {
+                  width: `${
+                    GOAL_EXPANSION_ZONE_RATIO *
+                    100
+                  }%`,
+                },
+              ]}
+            >
+              <View style={styles.expansionMark} />
+              <View style={styles.expansionMark} />
+              <View style={styles.expansionMark} />
+
+              <Text style={styles.expansionPlus}>
+                +
+              </Text>
+            </View>
+          ) : null}
+
           <View
             style={[
               styles.fill,
@@ -263,8 +334,44 @@ const styles = StyleSheet.create({
     borderColor: MONTHLY_PLAN_COLORS.border,
     position: "relative",
   },
+  expansionZone: {
+    position: "absolute",
+    top: -1,
+    right: -1,
+    bottom: -1,
+    zIndex: 2,
+    overflow: "hidden",
+    borderTopRightRadius: 999,
+    borderBottomRightRadius: 999,
+    borderLeftWidth: 1,
+    borderLeftColor:
+      MONTHLY_PLAN_COLORS.textMuted,
+    backgroundColor:
+      MONTHLY_PLAN_COLORS.trackDark,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: 3,
+    paddingRight: 5,
+    opacity: 0.9,
+  },
+  expansionMark: {
+    width: 1,
+    height: 5,
+    borderRadius: 999,
+    backgroundColor:
+      MONTHLY_PLAN_COLORS.textMuted,
+    opacity: 0.45,
+  },
+  expansionPlus: {
+    color: MONTHLY_PLAN_COLORS.brand,
+    fontSize: 13,
+    lineHeight: 14,
+    fontWeight: "900",
+  },
   fill: {
     position: "absolute",
+    zIndex: 1,
     top: -1,
     bottom: -1,
     left: -1,
@@ -273,6 +380,7 @@ const styles = StyleSheet.create({
   },
   thumb: {
     position: "absolute",
+    zIndex: 3,
     top: "50%",
     width: THUMB_SIZE,
     height: THUMB_SIZE,

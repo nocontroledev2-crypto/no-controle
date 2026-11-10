@@ -1,5 +1,46 @@
 import { clampGoalAmount } from "./goalScale";
 
+export const GOAL_ZERO_MAGNET_RATIO =
+  0.05;
+
+export const GOAL_EXPANSION_ZONE_RATIO =
+  0.12;
+
+function getGoalPositionProgress(
+  position: number,
+  width: number
+): number {
+  if (
+    !Number.isFinite(position) ||
+    !Number.isFinite(width) ||
+    width <= 0
+  ) {
+    return 0;
+  }
+
+  return Math.min(
+    Math.max(position / width, 0),
+    1
+  );
+}
+
+export function isGoalExpansionPosition(
+  position: number,
+  width: number
+): boolean {
+  const progress =
+    getGoalPositionProgress(
+      position,
+      width
+    );
+
+  return (
+    width > 0 &&
+    progress >=
+      1 - GOAL_EXPANSION_ZONE_RATIO
+  );
+}
+
 export function getGoalStep(
   maximum: number
 ): number {
@@ -76,10 +117,18 @@ export function getGoalAmountFromPosition(
     return 0;
   }
 
-  const progress = Math.min(
-    Math.max(position / width, 0),
-    1
-  );
+  const progress =
+    getGoalPositionProgress(
+      position,
+      width
+    );
+
+  if (
+    progress <=
+    GOAL_ZERO_MAGNET_RATIO
+  ) {
+    return 0;
+  }
 
   return snapGoalAmount(
     progress * maximum,
