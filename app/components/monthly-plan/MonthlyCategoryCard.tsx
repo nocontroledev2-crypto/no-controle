@@ -60,8 +60,7 @@ export function MonthlyCategoryCard({
     item.realizedAmount > 0 ||
     item.scheduledAmount > 0;
 
-  const historicalComparisonPercentage =
-    isHistoricalPeriod &&
+  const unplannedComparisonPercentage =
     item.realizedAmount > 0 &&
     unplannedComparisonMaximum > 0
       ? Math.min(
@@ -145,41 +144,32 @@ export function MonthlyCategoryCard({
           </Text>
 
           {item.realizedAmount > 0 ? (
-            isHistoricalPeriod ? (
+            <View
+              style={styles.unplannedComparisonTrack}
+              accessibilityRole="progressbar"
+              accessibilityLabel={`${formatMoney(
+                item.realizedAmount
+              )} em comparação com os gastos das categorias sem meta neste mês`}
+              accessibilityValue={{
+                min: 0,
+                max: 100,
+                now: Math.round(
+                  unplannedComparisonPercentage
+                ),
+                text: `${Math.round(
+                  unplannedComparisonPercentage
+                )}% do trilho comparativo`,
+              }}
+            >
               <View
-                style={styles.unplannedComparisonTrack}
-                accessibilityRole="progressbar"
-                accessibilityLabel={`${formatMoney(
-                  item.realizedAmount
-                )} em comparação com os gastos das categorias sem meta neste mês`}
-                accessibilityValue={{
-                  min: 0,
-                  max: 100,
-                  now: Math.round(
-                    historicalComparisonPercentage
-                  ),
-                  text: `${Math.round(
-                    historicalComparisonPercentage
-                  )}% do trilho comparativo`,
-                }}
-              >
-                <View
-                  style={[
-                    styles.unplannedComparisonFill,
-                    {
-                      width: `${historicalComparisonPercentage}%`,
-                    },
-                  ]}
-                />
-              </View>
-            ) : (
-              <View
-                style={styles.unplannedActivityLine}
-                accessibilityLabel={`${formatMoney(
-                  item.realizedAmount
-                )} gastos até agora`}
+                style={[
+                  styles.unplannedComparisonFill,
+                  {
+                    width: `${unplannedComparisonPercentage}%`,
+                  },
+                ]}
               />
-            )
+            </View>
           ) : null}
 
           <View
@@ -327,12 +317,6 @@ const styles = StyleSheet.create({
   },
   noGoalContainer: {
     gap: 8,
-  },
-  unplannedActivityLine: {
-    width: 96,
-    height: 8,
-    borderRadius: 999,
-    backgroundColor: MONTHLY_PLAN_COLORS.green,
   },
   unplannedComparisonTrack: {
     width: "100%",
