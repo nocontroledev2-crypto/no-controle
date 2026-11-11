@@ -50,6 +50,8 @@ export function MonthlySpendingLimitControl({
   const [trackWidth, setTrackWidth] = useState(0);
   const gestureValueRef = useRef(value);
   const gesturePositionRef = useRef(0);
+  const gestureTrackPageXRef =
+    useRef<number | null>(null);
   const expansionRequestedInGestureRef =
     useRef(false);
 
@@ -82,8 +84,14 @@ export function MonthlySpendingLimitControl({
         return;
       }
 
+      const trackPageX =
+        gestureTrackPageXRef.current;
+
       const gesturePosition =
-        event.nativeEvent.locationX;
+        trackPageX === null
+          ? event.nativeEvent.locationX
+          : event.nativeEvent.pageX -
+            trackPageX;
 
       const nextValue =
         getGoalAmountFromPosition(
@@ -109,6 +117,10 @@ export function MonthlySpendingLimitControl({
 
       expansionRequestedInGestureRef.current =
         false;
+
+      gestureTrackPageXRef.current =
+        event.nativeEvent.pageX -
+        event.nativeEvent.locationX;
 
       onInteractionStart?.();
       updateFromEvent(event);
@@ -145,6 +157,9 @@ export function MonthlySpendingLimitControl({
         onRequestExpand?.();
       }
 
+      gestureTrackPageXRef.current =
+        null;
+
       onChangeComplete?.(
         completedValue
       );
@@ -164,6 +179,9 @@ export function MonthlySpendingLimitControl({
     () => {
       expansionRequestedInGestureRef.current =
         false;
+
+      gestureTrackPageXRef.current =
+        null;
 
       onInteractionEnd?.();
     },
