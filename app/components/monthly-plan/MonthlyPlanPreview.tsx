@@ -51,6 +51,9 @@ type MonthlyPlanPreviewProps = {
   isSpendingLimitReadOnly?: boolean;
 };
 
+const INTERNAL_BUILD_LABEL =
+  process.env.EXPO_PUBLIC_INTERNAL_BUILD_LABEL;
+
 const MONTH_NAMES = [
   "Janeiro",
   "Fevereiro",
@@ -212,9 +215,19 @@ export function MonthlyPlanPreview({
           </TouchableOpacity>
 
           <View style={styles.periodTextContainer}>
-            <Text style={styles.eyebrow}>
-              Meu plano do mês
-            </Text>
+            <View style={styles.eyebrowRow}>
+              <Text style={styles.eyebrow}>
+                Meu plano do mês
+              </Text>
+
+              {INTERNAL_BUILD_LABEL ? (
+                <View style={styles.internalBuildBadge}>
+                  <Text style={styles.internalBuildBadgeText}>
+                    {INTERNAL_BUILD_LABEL}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
 
             <Text style={styles.periodText}>
               {monthName} de {data.year}
@@ -453,12 +466,32 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
   },
+  eyebrowRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    flexWrap: "wrap",
+    gap: 6,
+  },
   eyebrow: {
     color: MONTHLY_PLAN_COLORS.brand,
     fontSize: 12,
     fontWeight: "800",
     textTransform: "uppercase",
     letterSpacing: 0.7,
+  },
+  internalBuildBadge: {
+    borderRadius: 999,
+    backgroundColor: MONTHLY_PLAN_COLORS.brandSoft,
+    borderWidth: 1,
+    borderColor: MONTHLY_PLAN_COLORS.brandBorder,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  internalBuildBadgeText: {
+    color: MONTHLY_PLAN_COLORS.brand,
+    fontSize: 9,
+    fontWeight: "900",
   },
   periodText: {
     color: MONTHLY_PLAN_COLORS.text,

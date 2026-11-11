@@ -4,6 +4,9 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_INTERNAL_BUILD_LABEL": "INTERNO C3"
       }
     },
     "production": {
