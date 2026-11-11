@@ -125,7 +125,16 @@ export function MonthlyPlanPreview({
   const interactiveLimitRef =
     useRef<number | null>(null);
 
+  const isSpendingLimitInteractingRef =
+    useRef(false);
+
   useEffect(() => {
+    if (
+      isSpendingLimitInteractingRef.current
+    ) {
+      return;
+    }
+
     if (
       interactiveLimitRef.current ===
       data.spendingLimit
@@ -259,6 +268,14 @@ export function MonthlyPlanPreview({
             maximum={spendingLimitMaximum}
             formatMoney={formatMoney}
             onChange={handleSpendingLimitChange}
+            onInteractionStart={() => {
+              isSpendingLimitInteractingRef.current =
+                true;
+            }}
+            onInteractionEnd={() => {
+              isSpendingLimitInteractingRef.current =
+                false;
+            }}
             onChangeComplete={
               onSpendingLimitChangeComplete
             }

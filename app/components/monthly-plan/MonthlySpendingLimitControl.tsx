@@ -27,6 +27,8 @@ type MonthlySpendingLimitControlProps = {
   maximum: number;
   formatMoney: (value: number) => string;
   onChange: (value: number) => void;
+  onInteractionStart?: () => void;
+  onInteractionEnd?: () => void;
   onChangeComplete?: (value: number) => void;
   onRequestExpand?: () => void;
   readOnly?: boolean;
@@ -39,6 +41,8 @@ export function MonthlySpendingLimitControl({
   maximum,
   formatMoney,
   onChange,
+  onInteractionStart,
+  onInteractionEnd,
   onChangeComplete,
   onRequestExpand,
   readOnly = false,
@@ -106,9 +110,11 @@ export function MonthlySpendingLimitControl({
       expansionRequestedInGestureRef.current =
         false;
 
+      onInteractionStart?.();
       updateFromEvent(event);
     },
     [
+      onInteractionStart,
       readOnly,
       updateFromEvent,
     ]
@@ -142,9 +148,12 @@ export function MonthlySpendingLimitControl({
       onChangeComplete?.(
         completedValue
       );
+
+      onInteractionEnd?.();
     },
     [
       onChangeComplete,
+      onInteractionEnd,
       onRequestExpand,
       readOnly,
       trackWidth,
@@ -155,8 +164,10 @@ export function MonthlySpendingLimitControl({
     () => {
       expansionRequestedInGestureRef.current =
         false;
+
+      onInteractionEnd?.();
     },
-    []
+    [onInteractionEnd]
   );
 
   const handleAccessibilityAction = useCallback(
