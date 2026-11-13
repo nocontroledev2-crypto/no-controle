@@ -40,6 +40,7 @@ export type SpendingLimitSaveStatus =
 type MonthlyPlanPreviewProps = {
   data: MonthlyPlanPreviewData;
   formatMoney: (value: number) => string;
+  formatPercentage: (value: number | null | undefined) => string;
   onPlanCategories?: () => void;
   onCategoryPress?: (category: string) => void;
   onSpendingLimitChange?: (value: number) => void;
@@ -72,6 +73,7 @@ const MONTH_NAMES = [
 export function MonthlyPlanPreview({
   data,
   formatMoney,
+  formatPercentage,
   onPlanCategories,
   onCategoryPress,
   onSpendingLimitChange,
@@ -319,7 +321,7 @@ export function MonthlyPlanPreview({
                 { color: statusColor },
               ]}
             >
-              {percentage}%
+              {formatPercentage(percentage)}
             </Text>
           ) : (
             <Text style={styles.undefinedLimitText}>
@@ -332,6 +334,7 @@ export function MonthlyPlanPreview({
           realizedAmount={data.realizedAmount}
           limitAmount={data.spendingLimit}
           height={18}
+          formatPercentage={formatPercentage}
         />
 
         <View style={styles.metricsGrid}>
@@ -405,6 +408,7 @@ export function MonthlyPlanPreview({
             key={item.category}
             item={item}
             formatMoney={formatMoney}
+            formatPercentage={formatPercentage}
             onPress={
               onCategoryPress
                 ? () => onCategoryPress(item.category)

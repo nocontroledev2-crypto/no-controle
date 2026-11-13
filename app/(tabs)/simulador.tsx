@@ -58,18 +58,6 @@ function getUserMonthlyPlanPeriodKey(
   )}`;
 }
 
-function formatMoney(valor: number | null | undefined) {
-  const safeValue = Number(valor);
-
-  return (Number.isFinite(safeValue) ? safeValue : 0).toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  });
-}
-
-
-
-
 export default function Simulador() {
   const { width } = useWindowDimensions();
   const isMobile = width < 480;
@@ -77,6 +65,8 @@ export default function Simulador() {
   const {
     ocultarValores,
     alternarPrivacidade,
+    formatarValorVisivel,
+    formatarPercentualVisivel,
   } = usePrivacy();
 
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -733,7 +723,8 @@ export default function Simulador() {
         <MonthlyPlanPreview
           key={`${monthlyPlanPreviewData.year}-${monthlyPlanPreviewData.month}`}
           data={monthlyPlanPreviewData}
-          formatMoney={formatMoney}
+          formatMoney={formatarValorVisivel}
+          formatPercentage={formatarPercentualVisivel}
           onPlanCategories={
             openCategoryPlanning
           }
@@ -773,7 +764,8 @@ export default function Simulador() {
           visible={showCategoryPlanningModal}
           data={monthlyPlanPreviewData}
           expenses={expenses}
-          formatMoney={formatMoney}
+          formatMoney={formatarValorVisivel}
+          formatPercentage={formatarPercentualVisivel}
           onClose={() =>
             setShowCategoryPlanningModal(false)
           }

@@ -22,6 +22,7 @@ import {
 type MonthlyCategoryCardProps = {
   item: MonthlyPlanCategory;
   formatMoney: (value: number) => string;
+  formatPercentage: (value: number | null | undefined) => string;
   onPress?: () => void;
   onDefineGoal?: () => void;
   isHistoricalPeriod?: boolean;
@@ -31,6 +32,7 @@ type MonthlyCategoryCardProps = {
 export function MonthlyCategoryCard({
   item,
   formatMoney,
+  formatPercentage,
   onPress,
   onDefineGoal,
   isHistoricalPeriod = false,
@@ -125,7 +127,7 @@ export function MonthlyCategoryCard({
                 { color: statusColor },
               ]}
             >
-              {percentage}%
+              {formatPercentage(percentage)}
             </Text>
           </View>
 
@@ -133,6 +135,7 @@ export function MonthlyCategoryCard({
             realizedAmount={item.realizedAmount}
             limitAmount={item.plannedAmount ?? 0}
             height={12}
+            formatPercentage={formatPercentage}
           />
         </>
       ) : (
@@ -158,9 +161,11 @@ export function MonthlyCategoryCard({
                 now: Math.round(
                   unplannedComparisonPercentage
                 ),
-                text: `${Math.round(
-                  unplannedComparisonPercentage
-                )}% do trilho comparativo`,
+                text: `${formatPercentage(
+                  Math.round(
+                    unplannedComparisonPercentage
+                  )
+                )} do trilho comparativo`,
               }}
             >
               <View

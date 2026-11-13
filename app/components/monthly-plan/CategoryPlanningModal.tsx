@@ -46,6 +46,7 @@ type CategoryPlanningModalProps = {
   data: MonthlyPlanPreviewData;
   expenses: Expense[];
   formatMoney: (value: number) => string;
+  formatPercentage: (value: number | null | undefined) => string;
   onClose: () => void;
   onSave?: (
     value: CategoryPlanningSaveData
@@ -72,6 +73,7 @@ export function CategoryPlanningModal({
   data,
   expenses,
   formatMoney,
+  formatPercentage,
   onClose,
   onSave,
 }: CategoryPlanningModalProps) {
@@ -393,7 +395,9 @@ export function CategoryPlanningModal({
                 ]}
               >
                 {hasSpendingLimit
-                  ? `${distributedPercentage}% distribuído`
+                  ? `${formatPercentage(
+                      distributedPercentage
+                    )} distribuído`
                   : "Limite ainda não definido"}
               </Text>
 

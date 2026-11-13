@@ -14,6 +14,9 @@ type MonthlySpendingBarProps = {
   realizedAmount: number;
   limitAmount: number;
   height?: number;
+  formatPercentage: (
+    value: number | null | undefined
+  ) => string;
 };
 
 const MAX_VISUAL_PERCENTAGE = 140;
@@ -23,6 +26,7 @@ export function MonthlySpendingBar({
   realizedAmount,
   limitAmount,
   height = 14,
+  formatPercentage,
 }: MonthlySpendingBarProps) {
   const percentage =
     calculatePercentage(realizedAmount, limitAmount) ?? 0;
@@ -59,7 +63,9 @@ export function MonthlySpendingBar({
         min: 0,
         max: MAX_VISUAL_PERCENTAGE,
         now: Math.min(normalizedPercentage, MAX_VISUAL_PERCENTAGE),
-        text: `${percentage}% do limite`,
+        text: `${formatPercentage(
+          percentage
+        )} do limite`,
       }}
     >
       <View
