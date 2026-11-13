@@ -6,7 +6,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_INTERNAL_BUILD_LABEL": "INTERNO C3"
+        "EXPO_PUBLIC_INTERNAL_BUILD_LABEL": "INTERNO C4"
       }
     },
     "production": {
