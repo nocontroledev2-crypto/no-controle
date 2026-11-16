@@ -27,6 +27,7 @@ type CategoryGoalControlProps = {
   value: number;
   maximum: number;
   formatMoney: (value: number) => string;
+  compact?: boolean;
   onChange: (value: number) => void;
   onRequestExpand?: () => void;
 };
@@ -38,6 +39,7 @@ export function CategoryGoalControl({
   value,
   maximum,
   formatMoney,
+  compact = false,
   onChange,
   onRequestExpand,
 }: CategoryGoalControlProps) {
@@ -157,7 +159,12 @@ export function CategoryGoalControl({
   );
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        compact && styles.containerCompact,
+      ]}
+    >
       <View style={styles.valueRow}>
         <View style={styles.valueTextContainer}>
           <Text style={styles.categoryName}>
@@ -278,6 +285,10 @@ const styles = StyleSheet.create({
     backgroundColor: MONTHLY_PLAN_COLORS.surface,
     gap: 9,
     userSelect: "none",
+  },
+  containerCompact: {
+    padding: 10,
+    gap: 5,
   },
   valueRow: {
     flexDirection: "row",

@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import {
   Modal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -77,8 +78,12 @@ export function CategoryPlanningModal({
   onClose,
   onSave,
 }: CategoryPlanningModalProps) {
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const isWideModal = width >= 760;
+  const isCompactWebModal =
+    Platform.OS === "web" &&
+    width < 480 &&
+    height <= 760;
 
   const [draftCategories, setDraftCategories] =
     useState<MonthlyPlanCategory[]>(() =>
@@ -316,26 +321,50 @@ export function CategoryPlanningModal({
       animationType="fade"
       onRequestClose={closeModal}
     >
-      <View style={styles.overlay}>
+      <View
+        style={[
+          styles.overlay,
+          isCompactWebModal && styles.overlayCompact,
+        ]}
+      >
         <View
           style={[
             styles.modalBox,
+            isCompactWebModal && styles.modalBoxCompact,
             isWideModal && styles.modalBoxWide,
           ]}
         >
-          <View style={styles.header}>
+          <View
+            style={[
+              styles.header,
+              isCompactWebModal && styles.headerCompact,
+            ]}
+          >
             <View style={styles.headerText}>
-              <Text style={styles.title}>
+              <Text
+                style={[
+                  styles.title,
+                  isCompactWebModal && styles.titleCompact,
+                ]}
+              >
                 Planejar por categoria
               </Text>
 
-              <Text style={styles.subtitle}>
+              <Text
+                style={[
+                  styles.subtitle,
+                  isCompactWebModal && styles.subtitleCompact,
+                ]}
+              >
                 {monthName} de {data.year}
               </Text>
             </View>
 
             <TouchableOpacity
-              style={styles.closeButton}
+              style={[
+                styles.closeButton,
+                isCompactWebModal && styles.closeButtonCompact,
+              ]}
               onPress={closeModal}
               disabled={isSaving}
               activeOpacity={0.78}
@@ -357,6 +386,7 @@ export function CategoryPlanningModal({
           <View
             style={[
               styles.summaryCard,
+              isCompactWebModal && styles.summaryCardCompact,
               isOverLimit && styles.summaryCardOverLimit,
             ]}
           >
@@ -366,7 +396,13 @@ export function CategoryPlanningModal({
                   Limite do mês
                 </Text>
 
-                <Text style={styles.summaryValue}>
+                <Text
+                  style={[
+                    styles.summaryValue,
+                    isCompactWebModal &&
+                      styles.summaryValueCompact,
+                  ]}
+                >
                   {formatMoney(draftSpendingLimit)}
                 </Text>
               </View>
@@ -379,6 +415,8 @@ export function CategoryPlanningModal({
                 <Text
                   style={[
                     styles.summaryValue,
+                    isCompactWebModal &&
+                      styles.summaryValueCompact,
                     isOverLimit && styles.dangerText,
                   ]}
                 >
@@ -391,6 +429,8 @@ export function CategoryPlanningModal({
               <Text
                 style={[
                   styles.distributionPercentage,
+                  isCompactWebModal &&
+                    styles.distributionPercentageCompact,
                   isOverLimit && styles.dangerText,
                 ]}
               >
@@ -404,6 +444,8 @@ export function CategoryPlanningModal({
               <Text
                 style={[
                   styles.distributionDescription,
+                  isCompactWebModal &&
+                    styles.distributionDescriptionCompact,
                   isOverLimit && styles.dangerText,
                 ]}
               >
@@ -424,7 +466,10 @@ export function CategoryPlanningModal({
 
           <ScrollView
             style={styles.bodyScroll}
-            contentContainerStyle={styles.bodyContent}
+            contentContainerStyle={[
+              styles.bodyContent,
+              isCompactWebModal && styles.bodyContentCompact,
+            ]}
             showsVerticalScrollIndicator
           >
             {visible ? (
@@ -438,11 +483,21 @@ export function CategoryPlanningModal({
               />
             ) : null}
 
-            <Text style={styles.sectionTitle}>
+            <Text
+              style={[
+                styles.sectionTitle,
+                isCompactWebModal && styles.sectionTitleCompact,
+              ]}
+            >
               Metas das categorias
             </Text>
 
-            <View style={styles.categoryGrid}>
+            <View
+              style={[
+                styles.categoryGrid,
+                isCompactWebModal && styles.categoryGridCompact,
+              ]}
+            >
               {draftCategories.map((item) => {
                 const currentValue =
                   item.plannedAmount ?? 0;
@@ -468,6 +523,7 @@ export function CategoryPlanningModal({
                       value={currentValue}
                       maximum={maximum}
                       formatMoney={formatMoney}
+                      compact={isCompactWebModal}
                       onChange={(value) =>
                         updateCategoryGoal(
                           item.category,
@@ -486,8 +542,18 @@ export function CategoryPlanningModal({
             </View>
           </ScrollView>
 
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>
+          <View
+            style={[
+              styles.footer,
+              isCompactWebModal && styles.footerCompact,
+            ]}
+          >
+            <Text
+              style={[
+                styles.footerText,
+                isCompactWebModal && styles.footerTextCompact,
+              ]}
+            >
               Ajuste as metas sem alterar seus lançamentos.
             </Text>
 
@@ -500,10 +566,16 @@ export function CategoryPlanningModal({
               </Text>
             ) : null}
 
-            <View style={styles.footerActions}>
+            <View
+              style={[
+                styles.footerActions,
+                isCompactWebModal && styles.footerActionsCompact,
+              ]}
+            >
               <TouchableOpacity
                 style={[
                   styles.cancelButton,
+                  isCompactWebModal && styles.actionButtonCompact,
                   isSaving && styles.buttonDisabled,
                 ]}
                 onPress={closeModal}
@@ -519,6 +591,7 @@ export function CategoryPlanningModal({
               <TouchableOpacity
                 style={[
                   styles.saveButton,
+                  isCompactWebModal && styles.actionButtonCompact,
                   isSaving && styles.buttonDisabled,
                 ]}
                 onPress={() => {
@@ -568,12 +641,25 @@ const styles = StyleSheet.create({
   modalBoxWide: {
     maxWidth: 920,
   },
+  overlayCompact: {
+    padding: 6,
+  },
+  modalBoxCompact: {
+    width: "98%",
+    height: "97%",
+    borderRadius: 20,
+    padding: 10,
+  },
   header: {
     flexDirection: "row",
     alignItems: "flex-start",
     justifyContent: "space-between",
     gap: 12,
     marginBottom: 14,
+  },
+  headerCompact: {
+    gap: 8,
+    marginBottom: 8,
   },
   headerText: {
     flex: 1,
@@ -583,10 +669,16 @@ const styles = StyleSheet.create({
     fontSize: 19,
     fontWeight: "900",
   },
+  titleCompact: {
+    fontSize: 17,
+  },
   subtitle: {
     color: MONTHLY_PLAN_COLORS.textMuted,
     fontSize: 12,
     marginTop: 3,
+  },
+  subtitleCompact: {
+    marginTop: 1,
   },
   closeButton: {
     flexDirection: "row",
@@ -598,6 +690,10 @@ const styles = StyleSheet.create({
     backgroundColor: MONTHLY_PLAN_COLORS.surfaceSoft,
     borderWidth: 1,
     borderColor: MONTHLY_PLAN_COLORS.border,
+  },
+  closeButtonCompact: {
+    paddingVertical: 6,
+    paddingHorizontal: 9,
   },
   closeText: {
     color: MONTHLY_PLAN_COLORS.text,
@@ -611,6 +707,11 @@ const styles = StyleSheet.create({
     backgroundColor: MONTHLY_PLAN_COLORS.brandSoft,
     borderWidth: 1,
     borderColor: MONTHLY_PLAN_COLORS.border,
+  },
+  summaryCardCompact: {
+    borderRadius: 16,
+    padding: 10,
+    gap: 7,
   },
   summaryCardOverLimit: {
     backgroundColor: "#FFF5F5",
@@ -634,6 +735,10 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     marginTop: 4,
   },
+  summaryValueCompact: {
+    fontSize: 16,
+    marginTop: 2,
+  },
   distributionRow: {
     gap: 3,
   },
@@ -642,10 +747,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "900",
   },
+  distributionPercentageCompact: {
+    fontSize: 14,
+  },
   distributionDescription: {
     color: MONTHLY_PLAN_COLORS.textMuted,
     fontSize: 12,
     fontWeight: "700",
+  },
+  distributionDescriptionCompact: {
+    fontSize: 11,
   },
   dangerText: {
     color: MONTHLY_PLAN_COLORS.red,
@@ -664,10 +775,20 @@ const styles = StyleSheet.create({
     paddingTop: 14,
     paddingBottom: 8,
   },
+  bodyContentCompact: {
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
+  sectionTitleCompact: {
+    marginBottom: 6,
+  },
   categoryGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 10,
+  },
+  categoryGridCompact: {
+    gap: 6,
   },
   categoryItem: {
     width: "100%",
@@ -737,14 +858,28 @@ const styles = StyleSheet.create({
     marginTop: 10,
     gap: 10,
   },
+  footerCompact: {
+    paddingTop: 8,
+    marginTop: 6,
+    gap: 6,
+  },
   footerText: {
     color: MONTHLY_PLAN_COLORS.textMuted,
     fontSize: 11,
     lineHeight: 16,
   },
+  footerTextCompact: {
+    display: "none",
+  },
   footerActions: {
     flexDirection: "row",
     gap: 10,
+  },
+  footerActionsCompact: {
+    gap: 8,
+  },
+  actionButtonCompact: {
+    paddingVertical: 10,
   },
   cancelButton: {
     flex: 1,
