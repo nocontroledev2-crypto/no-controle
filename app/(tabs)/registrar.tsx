@@ -345,27 +345,123 @@ useFocusEffect(
       return;
     }
 
+    const previousRecognition =
+      recognitionRef.current;
+
+    if (previousRecognition) {
+      previousRecognition.onstart = null;
+      previousRecognition.onresult = null;
+      previousRecognition.onerror = null;
+      previousRecognition.onend = null;
+
+      try {
+        previousRecognition.abort();
+      } catch {
+        // A sessao anterior pode ja estar encerrada.
+      }
+
+      recognitionRef.current = null;
+    }
+
     const recognition = new SpeechRecognition();
     recognition.lang = "pt-BR";
     recognition.interimResults = false;
     recognition.continuous = false;
 
-    recognitionRef.current = recognition;
+    let resultReceived = false;
 
-    recognition.onstart = () => setState("listening");
+    const clearRecognition = () => {
+      recognition.onstart = null;
+      recognition.onresult = null;
+      recognition.onerror = null;
+      recognition.onend = null;
 
-    recognition.onresult = (event: any) => {
-      const textoFalado = event.results[0][0].transcript;
-      processarTextoInteligente(textoFalado);
+      if (recognitionRef.current === recognition) {
+        recognitionRef.current = null;
+      }
     };
 
-    recognition.onerror = () => setState("idle");
-    recognition.start();
+    recognitionRef.current = recognition;
+
+    recognition.onstart = () => {
+      if (recognitionRef.current === recognition) {
+        setState("listening");
+      }
+    };
+
+    recognition.onresult = (event: any) => {
+      if (resultReceived) {
+        return;
+      }
+
+      resultReceived = true;
+
+      const textoFalado =
+        event.results?.[0]?.[0]?.transcript?.trim();
+
+      try {
+        recognition.stop();
+      } catch {
+        try {
+          recognition.abort();
+        } catch {
+          // A sessao pode ja ter sido encerrada.
+        }
+      }
+
+      clearRecognition();
+
+      if (textoFalado) {
+        processarTextoInteligente(textoFalado);
+      } else {
+        setState("idle");
+      }
+    };
+
+    recognition.onerror = () => {
+      clearRecognition();
+      setState("idle");
+    };
+
+    recognition.onend = () => {
+      clearRecognition();
+
+      if (!resultReceived) {
+        setState("idle");
+      }
+    };
+
+    try {
+      recognition.start();
+    } catch {
+      clearRecognition();
+      setState("idle");
+
+      alert(
+        "Não foi possível iniciar a Fala Inteligente. Tente novamente."
+      );
+    }
   }
 
   function cancelarEscuta() {
     if (Platform.OS === "web") {
-      recognitionRef.current?.stop();
+      const recognition =
+        recognitionRef.current;
+
+      recognitionRef.current = null;
+
+      if (recognition) {
+        recognition.onstart = null;
+        recognition.onresult = null;
+        recognition.onerror = null;
+        recognition.onend = null;
+
+        try {
+          recognition.abort();
+        } catch {
+          // A sessao pode ja ter sido encerrada.
+        }
+      }
     } else {
       nativeResultReceivedRef.current = false;
       ExpoSpeechRecognitionModule.stop();
