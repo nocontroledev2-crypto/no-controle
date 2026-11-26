@@ -1,5 +1,6 @@
 // @ts-nocheck
 
+import * as Crypto from "expo-crypto";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -54,6 +55,15 @@ export default function Registrar() {
   const [dataTexto, setDataTexto] = useState(formatarData(new Date()));
   const [usuarioLogado, setUsuarioLogado] = useState<boolean | null>(null);
   const [saveResetTick, setSaveResetTick] = useState(0);
+  const [isSavingExpense, setIsSavingExpense] =
+    useState(false);
+
+  const expenseSaveInFlightRef = useRef(false);
+  const pendingExpenseRequestRef = useRef<{
+    fingerprint: string;
+    clientRequestId: string;
+    createdAt: string;
+  } | null>(null);
 
 useFocusEffect(
   useCallback(() => {
@@ -377,6 +387,10 @@ useFocusEffect(
   }
 
   async function salvarDespesa() {
+    if (expenseSaveInFlightRef.current) {
+      return;
+    }
+
     const valorNumerico = parseValorMonetario(valor);
 
     if (!Number.isFinite(valorNumerico) || valorNumerico <= 0) {
@@ -394,24 +408,77 @@ useFocusEffect(
         ? data
         : new Date();
 
-   try {
-  await saveExpense({
-    id: Date.now().toString(),
-    valor: Number(valorNumerico.toFixed(2)),
-    categoria,
-    subcategoria,
-    termoEncontrado,
-    paymentMethod,
-    data: dataFinal.toISOString().split("T")[0],
-    createdAt: new Date().toISOString(),
-  });
-} catch (error) {
-  alert(
-    "Não foi possível salvar a despesa.\n\n" +
-      String(error instanceof Error ? error.message : error)
-  );
-  return;
-}
+    const expenseDate =
+      dataFinal.toISOString().split("T")[0];
+
+    const normalizedValue =
+      Number(valorNumerico.toFixed(2));
+
+    const requestFingerprint = JSON.stringify({
+      valor: normalizedValue,
+      categoria,
+      subcategoria: subcategoria ?? "",
+      termoEncontrado: termoEncontrado ?? "",
+      paymentMethod: paymentMethod ?? null,
+      data: expenseDate,
+    });
+
+    let pendingRequest =
+      pendingExpenseRequestRef.current;
+
+    if (
+      !pendingRequest ||
+      pendingRequest.fingerprint !== requestFingerprint
+    ) {
+      pendingRequest = {
+        fingerprint: requestFingerprint,
+        clientRequestId: Crypto.randomUUID(),
+        createdAt: new Date().toISOString(),
+      };
+
+      pendingExpenseRequestRef.current =
+        pendingRequest;
+    }
+
+    expenseSaveInFlightRef.current = true;
+    setIsSavingExpense(true);
+
+    let saveSucceeded = false;
+
+    try {
+      await saveExpense({
+        id: pendingRequest.clientRequestId,
+        clientRequestId:
+          pendingRequest.clientRequestId,
+        valor: normalizedValue,
+        categoria,
+        subcategoria,
+        termoEncontrado,
+        paymentMethod,
+        data: expenseDate,
+        createdAt: pendingRequest.createdAt,
+      });
+
+      saveSucceeded = true;
+    } catch (error) {
+      alert(
+        "Não foi possível salvar a despesa.\n\n" +
+          String(
+            error instanceof Error
+              ? error.message
+              : error
+          )
+      );
+    } finally {
+      expenseSaveInFlightRef.current = false;
+      setIsSavingExpense(false);
+    }
+
+    if (!saveSucceeded) {
+      return;
+    }
+
+    pendingExpenseRequestRef.current = null;
 
     const hoje = new Date();
 
@@ -689,16 +756,32 @@ if (usuarioLogado === false) {
             {state === "confirm" ? (
               <>
                 <TouchableOpacity
-                  style={styles.confirmButton}
+                  style={[
+                    styles.confirmButton,
+                    isSavingExpense &&
+                      styles.confirmButtonDisabled,
+                  ]}
                   onPress={salvarDespesa}
+                  disabled={isSavingExpense}
                 >
                   <Text style={styles.confirmText}>
-                    ✅ Confirmar despesa
+                    {isSavingExpense
+                      ? "⏳ Salvando..."
+                      : "✅ Confirmar despesa"}
                   </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={alterarDados}>
-                  <Text style={styles.editText}>
+                <TouchableOpacity
+                  onPress={alterarDados}
+                  disabled={isSavingExpense}
+                >
+                  <Text
+                    style={[
+                      styles.editText,
+                      isSavingExpense &&
+                        styles.editTextDisabled,
+                    ]}
+                  >
                     ✏️ Alterar dados
                   </Text>
                 </TouchableOpacity>
@@ -707,11 +790,18 @@ if (usuarioLogado === false) {
               <>
                 {valor && categoria && (
                   <TouchableOpacity
-                    style={styles.confirmButton}
+                    style={[
+                      styles.confirmButton,
+                      isSavingExpense &&
+                        styles.confirmButtonDisabled,
+                    ]}
                     onPress={salvarDespesa}
+                    disabled={isSavingExpense}
                   >
                     <Text style={styles.confirmText}>
-                      💾 Salvar despesa
+                      {isSavingExpense
+                        ? "⏳ Salvando..."
+                        : "💾 Salvar despesa"}
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -887,6 +977,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 
+  confirmButtonDisabled: {
+    opacity: 0.65,
+  },
+
   voiceButton: {
     backgroundColor: "#0A8F55",
     padding: 16,
@@ -904,6 +998,10 @@ const styles = StyleSheet.create({
     marginTop: 8,
     color: "#2980B9",
     fontWeight: "600",
+  },
+
+  editTextDisabled: {
+    opacity: 0.5,
   },
 
   detailText: {

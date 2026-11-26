@@ -12,6 +12,7 @@ export type Expense = {
   subcategoria?: string;
   termoEncontrado?: string;
   paymentMethod?: PaymentMethod | null;
+  clientRequestId?: string | null;
   data: string;
   createdAt: string;
 };
@@ -46,9 +47,32 @@ function mapFromSupabase(row: any): Expense {
     paymentMethod: normalizePaymentMethod(
       row.payment_method
     ),
+    clientRequestId:
+      row.client_request_id ?? null,
     data: row.data,
     createdAt: row.created_at,
   };
+}
+
+function isIdempotencyConflict(error: any) {
+  if (error?.code !== "23505") {
+    return false;
+  }
+
+  const errorText = [
+    error?.message,
+    error?.details,
+    error?.hint,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return (
+    errorText.includes(
+      "expenses_user_client_request_id_uidx"
+    ) ||
+    errorText.includes("client_request_id")
+  );
 }
 
 async function requireUser() {
@@ -105,14 +129,22 @@ export async function saveExpense(expense: Expense): Promise<void> {
       termo_encontrado: normalizedExpense.termoEncontrado ?? "",
       payment_method:
         normalizedExpense.paymentMethod ?? null,
+      client_request_id:
+        normalizedExpense.clientRequestId ?? null,
       data: normalizedExpense.data,
       created_at: normalizedExpense.createdAt,
       updated_at: new Date().toISOString(),
     });
 
   if (error) {
+    if (isIdempotencyConflict(error)) {
+      return;
+    }
+
     console.error(error);
-    throw new Error("Não foi possível salvar a despesa na nuvem.");
+    throw new Error(
+      "Não foi possível salvar a despesa na nuvem."
+    );
   }
 }
 
