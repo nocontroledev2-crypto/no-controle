@@ -6,7 +6,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_INTERNAL_BUILD_LABEL": "INTERNO C5"
+        "EXPO_PUBLIC_INTERNAL_BUILD_LABEL": "INTERNO C6"
       },
       "buildArtifactPaths": [
         "android/app/build/outputs/mapping/release/mapping.txt"
