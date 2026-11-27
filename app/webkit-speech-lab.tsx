@@ -19,6 +19,7 @@ type Scenario = {
   label: string;
   preflight: boolean;
   delayMs: number;
+  recreateDocument?: boolean;
 };
 
 const scenarios: Scenario[] = [
@@ -52,9 +53,22 @@ const scenarios: Scenario[] = [
     preflight: true,
     delayMs: 3500,
   },
+  {
+    id: "recreate-document",
+    label: "6. Recriar documento após cada resultado",
+    preflight: false,
+    delayMs: 0,
+    recreateDocument: true,
+  },
 ];
 
 const watchdogMs = 8000;
+
+const reloadHistoryKey =
+  "enxergai-webkit-speech-reload-history";
+
+const reloadScenarioKey =
+  "enxergai-webkit-speech-reload-scenario";
 
 function wait(milliseconds: number) {
   return new Promise<void>((resolve) => {
@@ -102,6 +116,61 @@ export default function WebkitSpeechLab() {
       `${nowLabel()} | ${message}`,
       ...current,
     ]);
+  }
+
+  function readReloadHistory() {
+    try {
+      const stored =
+        window.sessionStorage.getItem(
+          reloadHistoryKey
+        );
+
+      const parsed = stored
+        ? JSON.parse(stored)
+        : [];
+
+      return Array.isArray(parsed)
+        ? parsed
+        : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function persistReloadResult(
+    text: string
+  ) {
+    const history = readReloadHistory();
+
+    const nextHistory = [
+      ...history,
+      {
+        round: history.length + 1,
+        transcript: text,
+        completedAt:
+          new Date().toISOString(),
+      },
+    ];
+
+    window.sessionStorage.setItem(
+      reloadHistoryKey,
+      JSON.stringify(nextHistory)
+    );
+
+    window.sessionStorage.setItem(
+      reloadScenarioKey,
+      "recreate-document"
+    );
+
+    return nextHistory;
+  }
+
+  function recreateDocument() {
+    const nextUrl =
+      `${window.location.pathname}` +
+      `?labReload=${Date.now()}`;
+
+    window.location.replace(nextUrl);
   }
 
   function clearWatchdog() {
@@ -282,6 +351,20 @@ export default function WebkitSpeechLab() {
         } catch {
           addLog("stop lançou exceção");
         }
+
+        if (scenario.recreateDocument) {
+          const history =
+            persistReloadResult(text);
+
+          addLog(
+            `recriando documento após resultado ${history.length}`
+          );
+
+          window.setTimeout(
+            recreateDocument,
+            500
+          );
+        }
       };
 
       recognition.onspeechend = () => {
@@ -380,6 +463,14 @@ export default function WebkitSpeechLab() {
   }
 
   function clearLog() {
+    window.sessionStorage.removeItem(
+      reloadHistoryKey
+    );
+
+    window.sessionStorage.removeItem(
+      reloadScenarioKey
+    );
+
     setLogs([]);
     setTranscript("");
     setAttempt(0);
@@ -398,6 +489,45 @@ export default function WebkitSpeechLab() {
     addLog(
       `touchPoints: ${navigator.maxTouchPoints}`
     );
+
+    const storedScenario =
+      window.sessionStorage.getItem(
+        reloadScenarioKey
+      );
+
+    if (
+      storedScenario ===
+      "recreate-document"
+    ) {
+      setScenarioId("recreate-document");
+
+      const history =
+        readReloadHistory();
+
+      setAttempt(history.length);
+
+      history
+        .slice()
+        .reverse()
+        .forEach((item: any) => {
+          addLog(
+            `DOCUMENTO ${item.round} | result | ${item.transcript}`
+          );
+        });
+
+      if (history.length > 0) {
+        const latest =
+          history[history.length - 1];
+
+        setTranscript(
+          String(latest.transcript ?? "")
+        );
+
+        setStatus(
+          `Documento recriado após ${history.length} resultado(s)`
+        );
+      }
+    }
 
     return () => {
       if (watchdogRef.current) {
