@@ -20,6 +20,7 @@ type Scenario = {
   preflight: boolean;
   delayMs: number;
   recreateDocument?: boolean;
+  postReloadDelayMs?: number;
 };
 
 const scenarios: Scenario[] = [
@@ -60,6 +61,15 @@ const scenarios: Scenario[] = [
     delayMs: 0,
     recreateDocument: true,
   },
+  {
+    id: "recreate-document-8000",
+    label:
+      "7. Recriar documento + estabilizar 8 segundos",
+    preflight: false,
+    delayMs: 0,
+    recreateDocument: true,
+    postReloadDelayMs: 8000,
+  },
 ];
 
 const watchdogMs = 8000;
@@ -69,6 +79,9 @@ const reloadHistoryKey =
 
 const reloadScenarioKey =
   "enxergai-webkit-speech-reload-scenario";
+
+const reloadReadyAtKey =
+  "enxergai-webkit-speech-reload-ready-at";
 
 function wait(milliseconds: number) {
   return new Promise<void>((resolve) => {
@@ -138,7 +151,8 @@ export default function WebkitSpeechLab() {
   }
 
   function persistReloadResult(
-    text: string
+    text: string,
+    scenario: Scenario
   ) {
     const history = readReloadHistory();
 
@@ -159,7 +173,16 @@ export default function WebkitSpeechLab() {
 
     window.sessionStorage.setItem(
       reloadScenarioKey,
-      "recreate-document"
+      scenario.id
+    );
+
+    const readyAt =
+      Date.now() +
+      (scenario.postReloadDelayMs ?? 0);
+
+    window.sessionStorage.setItem(
+      reloadReadyAtKey,
+      String(readyAt)
     );
 
     return nextHistory;
@@ -283,6 +306,17 @@ export default function WebkitSpeechLab() {
         (item) => item.id === scenarioId
       ) ?? scenarios[0];
 
+    const readyAt = Number(
+      window.sessionStorage.getItem(
+        reloadReadyAtKey
+      ) ?? "0"
+    );
+
+    const remainingDelayMs =
+      scenario.postReloadDelayMs
+        ? Math.max(0, readyAt - Date.now())
+        : 0;
+
     setRunning(true);
     setTranscript("");
     setStatus("Preparando");
@@ -297,6 +331,25 @@ export default function WebkitSpeechLab() {
     );
 
     try {
+      if (remainingDelayMs > 0) {
+        const seconds =
+          Math.ceil(remainingDelayMs / 1000);
+
+        setStatus(
+          `Estabilizando microfone: ${seconds} segundo(s)`
+        );
+
+        addLog(
+          `estabilização após recarga: ${remainingDelayMs} ms`
+        );
+
+        await wait(remainingDelayMs);
+
+        addLog(
+          "estabilização após recarga: concluída"
+        );
+      }
+
       if (scenario.preflight) {
         await releaseHardwareAudio();
 
@@ -354,7 +407,10 @@ export default function WebkitSpeechLab() {
 
         if (scenario.recreateDocument) {
           const history =
-            persistReloadResult(text);
+            persistReloadResult(
+              text,
+              scenario
+            );
 
           addLog(
             `recriando documento após resultado ${history.length}`
@@ -471,6 +527,10 @@ export default function WebkitSpeechLab() {
       reloadScenarioKey
     );
 
+    window.sessionStorage.removeItem(
+      reloadReadyAtKey
+    );
+
     setLogs([]);
     setTranscript("");
     setAttempt(0);
@@ -497,9 +557,11 @@ export default function WebkitSpeechLab() {
 
     if (
       storedScenario ===
-      "recreate-document"
+        "recreate-document" ||
+      storedScenario ===
+        "recreate-document-8000"
     ) {
-      setScenarioId("recreate-document");
+      setScenarioId(storedScenario);
 
       const history =
         readReloadHistory();
